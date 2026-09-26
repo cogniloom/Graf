@@ -1,0 +1,97 @@
+name: Build and release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: self-hosted
+    timeout-minutes: 30
+    outputs:
+      tag: ${{ steps.archive.outputs.tag }}
+    env:
+      # Keep opt-in tests away from any database/model configuration on the runner.
+      EVIDENCEKG_TEST_DSN: ''
+      EVIDENCEKG_APP_TEST_ADMIN_CONFIG: ''
+      EVIDENCEKG_APP_TEST_PYTHON: ''
+      EVIDENCEKG_APP_TEST_MODELS: ''
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.12.17'
+          python-version: '3.12'
+      - name: Install Python dependencies
+        run: uv sync --project evidencekg --frozen --extra app
+      - name: Check parser prerequisites
+        run: |
+          command -v pdftoppm
+          tesseract --list-langs | grep -Fx eng
+          uv run --project evidencekg --frozen --extra app python -c 'import ctypes; ctypes.CDLL("libseccomp.so.2")'
+      - name: Test Python
+        run: uv run --project evidencekg --frozen --extra app python -m pytest evidencekg/tests product/tests -q --tb=short
+      - name: Test and build dashboard
+        working-directory: product/ui
+        run: |
+          npm ci
+          npm test
+          npm run build
+      - name: Test release publication
+        run: node --test scripts/publish_candidate.test.cjs
+      - name: Build release archive
+        id: archive
+        env:
+          CANDIDATE_NUMBER: ${{ github.run_number }}
+        run: |
+          output=$(mktemp -d "$RUNNER_TEMP/docworm-release.XXXXXX")
+          version=$(python3 -c 'import tomllib; print(tomllib.load(open("evidencekg/pyproject.toml", "rb"))["project"]["version"])')
+          tag="v${version}-rc.${CANDIDATE_NUMBER}"
+          uv run --project evidencekg --frozen --extra app python scripts/build_release.py --output "$output" --tag "$tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          cd "$output"
+          sha256sum --check ./*.tar.gz.sha256
+          echo "RELEASE_OUTPUT=$output" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: |
+            ${{ env.RELEASE_OUTPUT }}/*.tar.gz
+            ${{ env.RELEASE_OUTPUT }}/*.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: self-hosted
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ needs.build.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: release
+          path: ${{ runner.temp }}/release-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Publish release candidate
+        env:
+          RELEASE_DIRECTORY: ${{ runner.temp }}/release-${{ github.run_id }}-${{ github.run_attempt }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const publish = require('./scripts/publish_candidate.cjs');
+            await publish({github, context, core});
