@@ -1,0 +1,112 @@
+{
+  "cache_hits": 0,
+  "complete_designated_sets": 16,
+  "coverage": [
+    {
+      "case_id": "doc-01",
+      "complete_designated_set": true,
+      "covered": 2,
+      "reference_count": 2
+    },
+    {
+      "case_id": "doc-02",
+      "complete_designated_set": true,
+      "covered": 3,
+      "reference_count": 3
+    },
+    {
+      "case_id": "doc-03",
+      "complete_designated_set": true,
+      "covered": 2,
+      "reference_count": 2
+    },
+    {
+      "case_id": "doc-04",
+      "complete_designated_set": true,
+      "covered": 2,
+      "reference_count": 2
+    },
+    {
+      "case_id": "doc-05",
+      "complete_designated_set": true,
+      "covered": 2,
+      "reference_count": 2
+    },
+    {
+      "case_id": "doc-06",
+      "complete_designated_set": true,
+      "covered": 1,
+      "reference_count": 1
+    },
+    {
+      "case_id": "doc-07",
+      "complete_designated_set": true,
+      "covered": 2,
+      "reference_count": 2
+    },
+    {
+      "case_id": "doc-08",
+      "complete_designated_set": true,
+      "covered": 2,
+      "reference_count": 2
+    },
+    {
+      "case_id": "doc-09",
+      "complete_designated_set": true,
+      "covered": 2,
+      "reference_count": 2
+    },
+    {
+      "case_id": "doc-10",
+      "complete_designated_set": true,
+      "covered": 2,
+      "reference_count": 2
+    },
+    {
+      "case_id": "doc-11",
+      "complete_designated_set": true,
+      "covered": 1,
+      "reference_count": 1
+    },
+    {
+      "case_id": "doc-12",
+      "complete_designated_set": true,
+      "covered": 2,
+      "reference_count": 2
+    },
+    {
+      "case_id": "doc-13",
+      "complete_designated_set": true,
+      "covered": 2,
+      "reference_count": 2
+    },
+    {
+      "case_id": "doc-14",
+      "complete_designated_set": true,
+      "covered": 2,
+      "reference_count": 2
+    },
+    {
+      "case_id": "doc-15",
+      "complete_designated_set": true,
+      "covered": 1,
+      "reference_count": 1
+    },
+    {
+      "case_id": "doc-16",
+      "complete_designated_set": true,
+      "covered": 1,
+      "reference_count": 1
+    }
+  ],
+  "files": 10000,
+  "generative_model_calls": 0,
+  "hybrid_preparation_seconds": 72.1752563600021,
+  "ingestion_seconds": 72.55609116598498,
+  "lines": 99946,
+  "median_seconds": 1.9702715775056276,
+  "p95_seconds": 18.33884999199654,
+  "query_count": 16,
+  "scope": "Single-pass actual hybrid retrieval of designated references; not answer accuracy. First query includes lazy model load. Existing model weights reused; OS cache not flushed.",
+  "source_bytes": 5506667
+}

@@ -1,0 +1,22 @@
+{
+  "arms": {
+    "files": {
+      "scheduled": 15,
+      "strict_passes": 15,
+      "answer_accuracy": 1.0,
+      "mean_input_tokens": 57262.933333333334,
+      "mean_output_tokens": 304.3333333333333,
+      "mean_cached_input_tokens": 25412.266666666666,
+      "median_seconds": 30.531304300995544
+    },
+    "graf": {
+      "scheduled": 15,
+      "strict_passes": 15,
+      "answer_accuracy": 1.0,
+      "mean_input_tokens": 16118.533333333333,
+      "mean_output_tokens": 221.6,
+      "mean_cached_input_tokens": 6732.8,
+      "median_seconds": 13.913247460994171
+    }
+  }
+}

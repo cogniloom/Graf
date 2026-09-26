@@ -1,0 +1,53 @@
+workload,case_id,question,category,arm,strict_pass,calls,seconds,cached_input_tokens,input_tokens,output_tokens,uncached_input_tokens,valid_citations,citations
+code,code-01,How does ingestion freeze lexical search to a snapshot rather than query the mutable global segment index?,cross_module_snapshot_retrieval,files,False,5,39.98674757799017,44800,77090,441,32290,3,3
+code,code-01,How does ingestion freeze lexical search to a snapshot rather than query the mutable global segment index?,cross_module_snapshot_retrieval,graf,True,5,72.20783429601579,38656,139248,957,100592,4,4
+code,code-02,What happens if a retrieval page cursor is reused with another snapshot or query scope?,cursor_failure,files,True,4,34.44884127899422,26752,61201,328,34449,1,1
+code,code-02,What happens if a retrieval page cursor is reused with another snapshot or query scope?,cursor_failure,graf,True,1,35.93763105900143,4864,25262,389,20398,3,3
+code,code-03,How does a parser timeout affect its process group and the ingestion result?,cross_module_worker_failure,files,False,4,35.396110078989295,22784,61636,446,38852,3,3
+code,code-03,How does a parser timeout affect its process group and the ingestion result?,cross_module_worker_failure,graf,True,2,50.29405593499541,4864,54379,631,49515,5,5
+code,code-04,Why does failed PDF extraction affect whether inventory can report a complete total?,cross_module_completeness,files,False,6,51.871725990000414,67584,101458,561,33874,4,4
+code,code-04,Why does failed PDF extraction affect whether inventory can report a complete total?,cross_module_completeness,graf,True,1,41.169453334005084,11392,24013,516,12621,3,3
+code,code-05,Can citation-choice resolution silently repair an altered quote or accept an unknown citation ID?,cross_module_citation_validation,files,True,5,42.71871709701372,38144,83413,503,45269,3,3
+code,code-05,Can citation-choice resolution silently repair an altered quote or accept an unknown citation ID?,cross_module_citation_validation,graf,True,1,34.8908219539735,11392,23891,355,12499,4,4
+code,code-06,How are citation IDs tied to immutable spans and duplicate choices rejected?,citation_identity,files,True,5,56.600668769009644,37760,76794,934,39034,3,3
+code,code-06,How are citation IDs tied to immutable spans and duplicate choices rejected?,citation_identity,graf,True,3,70.66799356701085,34176,74052,1083,39876,6,6
+code,code-07,"When a prior extraction failed, does a later ingest simply reuse it?",ingestion_retry,files,False,5,46.190188633976504,27136,82464,673,55328,4,4
+code,code-07,"When a prior extraction failed, does a later ingest simply reuse it?",ingestion_retry,graf,True,3,69.72931954602245,15744,78268,672,62524,2,2
+code,code-08,"How does the default snapshot read follow the acquisition head, and where is that head updated?",cross_module_head,files,False,6,47.51057875400875,20608,91831,384,71223,1,1
+code,code-08,"How does the default snapshot read follow the acquisition head, and where is that head updated?",cross_module_head,graf,False,6,97.62023901200155,67584,162963,739,95379,4,4
+code,code-09,What happens when a single paginated retrieval result exceeds the response byte budget?,retrieval_budget_failure,files,True,5,44.988288640015526,45568,74496,417,28928,2,2
+code,code-09,What happens when a single paginated retrieval result exceeds the response byte budget?,retrieval_budget_failure,graf,True,1,36.79337191398372,11008,24111,348,13103,3,3
+code,code-10,Can a parser continue if its Linux network-denial policy cannot be loaded?,worker_isolation_failure,files,True,5,38.67759362200741,21120,74064,351,52944,3,3
+code,code-10,Can a parser continue if its Linux network-denial policy cannot be loaded?,worker_isolation_failure,graf,True,1,31.33246254400001,4864,24482,167,19618,2,2
+documents,doc-01,"For PR-417, what quantity and spending ceiling applied on 14 February 2025?",temporal_approval,files,True,5,40.865543980005896,33792,70964,421,37172,2,2
+documents,doc-01,"For PR-417, what quantity and spending ceiling applied on 14 February 2025?",temporal_approval,graf,True,1,13.228129388997331,11392,16312,219,4920,3,3
+documents,doc-02,"What was PR-417's authorized ceiling and quantity on 16 February, and who approved the increase?",amendment,files,True,5,40.06297379598254,34176,72386,392,38210,1,1
+documents,doc-02,"What was PR-417's authorized ceiling and quantity on 16 February, and who approved the increase?",amendment,graf,True,1,17.284339741017902,0,15918,305,15918,3,3
+documents,doc-03,Did the supplier email authorize 120 sensors for PR-417?,conflicting_request,files,True,3,27.807678495999426,34176,42603,231,8427,2,2
+documents,doc-03,Did the supplier email authorize 120 sensors for PR-417?,conflicting_request,graf,True,1,15.001467072986998,0,16272,277,16272,4,4
+documents,doc-04,How many PR-417 sensors entered service and what invoice amount was disputed?,reconciliation,files,True,4,30.525960072001908,22400,56841,292,34441,3,3
+documents,doc-04,How many PR-417 sensors entered service and what invoice amount was disputed?,reconciliation,graf,True,1,11.905154884996591,11392,16301,175,4909,2,2
+documents,doc-05,"How long did INC-73 degradation last, and did rollback restore service?",incident_timeline,files,True,5,44.968316763988696,42752,75476,332,32724,1,1
+documents,doc-05,"How long did INC-73 degradation last, and did rollback restore service?",incident_timeline,graf,True,1,13.913247460994171,11008,15898,247,4890,2,2
+documents,doc-06,What was the confirmed root cause of INC-73?,unanswerable_causality,files,True,3,21.8439111780026,16256,42060,178,25804,1,1
+documents,doc-06,What was the confirmed root cause of INC-73?,unanswerable_causality,graf,True,1,11.334029179997742,11392,16348,158,4956,2,2
+documents,doc-07,"As of 3 March 2025, what approved retention applies to diagnostic logs under RP-9?",version_conflict,files,True,4,31.732628646015655,22784,56148,351,33364,2,2
+documents,doc-07,"As of 3 March 2025, what approved retention applies to diagnostic logs under RP-9?",version_conflict,graf,True,1,14.266082324000308,0,15875,264,15875,3,3
+documents,doc-08,Which employee ID belongs to the A. Kim who approved the loading-bay change?,ambiguous_identity,files,True,3,24.00113612000132,22784,42472,262,19688,4,4
+documents,doc-08,Which employee ID belongs to the A. Kim who approved the loading-bay change?,ambiguous_identity,graf,True,1,14.504633075994207,0,16292,273,16292,4,4
+documents,doc-09,Which Alex Kim approved CHG-311 and in what department?,identity_resolution,files,True,4,30.531304300995544,8960,60375,249,51415,2,2
+documents,doc-09,Which Alex Kim approved CHG-311 and in what department?,identity_resolution,graf,True,1,11.768722331005847,11008,15747,127,4739,2,2
+documents,doc-10,"For PO-608, what delivery date replaced the original proposal and how many pumps were accepted? Answer in English.",multilingual_join,files,True,4,28.0249729109928,22400,55727,291,33327,2,2
+documents,doc-10,"For PO-608, what delivery date replaced the original proposal and how many pumps were accepted? Answer in English.",multilingual_join,graf,True,1,12.379060098988703,11008,15935,170,4927,2,2
+documents,doc-11,What is the confirmed delivery date for PO-608 replacement pumps?,unanswerable_proposal,files,True,4,33.73048485800973,16256,56610,295,40354,2,2
+documents,doc-11,What is the confirmed delivery date for PO-608 replacement pumps?,unanswerable_proposal,graf,True,1,14.648990403977223,11008,15848,242,4840,3,3
+documents,doc-12,"Should Alder risk R-12 be closed after EX-14, and who owns the next action?",closure_criteria,files,True,3,24.59785322000971,15872,43211,288,27339,1,1
+documents,doc-12,"Should Alder risk R-12 be closed after EX-14, and who owns the next action?",closure_criteria,graf,True,1,15.527178404008737,11392,16354,278,4962,4,4
+documents,doc-13,Was Harbor M-18 announced early enough for the S-22 planned-maintenance exclusion?,contract_time_arithmetic,files,True,5,38.81295878498349,56960,71149,384,14189,3,3
+documents,doc-13,Was Harbor M-18 announced early enough for the S-22 planned-maintenance exclusion?,contract_time_arithmetic,graf,True,1,28.947219955996843,0,16474,231,16474,2,2
+documents,doc-14,On what date was the PR-417 invoice paid?,unanswerable_missing_record,files,True,5,35.46038965199841,15872,71307,356,55435,2,2
+documents,doc-14,On what date was the PR-417 invoice paid?,unanswerable_missing_record,graf,True,1,10.62831189899589,11392,16301,142,4909,2,2
+documents,doc-15,"Can finance recognize the EUR 18,000 Alder rebate as a receivable from this archive?",forecast_vs_commitment,files,True,3,23.946670928009553,15744,41615,243,25871,1,1
+documents,doc-15,"Can finance recognize the EUR 18,000 Alder rebate as a receivable from this archive?",forecast_vs_commitment,graf,True,1,13.43134866899345,0,15903,216,15903,2,2
+documents,doc-16,Does RP-9 establish the retention period for financial ledgers?,scope_boundary,files,False,3,22.99732771399431,27136,42013,204,14877,2,2
+documents,doc-16,Does RP-9 establish the retention period for financial ledgers?,scope_boundary,graf,False,1,14.35925823400612,0,16304,210,16304,4,4
