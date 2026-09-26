@@ -3,5 +3,5 @@
   "port": 55432,
   "dbname": "evidencekg",
   "user": "evidencekg",
-  "password_file": "/home/your-user/.local/share/docworm/secrets/runtime-password"
+  "password_file": "/home/your-user/.local/share/graf/secrets/runtime-password"
 }

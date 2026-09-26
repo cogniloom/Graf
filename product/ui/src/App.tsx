@@ -124,7 +124,7 @@ export function App() {
       <aside className="sidebar">
         <div className="brand">
           <Network size={33} />
-          <span>Docworm</span>
+          <span>Graf</span>
         </div>
         <div className="workspace">
           <label>Workspace</label>
@@ -247,7 +247,7 @@ export function App() {
           <div className="empty">
             <h2>Open your workspace securely</h2>
             <p>
-              Run ./docworm open to open the dashboard and establish a local
+              Run ./graf open to open the dashboard and establish a local
               session.
             </p>
             <button onClick={() => void refresh()}>Check connection</button>
@@ -255,7 +255,7 @@ export function App() {
         ) : !status ? (
           <div className="empty">
             <h2>Local server unavailable</h2>
-            <p>Check that Docworm is running, then reconnect.</p>
+            <p>Check that Graf is running, then reconnect.</p>
             <button onClick={() => void refresh()}>
               <RefreshCw size={16} />
               Retry connection

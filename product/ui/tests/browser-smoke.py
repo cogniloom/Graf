@@ -1,6 +1,6 @@
 """Synthetic API contract/browser smoke test. Requires Python Playwright and Chromium.
 After npm run build, run python tests/browser-smoke.py. An isolated static server is started automatically.
-Optionally set DOCWORM_UI_URL to verify another server static build and CSP; API calls are still intercepted.
+Optionally set GRAF_UI_URL to verify another server static build and CSP; API calls are still intercepted.
 All /api responses are synthetic; this does not validate the real backend or corpus.
 """
 
@@ -13,7 +13,7 @@ from threading import Thread
 
 from playwright.sync_api import expect, sync_playwright
 
-BASE = os.environ.get("DOCWORM_UI_URL")
+BASE = os.environ.get("GRAF_UI_URL")
 server = None
 if not BASE:
 

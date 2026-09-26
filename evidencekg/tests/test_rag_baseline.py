@@ -10,7 +10,7 @@ from evidencekg import rag_baseline as rag
 @pytest.fixture(scope="module")
 def runtime():
     if not rag.DEFAULT_PYTHON.is_file():
-        pytest.skip("Optional docworm Python runtime absent")
+        pytest.skip("Optional graf Python runtime absent")
     probe = subprocess.run(
         [
             str(rag.DEFAULT_PYTHON),

@@ -1,8 +1,8 @@
-# Docworm
+# Graf
 
 **A local evidence workspace with a connected graph and a Codex research assistant.**
 
-Add documents, follow their relationships in Cosmograph, and ask Codex to investigate with traceable passages. Docworm combines exact identifiers, lexical search, local multilingual embeddings, graph expansion and local reranking. It retains candidate worksets and shows extraction gaps instead of claiming that a short search result is complete.
+Add documents, follow their relationships in Cosmograph, and ask Codex to investigate with traceable passages. Graf combines exact identifiers, lexical search, local multilingual embeddings, graph expansion and local reranking. It retains candidate worksets and shows extraction gaps instead of claiming that a short search result is complete.
 
 Graph construction and retrieval do not call a generative model. PostgreSQL runs in Docker Compose; the application and ranking worker run on your computer. The dashboard, including its graph assets, works locally after installation. Codex reasoning uses your configured Codex provider and can transmit the evidence you request.
 
@@ -18,16 +18,16 @@ the built dashboard, so Node.js is only needed for source checkouts.
 From an extracted release archive or checkout:
 
 ```sh
-./docworm install --demo
-./docworm open
+./graf install --demo
+./graf open
 ```
 
 For an NVIDIA GPU and your own documents:
 
 ```sh
-./docworm install --device cuda --allow-root "$HOME/Documents"
-./docworm sources add "$HOME/Documents/my-case"
-./docworm open
+./graf install --device cuda --allow-root "$HOME/Documents"
+./graf sources add "$HOME/Documents/my-case"
+./graf open
 ```
 
 The installer generates private credentials, starts PostgreSQL, downloads pinned local models, and starts the application. Follow progress under **Activity**. The demo is entirely fictional. No API key is required for indexing or retrieval.
@@ -35,10 +35,10 @@ The installer generates private credentials, starts PostgreSQL, downloads pinned
 Install the Codex plugin after installing the application:
 
 ```sh
-./docworm plugin-install
+./graf plugin-install
 ```
 
-Open a new Codex thread and ask: “Use Docworm to investigate whether order 1847 was approved before it was placed. Cite the evidence and explain the conditions.”
+Open a new Codex thread and ask: “Use Graf to investigate whether order 1847 was approved before it was placed. Cite the evidence and explain the conditions.”
 
 ## What you can do
 
@@ -66,6 +66,6 @@ A source change gates evidence access until a matching revision is published. `R
 
 ## License and support boundary
 
-Docworm's original code is MIT licensed. **The included Cosmograph component is CC BY-NC 4.0 for non-commercial use.** Publishing this repository does not grant commercial rights to Cosmograph. See [third-party notices](THIRD_PARTY.md) and [Cosmograph licensing](https://cosmograph.app/licensing/). This combined distribution is not unrestricted open-source software.
+Graf's original code is MIT licensed. **The included Cosmograph component is CC BY-NC 4.0 for non-commercial use.** Publishing this repository does not grant commercial rights to Cosmograph. See [third-party notices](THIRD_PARTY.md) and [Cosmograph licensing](https://cosmograph.app/licensing/). This combined distribution is not unrestricted open-source software.
 
 This release targets a single local owner on Linux. It is not a public network service or a multi-tenant system. Native macOS, native Windows, WSL2 and unattended production deployments require their own validation. Research results require human review.

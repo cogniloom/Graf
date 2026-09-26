@@ -10,7 +10,7 @@ function fixture(t, options = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'candidate-test-'));
   t.after(() => fs.rmSync(dir, {recursive: true, force: true}));
   const tag = 'v0.1.0-rc.42';
-  const name = 'docworm-0.1.0-rc.42.tar.gz';
+  const name = 'graf-0.1.0-rc.42.tar.gz';
   const data = Buffer.from('synthetic archive');
   fs.writeFileSync(path.join(dir, name), data);
   fs.writeFileSync(path.join(dir, `${name}.sha256`), `${crypto.createHash('sha256').update(data).digest('hex')}  ${name}\n`);
@@ -63,8 +63,8 @@ test('upload failure never tags or publishes', async t => {
   assert.deepEqual(f.calls.map(c => c[0]), ['createRelease', 'uploadReleaseAsset']);
 });
 test('rerun resumes draft and replaces partial asset', async t => {
-  const f = fixture(t, {assets: [{id: 9, name: 'docworm-0.1.0-rc.42.tar.gz'}]});
-  f.args.github.paginate = async method => method === 'releases' ? [f.draft] : [{id: 9, name: 'docworm-0.1.0-rc.42.tar.gz'}];
+  const f = fixture(t, {assets: [{id: 9, name: 'graf-0.1.0-rc.42.tar.gz'}]});
+  f.args.github.paginate = async method => method === 'releases' ? [f.draft] : [{id: 9, name: 'graf-0.1.0-rc.42.tar.gz'}];
   await publish(f.args, f.env);
   assert.equal(f.calls[0][0], 'deleteReleaseAsset');
   assert.equal(f.calls.at(-1)[0], 'updateRelease');
@@ -81,7 +81,7 @@ test('API access error fails closed', async t => {
 });
 test('bad checksum fails before mutations', async t => {
   const f = fixture(t);
-  fs.appendFileSync(path.join(f.env.RELEASE_DIRECTORY, 'docworm-0.1.0-rc.42.tar.gz'), 'corrupt');
+  fs.appendFileSync(path.join(f.env.RELEASE_DIRECTORY, 'graf-0.1.0-rc.42.tar.gz'), 'corrupt');
   await assert.rejects(publish(f.args, f.env), /checksum mismatch/);
   assert.deepEqual(f.calls, []);
 });

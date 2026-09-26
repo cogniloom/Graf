@@ -18,7 +18,7 @@ FILES = [
     "SECURITY.md",
     "CONTRIBUTING.md",
     "CHANGELOG.md",
-    "docworm",
+    "graf",
     ".gitignore",
     "evidencekg/pyproject.toml",
     "evidencekg/uv.lock",
@@ -35,7 +35,7 @@ FILES = [
 TREES = [
     "docs",
     "examples",
-    "plugins/docworm",
+    "plugins/graf",
     "scripts",
     "evidencekg/src",
     "evidencekg/tests",
@@ -72,14 +72,14 @@ def main():
     if args.tag is not None and not re.fullmatch(rf"v{re.escape(version)}(?:-rc\.[1-9][0-9]*)?", args.tag):
         raise ValueError(f"Release tag must be v{version} or v{version}-rc.N, got {args.tag}")
     archive_version = args.tag[1:] if args.tag else version
-    for metadata in ("product/ui/package.json", "plugins/docworm/.codex-plugin/plugin.json"):
+    for metadata in ("product/ui/package.json", "plugins/graf/.codex-plugin/plugin.json"):
         if json.loads((ROOT / metadata).read_text())["version"] != version:
             raise ValueError(f"Version mismatch in {metadata}; expected {version}")
     if not (ROOT / "product/ui/dist/index.html").is_file():
         raise ValueError("Build the dashboard first")
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    stage = output / f"docworm-{archive_version}"
+    stage = output / f"graf-{archive_version}"
     if stage.exists():
         raise ValueError("Release staging directory already exists; choose a fresh --output")
     stage.mkdir()
@@ -107,12 +107,12 @@ def main():
     market.write_text(
         json.dumps(
             {
-                "name": "docworm",
-                "interface": {"displayName": "Docworm"},
+                "name": "graf",
+                "interface": {"displayName": "Graf"},
                 "plugins": [
                     {
-                        "name": "docworm",
-                        "source": {"source": "local", "path": "./plugins/docworm"},
+                        "name": "graf",
+                        "source": {"source": "local", "path": "./plugins/graf"},
                         "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
                         "category": "Productivity",
                     }
@@ -155,7 +155,7 @@ def main():
         if p.is_file()
     }
     (stage / "SHA256SUMS.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    archive = output / f"docworm-{archive_version}.tar.gz"
+    archive = output / f"graf-{archive_version}.tar.gz"
     with tarfile.open(archive, "w:gz") as tar:
         tar.add(stage, arcname=stage.name)
     (output / f"{archive.name}.sha256").write_text(

@@ -9,7 +9,7 @@ creates a Git tag and GitHub **pre-release** automatically. No manual tagging is
 required in Orca or a shell.
 
 Tags use the package version plus the workflow run number: for example,
-`v0.1.0-rc.42`. The archive is `docworm-0.1.0-rc.42.tar.gz`, with a `.sha256`
+`v0.1.0-rc.42`. The archive is `graf-0.1.0-rc.42.tar.gz`, with a `.sha256`
 checksum. The tag points to the exact tested commit, even if another merge has
 since updated `main`. Candidate numbers can have gaps. A rerun reuses its number,
 resumes an unfinished draft, and leaves an already published candidate or promoted
@@ -28,7 +28,7 @@ Promotion keeps the same tag, commit, and downloadable assets; it does not rebui
 or remove the `-rc.N` suffix. You can change the display title when promoting it.
 For the next version series, update the matching base version in
 `evidencekg/pyproject.toml`, `product/ui/package.json` and its lockfile, and
-`plugins/docworm/.codex-plugin/plugin.json`; refresh `evidencekg/uv.lock`. You do
+`plugins/graf/.codex-plugin/plugin.json`; refresh `evidencekg/uv.lock`. You do
 not need a version bump for each merge. The builder rejects mismatched component
 versions and tags.
 
@@ -48,10 +48,10 @@ models are downloaded during installation. Download both assets from GitHub Rele
 then verify and extract (substitute your candidate number):
 
 ```sh
-sha256sum --check docworm-0.1.0-rc.42.tar.gz.sha256
-tar -xzf docworm-0.1.0-rc.42.tar.gz
-cd docworm-0.1.0-rc.42
-./docworm install --demo
+sha256sum --check graf-0.1.0-rc.42.tar.gz.sha256
+tar -xzf graf-0.1.0-rc.42.tar.gz
+cd graf-0.1.0-rc.42
+./graf install --demo
 ```
 
 Releases in a private repository are accessible only to people with repository
@@ -72,6 +72,6 @@ Do not publish an existing research workspace wholesale. Private corpora, creden
 Commits, pushes and marketplace submission are explicit owner actions. Merging or
 pushing to main opts into automated candidate publication after CI passes; stable
 release promotion remains a manual GitHub UI action. The local builder never publishes. The clean release marketplace is named
-`docworm`; the development workspace may use a separate local marketplace name.
+`graf`; the development workspace may use a separate local marketplace name.
 
 The archive contains built UI files for easy installation and source/lockfiles for reproducibility. Python/model dependencies are installed/downloaded separately. Build metadata records file hashes; it is not a cryptographic publisher signature.

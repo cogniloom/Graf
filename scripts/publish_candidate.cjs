@@ -33,7 +33,7 @@ module.exports = async function publish({github, context, core}, env = process.e
   if (release && release.target_commitish !== context.sha) {
     throw new Error('Candidate draft targets a different commit');
   }
-  const archiveName = `docworm-${tag.slice(1)}.tar.gz`;
+  const archiveName = `graf-${tag.slice(1)}.tar.gz`;
   const checksumName = `${archiveName}.sha256`;
   const archive = fs.readFileSync(path.join(env.RELEASE_DIRECTORY, archiveName));
   const checksum = fs.readFileSync(path.join(env.RELEASE_DIRECTORY, checksumName));

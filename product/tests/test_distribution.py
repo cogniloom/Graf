@@ -100,12 +100,12 @@ def test_candidate_archive_name_and_checksum(tmp_path, monkeypatch):
     for directory in [
         "evidencekg",
         "product/ui/dist",
-        "plugins/docworm/.codex-plugin",
+        "plugins/graf/.codex-plugin",
         "product/ui/node_modules/cosmograph",
     ]:
         (root / directory).mkdir(parents=True)
     (root / "evidencekg/pyproject.toml").write_text('[project]\nversion = "0.1.0"\n')
-    for metadata in ["product/ui/package.json", "plugins/docworm/.codex-plugin/plugin.json"]:
+    for metadata in ["product/ui/package.json", "plugins/graf/.codex-plugin/plugin.json"]:
         (root / metadata).write_text('{"version":"0.1.0"}')
     (root / "product/ui/dist/index.html").write_text("synthetic dashboard")
     (root / "product/ui/node_modules/cosmograph/package.json").write_text('{"name":"cosmograph"}')
@@ -116,9 +116,9 @@ def test_candidate_archive_name_and_checksum(tmp_path, monkeypatch):
     output = tmp_path / "output"
     monkeypatch.setattr("sys.argv", ["build_release.py", "--output", str(output), "--tag", "v0.1.0-rc.42"])
     release.main()
-    archive = output / "docworm-0.1.0-rc.42.tar.gz"
+    archive = output / "graf-0.1.0-rc.42.tar.gz"
     assert (output / (archive.name + ".sha256")).read_text() == hashlib.sha256(
         archive.read_bytes()
     ).hexdigest() + "  " + archive.name + "\n"
     with tarfile.open(archive) as bundle:
-        assert "docworm-0.1.0-rc.42/product/ui/dist/index.html" in bundle.getnames()
+        assert "graf-0.1.0-rc.42/product/ui/dist/index.html" in bundle.getnames()
