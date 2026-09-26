@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "docworm": {
+      "command": "python3",
+      "args": [
+        "-c",
+        "\"\"\"Start the installed local MCP bridge without embedding machine-specific paths.\"\"\"\n\nimport json\nimport os\nimport sys\nfrom pathlib import Path\n\nif os.environ.get(\"DOCWORM_HOME\"):\n    config = Path(os.environ[\"DOCWORM_HOME\"]).expanduser().resolve() / \"app.json\"\n    installed = json.loads(config.read_text())\n    pointer = {\"config\": str(config), \"python\": installed[\"python\"], \"bridge\": installed[\"mcp_bridge\"]}\nelse:\n    path = Path(os.environ.get(\"XDG_CONFIG_HOME\", Path.home() / \".config\")) / \"docworm/runtime.json\"\n    if not path.is_file():\n        sys.exit(\"Install Docworm and run ./docworm plugin-install first.\")\n    pointer = json.loads(path.read_text())\nos.execv(pointer[\"python\"], [pointer[\"python\"], pointer[\"bridge\"], pointer[\"config\"]])\n"
+      ]
+    }
+  }
+}

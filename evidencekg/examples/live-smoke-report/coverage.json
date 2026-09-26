@@ -1,0 +1,56 @@
+{
+  "run_id": "R3637e97fac924b9785910b04463a61f0",
+  "snapshot_id": "N2b318e507b0c3ebd3c6985f154822038a0921b5ae75ce1ee7a94ba116e99f4cf",
+  "state": "scheduled_work_complete",
+  "known_source_inventory": 1,
+  "inventory_complete": true,
+  "inventory_errors": 0,
+  "extraction_gaps": 0,
+  "tasks": [
+    {
+      "kind": "connection",
+      "state": "validated",
+      "n": 2
+    },
+    {
+      "kind": "source",
+      "state": "validated",
+      "n": 1
+    }
+  ],
+  "source_units": 1,
+  "source_scheduled": 1,
+  "source_delivered": 1,
+  "source_validated": 1,
+  "graph_memberships_scheduled": 2,
+  "graph_memberships_returned": 2,
+  "explicit_links_scheduled": 0,
+  "explicit_links_returned": 0,
+  "round_limit_reached": false,
+  "scheduling_failures": 0,
+  "unresolved_input_failures": 0,
+  "exhaustive": true,
+  "max_rounds": 0,
+  "prompt_version": "evidence-review-v2",
+  "worker_identity": {
+    "adapter": {
+      "adapter": "existing-lawcase-codex-v3",
+      "adapter_sha": "6d135d351ddd4cb26329ecedc610024d175ad400e9e58739e3c5c2b8a4bbd103",
+      "cli_version": "codex-cli 0.157.0",
+      "corpus_sha": "44344537afa2601f83be988f2c455b245aa6798b825747e82911c96771e3883b",
+      "executable": "/home/wenga/.codex/packages/standalone/releases/0.157.0-x86_64-unknown-linux-musl/bin/codex",
+      "project": "/home/wenga/src/docworm"
+    },
+    "effort": "medium",
+    "model": "gpt-6-astra"
+  },
+  "scheduled": 3,
+  "delivered": 3,
+  "result_validated": 3,
+  "failed_tasks": 0,
+  "graph_memberships": 2,
+  "explicit_links": 0,
+  "followups_open": 0,
+  "model_interpretations_unreviewed": 0,
+  "coverage_claim": "All scheduled inputs have validated results only when counts agree. Not comprehension, all-pairs coverage, or semantic completeness."
+}

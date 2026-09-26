@@ -1,0 +1,8 @@
+# Direct dependencies verified against the existing environment on 2026-09-24.
+# Install additively with: uv pip install --python .venv/bin/python -r requirements-lawcase.txt
+haiku.rag==0.88.2
+fastmcp==4.0.9
+jsonschema==4.26.0
+httpx==0.28.1
+beautifulsoup4==4.15.0
+pypdfium2==5.13.0

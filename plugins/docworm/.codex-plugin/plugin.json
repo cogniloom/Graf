@@ -1,0 +1,27 @@
+{
+  "name": "docworm",
+  "version": "0.1.0",
+  "description": "Search and inspect your local evidence graph, with citations and visible processing gaps.",
+  "author": {
+    "name": "Docworm contributors"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Docworm",
+    "shortDescription": "Local evidence, connected and traceable.",
+    "longDescription": "Manage local sources, inspect readiness, and investigate connected evidence through your Docworm workspace. Retrieval uses local non-generative models; Codex reasons over the evidence you request.",
+    "developerName": "Docworm contributors",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "Use Docworm to investigate my evidence. Check readiness first, cite source passages, and show contradictions and gaps.",
+    "brandColor": "#7656FF"
+  },
+  "mcpServers": "./.mcp.json",
+  "license": "MIT",
+  "keywords": [
+    "evidence",
+    "knowledge-graph",
+    "local",
+    "research"
+  ]
+}

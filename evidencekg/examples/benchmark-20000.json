@@ -1,0 +1,21 @@
+{
+  "scope": "synthetic local TXT high-frequency-key stress; no model calls",
+  "source_files": 20000,
+  "source_bytes": 848890,
+  "ingestion_seconds": 43.15649373600172,
+  "files_per_second": 463.4296781000013,
+  "common_key_memberships": 20000,
+  "explicit_pair_edges": 0,
+  "total_postings": 80000,
+  "database_bytes": 163016704,
+  "artifact_bytes": 30587599,
+  "bytes_per_posting_including_occurrence_indexes": 737.5872,
+  "storage_amplification": 228.06759768639046,
+  "neighbour_page_100_seconds": [
+    0.7445401969962404,
+    0.7293625759994029,
+    0.722917402999883
+  ],
+  "neighbour_page_100_median_seconds": 0.7293625759994029,
+  "limitations": "Small synthetic files amplify per-document metadata. Warm-cache local timings; not production, semantic quality or million-document capacity."
+}

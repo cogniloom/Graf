@@ -1,0 +1,8 @@
+# Versions exercised by this isolated PoC; GPU runtime requires compatible NVIDIA drivers.
+torch==2.14.0
+transformers==5.17.0
+numpy==2.5.3
+tokenizers==0.23.2
+safetensors==0.8.0
+huggingface_hub==1.33.0
+jsonschema==4.26.0

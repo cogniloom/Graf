@@ -1,0 +1,57 @@
+{
+  "configuration": {
+    "excludes": [],
+    "identifiers": [],
+    "lease_seconds": 1200,
+    "max_attachment_bytes": 200000000,
+    "max_attachment_depth": 8,
+    "max_attachments": 1000,
+    "max_attempts": 3,
+    "max_file_bytes": 100000000,
+    "max_input_bytes": 100000,
+    "names": [],
+    "ocr": "auto",
+    "ocr_languages": "eng",
+    "overlap_chars": 300,
+    "parser_timeout": 180,
+    "root": "/tmp/evidencekg-live-v2-sources",
+    "rules_version": "mechanical-v1",
+    "segment_chars": 6000,
+    "terms": [],
+    "tessdata": null
+  },
+  "documents": [
+    {
+      "artifacts": [],
+      "blob": "fc17abde4eee4e1dc1d5788959d25105661a534b2733bc757a74666ea4836b8d",
+      "document_version_id": "Dee80c6bc5ae3cead0f39324352e6bbb555265382ece3f2ffc82b3b39e3dbe5d4",
+      "empty": false,
+      "extraction_id": "X08953ac5f956acaf262f6a75f49dc274411efde0b93d80d17467cfb3426613fd",
+      "mime_part": null,
+      "parent": null,
+      "path": "example.txt",
+      "source_entry_id": "E3322a8ecda9a3c4dcdcd12c3bcbaf141bf977620e5fdb0d440d44605f1e0f85e",
+      "source_kind": "filesystem",
+      "status": "ready",
+      "warnings": []
+    }
+  ],
+  "history": [],
+  "inventory_complete": true,
+  "inventory_errors": [],
+  "parser": {
+    "adapter": "native-v1",
+    "ocr": "auto",
+    "ocr_languages": "eng",
+    "versions": {
+      "beautifulsoup4": "4.15.0",
+      "pdftoppm": "pdftoppm version 26.08.0",
+      "pillow": "12.3.0",
+      "pypdf": "6.19.0",
+      "python-docx": "1.2.0",
+      "tesseract": "tesseract 5.5.3"
+    }
+  },
+  "root": "/tmp/evidencekg-live-v2-sources",
+  "ruleset_hash": "3b01acfa71cbc3d3f4fa8d2661797b88433715fcb15f69394124be989ff232bd"
+}

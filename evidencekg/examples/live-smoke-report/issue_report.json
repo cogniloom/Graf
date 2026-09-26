@@ -1,0 +1,46 @@
+[
+  {
+    "id": "question",
+    "issue": "Identify the qualifier in this synthetic fixture. Cite the complete five-character source text, including its period, using start=0 and end=5. Do not invent an external context or follow-up issue.\n",
+    "state": "scheduled_work_complete",
+    "findings": [
+      "G06820a5989b1686c785758a0390fc0287fcd41d0453d114e9dd371ac2992c778",
+      "G60b347fb9c03d2608cf2cc8e3398005e04db48f71d634a20613f54895b1b17bc",
+      "Gea6789a3c1d099343626382c8bd7ed654f940122a3e61aaeae3509b4cd613222"
+    ],
+    "source_premises": [
+      {
+        "end": 5,
+        "extraction_id": "X08953ac5f956acaf262f6a75f49dc274411efde0b93d80d17467cfb3426613fd",
+        "quote": "Only.",
+        "segment_id": "Sad6b2d14b544adec3ba1c233d2f723789cb793323da47108730f474fb428dd62",
+        "start": 0
+      },
+      {
+        "end": 5,
+        "extraction_id": "X08953ac5f956acaf262f6a75f49dc274411efde0b93d80d17467cfb3426613fd",
+        "quote": "Only.",
+        "segment_id": "Sad6b2d14b544adec3ba1c233d2f723789cb793323da47108730f474fb428dd62",
+        "start": 0
+      },
+      {
+        "end": 5,
+        "extraction_id": "X08953ac5f956acaf262f6a75f49dc274411efde0b93d80d17467cfb3426613fd",
+        "quote": "Only.",
+        "segment_id": "Sad6b2d14b544adec3ba1c233d2f723789cb793323da47108730f474fb428dd62",
+        "start": 0
+      }
+    ],
+    "supporting_interpretations": [],
+    "opposing_interpretations": [],
+    "other_interpretations": [],
+    "assumptions": [
+      "Grouping follows scheduled issue tasks and cited sources; not an independently validated semantic classification.",
+      "Empty support/opposition lists mean no such attributed classification was supplied."
+    ],
+    "uncertainties": [
+      "None for identification in the supplied text.",
+      "None for identifying the supplied text."
+    ]
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "G06820a5989b1686c785758a0390fc0287fcd41d0453d114e9dd371ac2992c778",
+    "run_id": "R3637e97fac924b9785910b04463a61f0",
+    "task_id": "Tec55c3bb6f06d1df94f35f2f333d94d72aa5a68b7380e429d582e0ca5ec955b9",
+    "assertion": "The qualifier is “Only”.",
+    "epistemic_status": "observation",
+    "payload_json": "{\"assertion\":\"The qualifier is “Only”.\",\"epistemic_status\":\"observation\",\"sources\":[{\"end\":5,\"extraction_id\":\"X08953ac5f956acaf262f6a75f49dc274411efde0b93d80d17467cfb3426613fd\",\"quote\":\"Only.\",\"segment_id\":\"Sad6b2d14b544adec3ba1c233d2f723789cb793323da47108730f474fb428dd62\",\"start\":0}],\"uncertainty\":\"None for identification in the supplied text.\"}"
+  },
+  {
+    "id": "G60b347fb9c03d2608cf2cc8e3398005e04db48f71d634a20613f54895b1b17bc",
+    "run_id": "R3637e97fac924b9785910b04463a61f0",
+    "task_id": "T3da34b56f5c23dba59c57c08088893232729af97aaa79f4f0bb2b8978d44a62e",
+    "assertion": "The qualifier is “Only.”",
+    "epistemic_status": "observation",
+    "payload_json": "{\"assertion\":\"The qualifier is “Only.”\",\"epistemic_status\":\"observation\",\"sources\":[{\"end\":5,\"extraction_id\":\"X08953ac5f956acaf262f6a75f49dc274411efde0b93d80d17467cfb3426613fd\",\"quote\":\"Only.\",\"segment_id\":\"Sad6b2d14b544adec3ba1c233d2f723789cb793323da47108730f474fb428dd62\",\"start\":0}],\"uncertainty\":\"None for identifying the supplied text.\"}"
+  },
+  {
+    "id": "Gea6789a3c1d099343626382c8bd7ed654f940122a3e61aaeae3509b4cd613222",
+    "run_id": "R3637e97fac924b9785910b04463a61f0",
+    "task_id": "T30a7e55e40d1b577f67f3c817b9768d61f4ff8e1ccb415ea59cfc727f8708dc0",
+    "assertion": "The qualifier is “Only”.",
+    "epistemic_status": "observation",
+    "payload_json": "{\"assertion\":\"The qualifier is “Only”.\",\"epistemic_status\":\"observation\",\"sources\":[{\"end\":5,\"extraction_id\":\"X08953ac5f956acaf262f6a75f49dc274411efde0b93d80d17467cfb3426613fd\",\"quote\":\"Only.\",\"segment_id\":\"Sad6b2d14b544adec3ba1c233d2f723789cb793323da47108730f474fb428dd62\",\"start\":0}],\"uncertainty\":\"\"}"
+  }
+]

@@ -1,0 +1,49 @@
+name: docworm-knowledge
+services:
+  postgres:
+    image: postgres:17@sha256:d74eeac9a635390a49bc21bd49fccd973de707e2a53a76ac49b552b8712ec46f
+    entrypoint: ["/bin/sh", "/opt/evidencekg-entrypoint.sh"]
+    command: ["postgres"]
+    tmpfs:
+      - /run/evidencekg
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: evidencekg
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/admin_password
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    secrets:
+      - admin_password
+      - runtime_password
+    ports:
+      - "127.0.0.1:${EVIDENCEKG_PG_PORT:-55432}:5432"
+    volumes:
+      - knowledge_postgres:/var/lib/postgresql/data
+      - ./deploy/postgres/entrypoint.sh:/opt/evidencekg-entrypoint.sh:ro
+      - ./deploy/postgres/init.sh:/docker-entrypoint-initdb.d/10-runtime.sh:ro
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U postgres -d evidencekg"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 20s
+    stop_grace_period: 60s
+    shm_size: 256mb
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+secrets:
+  admin_password:
+    file: ./.evidencekg-private/postgres/admin-password
+  runtime_password:
+    file: ./.evidencekg-private/postgres/runtime-password
+volumes:
+  knowledge_postgres:
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: ${EVIDENCEKG_PG_SUBNET:-10.231.48.0/24}
