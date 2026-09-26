@@ -1,4 +1,4 @@
-"""Local Docworm source lifecycle and authenticated HTTP service."""
+"""Local Graf source lifecycle and authenticated HTTP service."""
 
 from .config import AppConfig
 from .manager import Manager, migrate

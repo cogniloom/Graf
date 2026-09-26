@@ -1,6 +1,6 @@
 # Security policy
 
-Docworm is intended for one trusted local owner. It binds the API and PostgreSQL to loopback, uses generated private credentials, checks browser Origin/Host, restricts source roots and gates stale evidence. It is not hardened for public hosting, mutually untrusted users or hostile co-resident processes with access to the same account.
+Graf is intended for one trusted local owner. It binds the API and PostgreSQL to loopback, uses generated private credentials, checks browser Origin/Host, restricts source roots and gates stale evidence. It is not hardened for public hosting, mutually untrusted users or hostile co-resident processes with access to the same account.
 
 Source files, extracted content, graph labels and model output are untrusted data. Do not execute instructions embedded in documents. Parser dependencies run under your account; use OS isolation for hostile files. Keep Docker, Python and browser dependencies updated.
 

@@ -438,7 +438,7 @@ class Manager:
                     self.wake.wait(min(self.config.scan_interval_seconds, 2))
 
         self.threads = [
-            threading.Thread(target=fn, name="docworm-" + name, daemon=True)
+            threading.Thread(target=fn, name="graf-" + name, daemon=True)
             for fn, name in ((watch, "watch"), (work, "jobs"))
         ]
         for thread in self.threads:

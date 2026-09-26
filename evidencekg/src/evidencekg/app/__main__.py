@@ -9,7 +9,7 @@ from .config import AppConfig
 def main():
     import uvicorn
 
-    parser = argparse.ArgumentParser(description="Local Docworm workspace server")
+    parser = argparse.ArgumentParser(description="Local Graf workspace server")
     parser.add_argument("--config", required=True)
     args = parser.parse_args()
     config = AppConfig.load(args.config)

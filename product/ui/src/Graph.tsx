@@ -112,7 +112,7 @@ export function Graph({
           color: strings(points.map((n) => n.color)),
           size: numbers(points.map((n) => n.size)),
         }),
-        { name: "docworm_points" },
+        { name: "graf_points" },
       );
       if (links.length)
         await connection.insertArrowTable(
@@ -122,7 +122,7 @@ export function Graph({
             sourceIndex: numbers(links.map((e) => e.sourceIndex)),
             targetIndex: numbers(links.map((e) => e.targetIndex)),
           }),
-          { name: "docworm_links" },
+          { name: "graf_links" },
         );
       if (disposed) {
         return;
@@ -130,8 +130,8 @@ export function Graph({
       const instance = new Cosmograph(
         host.current!,
         {
-          points: "docworm_points",
-          links: links.length ? "docworm_links" : undefined,
+          points: "graf_points",
+          links: links.length ? "graf_links" : undefined,
           pointIdBy: "id",
           pointIndexBy: "index",
           pointLabelBy: "label",

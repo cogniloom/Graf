@@ -3,11 +3,11 @@
 ## Daily commands
 
 ```sh
-./docworm start
-./docworm status
-./docworm doctor
-./docworm stop
-./docworm stop --database
+./graf start
+./graf status
+./graf doctor
+./graf stop
+./graf stop --database
 ```
 
 Stop preserves the database volume, models, source originals and private generations. Application logs are in `<home>/logs/application.log`; PostgreSQL has bounded Docker logs. Do not publish logs without checking for document names, excerpts and errors. The application runs as your user. Docker restarts PostgreSQL automatically; the native application must be started again after logout/reboot. An unattended service manager is not installed automatically.
@@ -17,8 +17,8 @@ Activity shows failed and recovered jobs. After fixing an unavailable source or 
 ## Back up
 
 ```sh
-./docworm backup /absolute/private-backups/2026-09-26
-./docworm verify-backup /absolute/private-backups/2026-09-26
+./graf backup /absolute/private-backups/2026-09-26
+./graf verify-backup /absolute/private-backups/2026-09-26
 ```
 
 The launcher stops the API, takes a PostgreSQL custom-format dump, copies private generations/configuration/credentials, writes file checksums, and restarts an application that was running. The destination must be new and outside the workspace. Failed bundles contain `INCOMPLETE` and must not be used. Keep backups private and preferably encrypted at rest; they contain source-derived evidence and credentials. Original source directories, downloaded models and the Python environment are not included: back up originals separately and retain the pinned model revisions.
@@ -33,12 +33,12 @@ Reinstall the locked Python runtime and pinned model weights, check external sou
 
 ## Update
 
-Back up and verify first. Extract a new release at a stable application path, then run `./docworm update` for the existing home. It stops the API, synchronizes the locked runtime, migrates schemas, starts the API and requests a rebuild. Source releases need `npm ci && npm run build` in `product/ui` before updating. Do not interrupt schema migration. Re-run plugin-install so Codex uses the current bridge.
+Back up and verify first. Extract a new release at a stable application path, then run `./graf update` for the existing home. It stops the API, synchronizes the locked runtime, migrates schemas, starts the API and requests a rebuild. Source releases need `npm ci && npm run build` in `product/ui` before updating. Do not interrupt schema migration. Re-run plugin-install so Codex uses the current bridge.
 
 ## Troubleshooting
 
 - **Docker unavailable:** verify Docker/Compose independently; the installer never changes socket permissions.
-- **Missing models:** run `./docworm models`. Download access is needed only to obtain pinned weights.
+- **Missing models:** run `./graf models`. Download access is needed only to obtain pinned weights.
 - **CUDA unavailable or out of memory:** stop, choose `device: "cpu"` in private app.json, start and rebuild. CPU may be substantially slower.
 - **Blocked extraction:** inspect the job error and document warnings. Scanned images require a working Tesseract installation and suitable language data. Unsupported/oversized/locked documents remain coverage gaps.
 - **Graph unavailable:** check WebGL support and use the document list. Local graph worker/WASM files must be present in the built UI assets.

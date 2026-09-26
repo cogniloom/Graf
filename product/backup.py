@@ -65,7 +65,7 @@ def verify(home, target, compose):
         path = target / name
         if not path.resolve().is_relative_to(target) or path.is_symlink() or digest(path) != expected:
             raise ValueError("Backup checksum mismatch: " + name)
-    database = "docworm_verify_" + uuid.uuid4().hex
+    database = "graf_verify_" + uuid.uuid4().hex
     compose(home, "exec", "-T", "postgres", "createdb", "-U", "postgres", database)
     try:
         with (target / "database.dump").open("rb") as stream:

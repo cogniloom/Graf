@@ -205,8 +205,8 @@ For this repository's existing hardened, subscription-only Codex adapter:
 
 ```bash
 uv run evidencekg --state /local/case-state resume RUN_ID \
-  --lawcase-project /absolute/path/to/docworm \
-  --lawcase-worker-state /absolute/path/to/docworm/.lawcase \
+  --lawcase-project /absolute/path/to/Graf \
+  --lawcase-worker-state /absolute/path/to/Graf/.lawcase \
   --model gpt-6-astra --effort medium --max-calls 20
 ```
 

@@ -10,6 +10,6 @@ Do not publish an existing research workspace wholesale. Private corpora, creden
 6. Initialize/publish the **staged directory** as the GitHub repository, or copy its reviewed source into an already-clean repository. Do not copy this development workspace's hidden directories. Upload the `.tar.gz` and its checksum as release assets.
 7. Enable private vulnerability reporting, choose a maintainer contact, and set repository description/topics and the documented support scope. Do not label the combined Cosmograph distribution unrestricted open source.
 
-GitHub publication, commits, pushes, release uploads and marketplace submission are explicit owner actions. The builder does not perform them. The clean release marketplace is named `docworm`; the development workspace may use a separate local marketplace name.
+GitHub publication, commits, pushes, release uploads and marketplace submission are explicit owner actions. The builder does not perform them. The clean release marketplace is named `graf`; the development workspace may use a separate local marketplace name.
 
 The archive contains built UI files for easy installation and source/lockfiles for reproducibility. Python/model dependencies are installed/downloaded separately. Build metadata records file hashes; it is not a cryptographic publisher signature.

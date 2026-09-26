@@ -1,9 +1,9 @@
 ---
 name: investigate
-description: Investigate questions using the local Docworm evidence graph, with source citations, connected context, contradictions and explicit coverage limits.
+description: Investigate questions using the local Graf evidence graph, with source citations, connected context, contradictions and explicit coverage limits.
 ---
 
-Use Docworm MCP tools for the user's evidence question. Start with workspace_status. If updating, empty or blocked, explain the actual state; do not reuse an old workset as current evidence. For ready_with_gaps, report the relevant extraction gaps.
+Use Graf MCP tools for the user's evidence question. Start with workspace_status. If updating, empty or blocked, explain the actual state; do not reuse an old workset as current evidence. For ready_with_gaps, report the relevant extraction gaps.
 
 Preserve the original question and search its separate information needs. Use discover for complementary exact identifiers, terminology and paraphrases. Inspect connected bundles, parent documents, versions and replies. Follow evidence_workset cursors and read_document next_offset when needed; a top-ranked preview is not a complete review. Actively look for contrary evidence, negation and timing conditions.
 
