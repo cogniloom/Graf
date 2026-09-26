@@ -32,8 +32,8 @@ For the next version series, update the matching base version in
 not need a version bump for each merge. The builder rejects mismatched component
 versions and tags.
 
-The repository needs an available runner labeled `self-hosted`, `Linux`, and `X64`,
-with Git, Tesseract with English data, Poppler (`pdftoppm`), `libseccomp.so.2`, and
+Both jobs select only the exact `self-hosted` runner label. The runner must provide
+a Linux environment with Git, Tesseract with English data, Poppler (`pdftoppm`), `libseccomp.so.2`, and
 the standard GitHub Actions runner prerequisites. On Ubuntu, the parser packages
 are `tesseract-ocr-eng poppler-utils libseccomp2`. Actions installs Node 22, uv and
 Python 3.12. Only the publishing job gets `contents: write`, using the built-in

@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: self-hosted
     timeout-minutes: 30
     outputs:
       tag: ${{ steps.archive.outputs.tag }}
@@ -73,7 +73,7 @@ jobs:
   publish:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: self-hosted
     timeout-minutes: 5
     permissions:
       contents: write
