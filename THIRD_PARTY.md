@@ -1,6 +1,6 @@
 # Third-party software and models
 
-Original Docworm code is MIT licensed. Dependencies retain their own terms. The dependency lockfiles are the authoritative version inventory; the release archive also includes collected frontend license notices.
+Original Graf code is MIT licensed. Dependencies retain their own terms. The dependency lockfiles are the authoritative version inventory; the release archive also includes collected frontend license notices.
 
 | Component | Role | License/source |
 |---|---|---|
@@ -13,6 +13,6 @@ Original Docworm code is MIT licensed. Dependencies retain their own terms. The 
 | FastAPI / Uvicorn | Local API | MIT / BSD-3-Clause; project package notices |
 | PyTorch / Transformers | Local model execution | BSD-style / Apache 2.0; project package notices |
 
-Cosmograph attribution: Cosmograph, developed by Cosmograph contributors. The integration configures and styles the library; it does not claim authorship of it. CC BY-NC 4.0 terms are available at https://creativecommons.org/licenses/by-nc/4.0/. A commercial user must obtain appropriate Cosmograph rights or replace that component. The fact that Docworm is distributed without charge does not authorize every downstream use.
+Cosmograph attribution: Cosmograph, developed by Cosmograph contributors. The integration configures and styles the library; it does not claim authorship of it. CC BY-NC 4.0 terms are available at https://creativecommons.org/licenses/by-nc/4.0/. A commercial user must obtain appropriate Cosmograph rights or replace that component. The fact that Graf is distributed without charge does not authorize every downstream use.
 
 Model weights are downloaded separately at pinned commits, not bundled into the release. Their licenses and model cards remain available with the upstream repositories. Review all applicable licenses before redistribution.

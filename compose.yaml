@@ -1,3 +1,4 @@
+# Keep the legacy project name so existing Compose volumes remain attached.
 name: docworm-knowledge
 services:
   postgres:

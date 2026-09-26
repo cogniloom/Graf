@@ -1,4 +1,4 @@
-# Docworm dashboard handoff
+# Graf dashboard handoff
 
 Scope: `product/ui` only. React 18 + TypeScript + Vite, real `@cosmograph/cosmograph` 2.5.1 under its CC-BY-NC-4.0 license. No custom canvas substitute, CDN runtime loading, telemetry, demo records, or document-provider calls exist in application code. Synthetic data exists only in the explicitly labeled browser test.
 
@@ -8,7 +8,7 @@ Scope: `product/ui` only. React 18 + TypeScript + Vite, real `@cosmograph/cosmog
 - Polling: actual status/phase/counts, activity jobs and progress, ready/ready-with-gaps/empty/updating/blocked/unauthorized/offline states. Published revision equality gates graph and documents. Mutations clear evidence immediately, report server acceptance or persistent errors, and refresh state.
 - Explore: bounded actual graph data, document-ID click navigation, fit/pause/labels controls, reduced-motion initial pause, searchable paginated document alternative, source passages and locators, passage continuation, bounded relationship counts. Layout is explicitly not evidence.
 - Settings: server-provided safe configuration and copyable `codex_instructions`; Open in Codex opens instructions, not a guessed URI. Codex provider-data caveat is visible.
-- Auth: fragment removed synchronously before token POST; cookie credentials included on same-origin API requests; both initial bootstrap and mounted-page hash changes work. Unauthorized guidance uses `./docworm open`.
+- Auth: fragment removed synchronously before token POST; cookie credentials included on same-origin API requests; both initial bootstrap and mounted-page hash changes work. Unauthorized guidance uses `./graf open`.
 - Runtime: explicitly instantiate a locally bundled DuckDB worker/WASM, load API records into Arrow tables, and pass that local connection to Cosmograph. External connections do not auto-upload JavaScript arrays; this was caught and corrected in browser verification. Graph lifecycle waits for initialization/config updates before teardown.
 - Cosmograph attribution and complete upstream license are served at `/cosmograph-license.txt`.
 
@@ -21,7 +21,7 @@ Scope: `product/ui` only. React 18 + TypeScript + Vite, real `@cosmograph/cosmog
 - `npm audit --audit-level=moderate` — zero vulnerabilities in the final pinned lockfile.
 - `python tests/browser-smoke.py` against built assets on an isolated loopback fixture server — passed. Real Cosmograph rendered 64 synthetic nodes/64 edges, actual graph label selected the correct source, fit/pause/labels worked, list search/empty results worked, source add/toggle/rescan/removal and Escape confirmation worked, Codex instructions loaded, mobile width had no horizontal overflow, published evidence cleared on updating, blocked/empty/unauthorized/offline states worked, and mounted-page token bootstrap worked. No external requests or uncaught page errors in Chromium.
 
-The browser script requires Python Playwright and `/usr/bin/chromium`. It starts an isolated static server for the built assets with strict CSP automatically; override `CHROMIUM` or `DOCWORM_UI_URL` when needed. The final suite passed with `wasm-unsafe-eval` and without general `unsafe-eval`. All API responses in that script are explicitly synthetic; it does not test the actual backend, corpus, source filesystem operations, or model preparation.
+The browser script requires Python Playwright and `/usr/bin/chromium`. It starts an isolated static server for the built assets with strict CSP automatically; override `CHROMIUM` or `GRAF_UI_URL` when needed. The final suite passed with `wasm-unsafe-eval` and without general `unsafe-eval`. All API responses in that script are explicitly synthetic; it does not test the actual backend, corpus, source filesystem operations, or model preparation.
 
 ## Visual evidence and fidelity ledger
 

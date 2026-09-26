@@ -14,8 +14,8 @@ Optional bilingual discovery annotations are stored separately from evidence. Th
 # Requires an existing authenticated subscription worker state; no billing fallback.
 evidencekg --state /local/case-state index-discovery \
   --output /local/case-discovery \
-  --lawcase-project /path/to/docworm \
-  --lawcase-worker-state /path/to/docworm/.lawcase
+  --lawcase-project /path/to/Graf \
+  --lawcase-worker-state /path/to/Graf/.lawcase
 
 evidencekg --state /local/case-state discover 'What requires written consent?' \
   --discovery-index /local/case-discovery

@@ -13,8 +13,8 @@ from mcp.types import ToolAnnotations
 
 cfg = json.loads(Path(sys.argv[1]).read_text())
 if cfg["host"] != "127.0.0.1" or not 1024 <= cfg["port"] <= 65535:
-    raise ValueError("Docworm must use a local loopback address")
-server = MCPServer("Docworm")
+    raise ValueError("Graf must use a local loopback address")
+server = MCPServer("Graf")
 READ = ToolAnnotations(read_only_hint=True, destructive_hint=False, open_world_hint=False)
 WRITE = ToolAnnotations(read_only_hint=False, destructive_hint=False, open_world_hint=False)
 
@@ -32,7 +32,7 @@ def request(path, method="GET", payload=None):
             return json.load(response)
     except HTTPError as exc:
         body = exc.read(8192).decode(errors="replace")
-        raise ValueError(f"Docworm returned HTTP {exc.code}: {body}") from None
+        raise ValueError(f"Graf returned HTTP {exc.code}: {body}") from None
 
 
 @server.tool(annotations=READ)

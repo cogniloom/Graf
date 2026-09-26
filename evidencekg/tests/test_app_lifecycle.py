@@ -36,7 +36,7 @@ def app_database(tmp_path_factory):
 
     original = json.loads(Path(config_path).read_text())
     admin = database_dsn(config_path)
-    name = "docworm_app_test_" + uuid4().hex
+    name = "graf_app_test_" + uuid4().hex
     directory = tmp_path_factory.mktemp("app-database")
     dbconfig = directory / "admin.json"
     dbconfig.write_text(json.dumps(original | {"dbname": name}))

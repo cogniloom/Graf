@@ -16,7 +16,7 @@ FILES = [
     "SECURITY.md",
     "CONTRIBUTING.md",
     "CHANGELOG.md",
-    "docworm",
+    "graf",
     ".gitignore",
     "evidencekg/pyproject.toml",
     "evidencekg/uv.lock",
@@ -33,7 +33,7 @@ FILES = [
 TREES = [
     "docs",
     "examples",
-    "plugins/docworm",
+    "plugins/graf",
     "scripts",
     "evidencekg/src",
     "evidencekg/tests",
@@ -67,7 +67,7 @@ def main():
         raise ValueError("Build the dashboard first")
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    stage = output / "docworm-0.1.0"
+    stage = output / "graf-0.1.0"
     if stage.exists():
         raise ValueError("Release staging directory already exists; choose a fresh --output")
     stage.mkdir()
@@ -95,12 +95,12 @@ def main():
     market.write_text(
         json.dumps(
             {
-                "name": "docworm",
-                "interface": {"displayName": "Docworm"},
+                "name": "graf",
+                "interface": {"displayName": "Graf"},
                 "plugins": [
                     {
-                        "name": "docworm",
-                        "source": {"source": "local", "path": "./plugins/docworm"},
+                        "name": "graf",
+                        "source": {"source": "local", "path": "./plugins/graf"},
                         "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
                         "category": "Productivity",
                     }
@@ -143,10 +143,10 @@ def main():
         if p.is_file()
     }
     (stage / "SHA256SUMS.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    archive = output / "docworm-0.1.0.tar.gz"
+    archive = output / "graf-0.1.0.tar.gz"
     with tarfile.open(archive, "w:gz") as tar:
         tar.add(stage, arcname=stage.name)
-    (output / "docworm-0.1.0.tar.gz.sha256").write_text(
+    (output / "graf-0.1.0.tar.gz.sha256").write_text(
         hashlib.sha256(archive.read_bytes()).hexdigest() + "  " + archive.name + "\n"
     )
     print(json.dumps({"staging": str(stage), "archive": str(archive), "files": len(manifest)}, indent=2))

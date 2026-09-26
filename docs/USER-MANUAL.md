@@ -2,7 +2,7 @@
 
 ## Open and sign in
 
-Run `./docworm open`. A short-lived browser navigation carries your private local token in a URL fragment, exchanges it for an HttpOnly session cookie, and removes the fragment. Do not share sign-in links. `./docworm open --print-url` is an explicit fallback when no browser launcher is available; its output is a credential.
+Run `./graf open`. A short-lived browser navigation carries your private local token in a URL fragment, exchanges it for an HttpOnly session cookie, and removes the fragment. Do not share sign-in links. `./graf open --print-url` is an explicit fallback when no browser launcher is available; its output is a credential.
 
 ## Add and manage evidence
 
@@ -10,7 +10,7 @@ In **Sources**, add an absolute file or directory path within an allowed root. D
 
 **Rescan** requests a new build. A periodic watcher also checks contents, including changes that preserve file size and modification time. **Pause** excludes a source from the next published revision; **Resume** includes it again. **Remove** unregisters a source and rebuilds the remaining collection. This is not secure erasure: old private generations and audit data remain until a separately planned retention procedure removes them.
 
-To authorize a new location, run `./docworm allow-root /absolute/directory`. You can also manage sources using `./docworm sources list`, `add PATH`, `rescan ID`, `pause ID`, `resume ID` and `remove ID`.
+To authorize a new location, run `./graf allow-root /absolute/directory`. You can also manage sources using `./graf sources list`, `add PATH`, `rescan ID`, `pause ID`, `resume ID` and `remove ID`.
 
 ## Understand readiness
 
@@ -32,7 +32,7 @@ Cosmograph requires a working WebGL browser. If graphics are unavailable, the do
 
 ## Investigate
 
-The dashboard search filters document names/paths. Use **Open in Codex** and the Docworm tools for semantic evidence questions, ranking and retained candidate queues. A filename search with no matches does not mean no relevant evidence exists.
+The dashboard search filters document names/paths. Use **Open in Codex** and the Graf tools for semantic evidence questions, ranking and retained candidate queues. A filename search with no matches does not mean no relevant evidence exists.
 
 Ask a precise question, preserve identifiers, and inspect connected replies, attachments and versions. Continue candidate queues when needed. A highly ranked passage can be incomplete or contradicted elsewhere. The fictional demo deliberately includes conditional approval, an order placed before a certificate was issued, and conflicting drafts.
 

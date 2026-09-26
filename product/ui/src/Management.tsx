@@ -303,7 +303,7 @@ export function Settings({ codex = false }: { codex?: boolean }) {
       : "";
   return (
     <section className="page">
-      <h2>{codex ? "Use Docworm in Codex" : "Workspace settings"}</h2>
+      <h2>{codex ? "Use Graf in Codex" : "Workspace settings"}</h2>
       <p className="muted">Your local workspace, connected on your terms.</p>
       {error && <p role="alert">{error}</p>}
       {!settings && !error && <p>Loading configuration…</p>}

@@ -60,7 +60,7 @@ def create_app(config, *, manager=None, start_background=True):
             if start_background:
                 manager.stop()
 
-    app = FastAPI(title="Docworm", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
+    app = FastAPI(title="Graf", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
     app.state.manager = manager
 
     def cookie_key(value):
@@ -211,7 +211,7 @@ def create_app(config, *, manager=None, start_background=True):
     def settings():
         return {
             "workspace_name": config.workspace_name or config.home.name,
-            "codex_instructions": "Run ./docworm plugin-install, then ask Codex to use Docworm.",
+            "codex_instructions": "Run ./graf plugin-install, then ask Codex to use Graf.",
             "allowed_roots": [str(p) for p in config.allowed_roots],
             "device": config.device,
             "host": config.host,

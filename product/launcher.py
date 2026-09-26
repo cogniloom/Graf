@@ -1,4 +1,4 @@
-"""Docworm local installation and service lifecycle. Standard-library bootstrap."""
+"""Graf local installation and service lifecycle. Standard-library bootstrap."""
 
 from __future__ import annotations
 
@@ -41,7 +41,7 @@ def write_json(path, value):
 def config(home):
     path = home / "app.json"
     if not path.is_file():
-        raise ValueError("Workspace is not installed. Run ./docworm install first.")
+        raise ValueError("Workspace is not installed. Run ./graf install first.")
     return json.loads(path.read_text())
 
 
@@ -109,7 +109,7 @@ def alive(home):
 def start(home):
     cfg = config(home)
     if alive(home):
-        print("Docworm is already running.")
+        print("Graf is already running.")
         return
     compose(home, "up", "-d", "--wait", "postgres")
     (home / "logs").mkdir(exist_ok=True)
@@ -135,7 +135,7 @@ def start(home):
             with urllib.request.urlopen(f"http://127.0.0.1:{cfg['port']}/healthz", timeout=1) as response:
                 if response.status == 200:
                     print(
-                        f"Docworm is running at http://127.0.0.1:{cfg['port']}. Run ./docworm open to sign in."
+                        f"Graf is running at http://127.0.0.1:{cfg['port']}. Run ./graf open to sign in."
                     )
                     return
         except (OSError, urllib.error.URLError):
@@ -217,7 +217,7 @@ def install(args, home):
             },
         )
     compose_value = {
-        "name": "docworm-" + hashlib.sha256(str(home).encode()).hexdigest()[:12],
+        "name": "graf-" + hashlib.sha256(str(home).encode()).hexdigest()[:12],
         "services": {
             "postgres": {
                 "image": PG_IMAGE,
@@ -307,7 +307,7 @@ def install(args, home):
         "ui_dist": str(ui),
         "scan_interval_seconds": 30,
         "python": str(python),
-        "mcp_bridge": str(ROOT / "plugins/docworm/scripts/server.py"),
+        "mcp_bridge": str(ROOT / "plugins/graf/scripts/server.py"),
     }
     write_json(home / "app.json", cfg)
     compose(home, "up", "-d", "--wait", "postgres")
@@ -338,14 +338,14 @@ with connect(dsn) as db:
 
 def main():
     os.umask(0o077)
-    p = argparse.ArgumentParser(description="Docworm local evidence workspace")
+    p = argparse.ArgumentParser(prog="graf", description="Graf local evidence workspace")
     p.add_argument(
         "--home",
         type=Path,
         default=Path(
             os.environ.get(
-                "DOCWORM_HOME",
-                Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share")) / "docworm",
+                "GRAF_HOME",
+                Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share")) / "graf",
             )
         ),
     )
@@ -486,7 +486,7 @@ def main():
             cfg = config(home)
             cfg["python"] = str(home / "runtime/bin/python")
             cfg["ui_dist"] = str(ROOT / "product/ui/dist")
-            cfg["mcp_bridge"] = str(ROOT / "plugins/docworm/scripts/server.py")
+            cfg["mcp_bridge"] = str(ROOT / "plugins/graf/scripts/server.py")
             write_json(home / "app.json", cfg)
             migrate(home)
             start(home)
@@ -497,19 +497,19 @@ def main():
             write_json(target, {"python": cfg["python"], "config": str(home / "app.json")})
             # The plugin launch helper reads this per-user pointer, not credentials.
             pointer = (
-                Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "docworm/runtime.json"
+                Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "graf/runtime.json"
             )
             write_json(
                 pointer,
                 {
                     "config": str(home / "app.json"),
                     "python": cfg["python"],
-                    "bridge": str(ROOT / "plugins/docworm/scripts/server.py"),
+                    "bridge": str(ROOT / "plugins/graf/scripts/server.py"),
                 },
             )
             run(["codex", "plugin", "marketplace", "add", ROOT])
             marketplace = json.loads((ROOT / ".agents/plugins/marketplace.json").read_text())["name"]
-            run(["codex", "plugin", "add", "docworm@" + marketplace])
+            run(["codex", "plugin", "add", "graf@" + marketplace])
             print("Plugin installed. Open a new Codex thread to load its skills and tools.")
 
 
@@ -517,5 +517,5 @@ if __name__ == "__main__":
     try:
         main()
     except (ValueError, OSError, subprocess.CalledProcessError, urllib.error.HTTPError) as exc:
-        print("Docworm: " + str(exc), file=sys.stderr)
+        print("Graf: " + str(exc), file=sys.stderr)
         raise SystemExit(1)

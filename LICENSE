@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 Docworm contributors
+Copyright (c) 2026 Graf contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,5 +20,5 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-This license applies to original Docworm code. Third-party dependencies,
+This license applies to original Graf code. Third-party dependencies,
 including Cosmograph, retain their own licenses; see THIRD_PARTY.md.

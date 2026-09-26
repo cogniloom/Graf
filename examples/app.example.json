@@ -1,15 +1,15 @@
 {
-  "home": "/home/your-user/.local/share/docworm",
+  "home": "/home/your-user/.local/share/graf",
   "workspace_name": "My workspace",
-  "database_config": "/home/your-user/.local/share/docworm/evidencekg.json",
-  "models": "/home/your-user/.local/share/docworm/models",
+  "database_config": "/home/your-user/.local/share/graf/evidencekg.json",
+  "models": "/home/your-user/.local/share/graf/models",
   "device": "cpu",
   "allowed_roots": ["/home/your-user/Documents/cases"],
   "host": "127.0.0.1",
   "port": 8765,
-  "token_file": "/home/your-user/.local/share/docworm/secrets/session-token",
-  "ui_dist": "/home/your-user/Applications/docworm/product/ui/dist",
+  "token_file": "/home/your-user/.local/share/graf/secrets/session-token",
+  "ui_dist": "/home/your-user/Applications/Graf/product/ui/dist",
   "scan_interval_seconds": 30,
-  "python": "/home/your-user/.local/share/docworm/runtime/bin/python",
-  "mcp_bridge": "/home/your-user/Applications/docworm/plugins/docworm/scripts/server.py"
+  "python": "/home/your-user/.local/share/graf/runtime/bin/python",
+  "mcp_bridge": "/home/your-user/Applications/Graf/plugins/graf/scripts/server.py"
 }
