@@ -1,0 +1,22 @@
+{
+  "arms": {
+    "files": {
+      "scheduled": 9,
+      "strict_passes": 5,
+      "answer_accuracy": 0.5555555555555556,
+      "mean_input_tokens": 80312.33333333333,
+      "mean_output_tokens": 510.22222222222223,
+      "mean_cached_input_tokens": 36608,
+      "median_seconds": 44.988288640015526
+    },
+    "graf": {
+      "scheduled": 9,
+      "strict_passes": 8,
+      "answer_accuracy": 0.8888888888888888,
+      "mean_input_tokens": 64032.22222222222,
+      "mean_output_tokens": 580.6666666666666,
+      "mean_cached_input_tokens": 22186.666666666668,
+      "median_seconds": 41.169453334005084
+    }
+  }
+}

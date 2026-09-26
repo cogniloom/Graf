@@ -1,0 +1,195 @@
+{
+  "run_sha256": "305d4df6a2fd7fa7f542b63375c0184b89dd0af72f39d78f46f971354a28b7e1",
+  "complete_measured_and_graded": true,
+  "quality": "strict automated judgment; human adjudication pending",
+  "both_strict_pass_pairs": 15,
+  "paired": {
+    "all_scheduled_total_tokens_saved": {
+      "questions": 16,
+      "mean": 40256.875,
+      "mean_95pct_cluster_bootstrap": [
+        34188.0625,
+        46432.125
+      ]
+    },
+    "all_scheduled_strict_accuracy_delta_graf_minus_files": {
+      "questions": 16,
+      "mean": 0,
+      "mean_95pct_cluster_bootstrap": [
+        0,
+        0
+      ]
+    },
+    "both_correct_seconds_saved": {
+      "questions": 15,
+      "mean": 17.209657921069688,
+      "mean_95pct_cluster_bootstrap": [
+        13.979466329006634,
+        20.729316301929067
+      ]
+    },
+    "both_correct_total_tokens_saved": {
+      "questions": 15,
+      "mean": 41227.13333333333,
+      "mean_95pct_cluster_bootstrap": [
+        34929.8,
+        47248
+      ]
+    }
+  },
+  "arms": {
+    "files": {
+      "scheduled": 16,
+      "strict_passes": 15,
+      "total_tokens": 905726,
+      "mean_total_tokens": 56607.875,
+      "tokens_per_strict_pass_including_failed_answers": 60381.73333333333,
+      "total_seconds": 499.9101114209916,
+      "strict_accuracy": 0.9375,
+      "categories": {
+        "ambiguous_identity": {
+          "trials": 1,
+          "passes": 1
+        },
+        "amendment": {
+          "trials": 1,
+          "passes": 1
+        },
+        "closure_criteria": {
+          "trials": 1,
+          "passes": 1
+        },
+        "conflicting_request": {
+          "trials": 1,
+          "passes": 1
+        },
+        "contract_time_arithmetic": {
+          "trials": 1,
+          "passes": 1
+        },
+        "forecast_vs_commitment": {
+          "trials": 1,
+          "passes": 1
+        },
+        "identity_resolution": {
+          "trials": 1,
+          "passes": 1
+        },
+        "incident_timeline": {
+          "trials": 1,
+          "passes": 1
+        },
+        "multilingual_join": {
+          "trials": 1,
+          "passes": 1
+        },
+        "reconciliation": {
+          "trials": 1,
+          "passes": 1
+        },
+        "scope_boundary": {
+          "trials": 1,
+          "passes": 0
+        },
+        "temporal_approval": {
+          "trials": 1,
+          "passes": 1
+        },
+        "unanswerable_causality": {
+          "trials": 1,
+          "passes": 1
+        },
+        "unanswerable_missing_record": {
+          "trials": 1,
+          "passes": 1
+        },
+        "unanswerable_proposal": {
+          "trials": 1,
+          "passes": 1
+        },
+        "version_conflict": {
+          "trials": 1,
+          "passes": 1
+        }
+      }
+    },
+    "graf": {
+      "scheduled": 16,
+      "strict_passes": 15,
+      "total_tokens": 261616,
+      "mean_total_tokens": 16351.0,
+      "tokens_per_strict_pass_including_failed_answers": 17441.066666666666,
+      "total_seconds": 233.12717312495806,
+      "strict_accuracy": 0.9375,
+      "categories": {
+        "ambiguous_identity": {
+          "trials": 1,
+          "passes": 1
+        },
+        "amendment": {
+          "trials": 1,
+          "passes": 1
+        },
+        "closure_criteria": {
+          "trials": 1,
+          "passes": 1
+        },
+        "conflicting_request": {
+          "trials": 1,
+          "passes": 1
+        },
+        "contract_time_arithmetic": {
+          "trials": 1,
+          "passes": 1
+        },
+        "forecast_vs_commitment": {
+          "trials": 1,
+          "passes": 1
+        },
+        "identity_resolution": {
+          "trials": 1,
+          "passes": 1
+        },
+        "incident_timeline": {
+          "trials": 1,
+          "passes": 1
+        },
+        "multilingual_join": {
+          "trials": 1,
+          "passes": 1
+        },
+        "reconciliation": {
+          "trials": 1,
+          "passes": 1
+        },
+        "scope_boundary": {
+          "trials": 1,
+          "passes": 0
+        },
+        "temporal_approval": {
+          "trials": 1,
+          "passes": 1
+        },
+        "unanswerable_causality": {
+          "trials": 1,
+          "passes": 1
+        },
+        "unanswerable_missing_record": {
+          "trials": 1,
+          "passes": 1
+        },
+        "unanswerable_proposal": {
+          "trials": 1,
+          "passes": 1
+        },
+        "version_conflict": {
+          "trials": 1,
+          "passes": 1
+        }
+      }
+    }
+  },
+  "core_setup_break_even_queries_on_both_correct_subset": null,
+  "setup_limit": "Core only; hybrid preparation/download cost is not inferred. Corpus export cost excluded for both.",
+  "publication_ready": false
+}

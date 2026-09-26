@@ -1,0 +1,17 @@
+{
+  "python": "3.13.13",
+  "platform": "Linux-7.2.6-1-cachyos-x86_64-with-glibc2.44",
+  "packages": {
+    "torch": "2.14.0",
+    "transformers": "5.17.0",
+    "psycopg": "3.3.6",
+    "sentence-transformers": "5.7.0"
+  },
+  "cpu": "AMD Ryzen 9 5950X",
+  "gpu": "NVIDIA RTX 4060 Ti 16 GB",
+  "shared_host": true,
+  "model_weights_preexisting": true,
+  "requested_model": "gpt-6-astra",
+  "effort": "medium",
+  "billing_route": "existing ChatGPT subscription"
+}

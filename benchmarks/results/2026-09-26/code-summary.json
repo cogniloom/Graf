@@ -1,0 +1,71 @@
+{
+  "scheduled_trials": 20,
+  "recorded_trials": 20,
+  "arms": {
+    "files": {
+      "scheduled": 10,
+      "recorded": 10,
+      "answered": 10,
+      "failed_or_limited": 0,
+      "median_seconds": 43.853502868514624,
+      "p95_seconds": 56.600668769009644,
+      "usage_complete_trials": 10,
+      "missing_trials": 0,
+      "known_input_tokens_lower_bound": 784447,
+      "known_output_tokens_lower_bound": 5038,
+      "unknown_usage_trials": 0,
+      "mean_input_tokens": 78444.7,
+      "mean_cached_input_tokens": 35225.6,
+      "mean_output_tokens": 503.8,
+      "valid_citations": 27,
+      "citations": 27,
+      "graded": 10,
+      "strict_passes": 5,
+      "answer_accuracy": 0.5
+    },
+    "graf": {
+      "scheduled": 10,
+      "recorded": 10,
+      "answered": 10,
+      "failed_or_limited": 0,
+      "median_seconds": 45.73175463450025,
+      "p95_seconds": 97.62023901200155,
+      "usage_complete_trials": 10,
+      "missing_trials": 0,
+      "known_input_tokens_lower_bound": 630669,
+      "known_output_tokens_lower_bound": 5857,
+      "unknown_usage_trials": 0,
+      "mean_input_tokens": 63066.9,
+      "mean_cached_input_tokens": 20454.4,
+      "mean_output_tokens": 585.7,
+      "valid_citations": 36,
+      "citations": 36,
+      "graded": 10,
+      "strict_passes": 9,
+      "answer_accuracy": 0.9
+    }
+  },
+  "paired_question_count": 10,
+  "answered_pair_latency_difference_95pct_cluster_bootstrap_seconds": [
+    -22.84644433320209,
+    1.4675669114047196
+  ],
+  "publication_ready": false,
+  "grading": {
+    "method": "arm-blinded automated same-model judge; human review pending",
+    "calls": 20,
+    "seconds": 171.64091938111233,
+    "input_tokens": 441242,
+    "output_tokens": 1876
+  },
+  "limitations": [
+    "Answer accuracy, when available, is strict automated grading; independent human review is pending.",
+    "Core backend is Graf's mechanical graph engine, not the default hybrid product.",
+    "CLI requests gpt-6-astra; effective server model identity is not independently attested.",
+    "Local cache/OS cache are not flushed; random order does not establish cold-cache performance.",
+    "Subscription tokens are usage, not dollar costs. Failed-call usage may be missing.",
+    "Paired response latency includes wrong answers; it is not time-to-correct-answer. Means use only usage-complete trials.",
+    "Controlled fresh-call JSON tool loop includes repeated context; this is not a native Codex CLI agent benchmark.",
+    "Fictional documents and one repository cannot establish customer-wide generalization."
+  ]
+}
