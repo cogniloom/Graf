@@ -1,7 +1,6 @@
 .agents/
 .lawcase/
 .serena/
-.github/
 .evidencekg*
 .swarm/
 .venv/

@@ -4,8 +4,10 @@
 import argparse
 import hashlib
 import json
+import re
 import shutil
 import tarfile
+import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -62,12 +64,22 @@ def checked(path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=ROOT / "dist")
+    parser.add_argument("--tag", help="Require vX.Y.Z or vX.Y.Z-rc.N matching the package version")
     args = parser.parse_args()
+    version = tomllib.loads((ROOT / "evidencekg/pyproject.toml").read_text())["project"]["version"]
+    if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
+        raise ValueError("Release version must be X.Y.Z")
+    if args.tag is not None and not re.fullmatch(rf"v{re.escape(version)}(?:-rc\.[1-9][0-9]*)?", args.tag):
+        raise ValueError(f"Release tag must be v{version} or v{version}-rc.N, got {args.tag}")
+    archive_version = args.tag[1:] if args.tag else version
+    for metadata in ("product/ui/package.json", "plugins/docworm/.codex-plugin/plugin.json"):
+        if json.loads((ROOT / metadata).read_text())["version"] != version:
+            raise ValueError(f"Version mismatch in {metadata}; expected {version}")
     if not (ROOT / "product/ui/dist/index.html").is_file():
         raise ValueError("Build the dashboard first")
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    stage = output / "docworm-0.1.0"
+    stage = output / f"docworm-{archive_version}"
     if stage.exists():
         raise ValueError("Release staging directory already exists; choose a fresh --output")
     stage.mkdir()
@@ -143,10 +155,10 @@ def main():
         if p.is_file()
     }
     (stage / "SHA256SUMS.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    archive = output / "docworm-0.1.0.tar.gz"
+    archive = output / f"docworm-{archive_version}.tar.gz"
     with tarfile.open(archive, "w:gz") as tar:
         tar.add(stage, arcname=stage.name)
-    (output / "docworm-0.1.0.tar.gz.sha256").write_text(
+    (output / f"{archive.name}.sha256").write_text(
         hashlib.sha256(archive.read_bytes()).hexdigest() + "  " + archive.name + "\n"
     )
     print(json.dumps({"staging": str(stage), "archive": str(archive), "files": len(manifest)}, indent=2))

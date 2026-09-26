@@ -1,5 +1,64 @@
 # Build and publish a release
 
+## GitHub Actions
+
+`.github/workflows/release.yml` runs on every push to `main`, including PR
+merges, squash merges, rebase merges, and direct pushes. After Python/dashboard
+tests and the dashboard build pass, it packages the allowlisted application and
+creates a Git tag and GitHub **pre-release** automatically. No manual tagging is
+required in Orca or a shell.
+
+Tags use the package version plus the workflow run number: for example,
+`v0.1.0-rc.42`. The archive is `docworm-0.1.0-rc.42.tar.gz`, with a `.sha256`
+checksum. The tag points to the exact tested commit, even if another merge has
+since updated `main`. Candidate numbers can have gaps. A rerun reuses its number,
+resumes an unfinished draft, and leaves an already published candidate or promoted
+release unchanged. Upload failures leave a draft; publication happens only after
+both assets upload. Each main push runs independently; newer merges do not cancel
+older candidates.
+
+### Promote a candidate using GitHub's web UI
+
+1. Open the repository's **Releases** page and choose the tested candidate.
+2. Click the pencil/edit control for that release.
+3. Clear **Set as a pre-release**. Select **Set as the latest release** if desired.
+4. Click **Update release**.
+
+Promotion keeps the same tag, commit, and downloadable assets; it does not rebuild
+or remove the `-rc.N` suffix. You can change the display title when promoting it.
+For the next version series, update the matching base version in
+`evidencekg/pyproject.toml`, `product/ui/package.json` and its lockfile, and
+`plugins/docworm/.codex-plugin/plugin.json`; refresh `evidencekg/uv.lock`. You do
+not need a version bump for each merge. The builder rejects mismatched component
+versions and tags.
+
+The repository needs an available runner labeled `self-hosted`, `Linux`, and `X64`,
+with Git, Tesseract with English data, Poppler (`pdftoppm`), `libseccomp.so.2`, and
+the standard GitHub Actions runner prerequisites. On Ubuntu, the parser packages
+are `tesseract-ocr-eng poppler-utils libseccomp2`. Actions installs Node 22, uv and
+Python 3.12. Only the publishing job gets `contents: write`, using the built-in
+`GITHUB_TOKEN`; no personal token is needed. Repository rules must permit this
+token to create candidate tags and releases. Pull requests do not run automatically
+on the private runner. Maintainers can manually run the workflow on a reviewed
+branch; manual runs produce an Actions artifact but never publish a tag or release.
+Tag pushes do not trigger this workflow.
+
+The archive includes the built dashboard and Codex plugin; Python dependencies and
+models are downloaded during installation. Download both assets from GitHub Releases,
+then verify and extract (substitute your candidate number):
+
+```sh
+sha256sum --check docworm-0.1.0-rc.42.tar.gz.sha256
+tar -xzf docworm-0.1.0-rc.42.tar.gz
+cd docworm-0.1.0-rc.42
+./docworm install --demo
+```
+
+Releases in a private repository are accessible only to people with repository
+access. Public downloads require a public, reviewed distribution repository.
+
+## Local acceptance and clean publication
+
 Do not publish an existing research workspace wholesale. Private corpora, credentials, benchmark receipts and historical artifacts may be present beside the source code. The release builder copies only named product paths into a fresh staging tree.
 
 1. Run the checks in VERIFICATION.md, including real local ingestion, browser journeys, removal gating and an isolated backup restore.
@@ -10,6 +69,9 @@ Do not publish an existing research workspace wholesale. Private corpora, creden
 6. Initialize/publish the **staged directory** as the GitHub repository, or copy its reviewed source into an already-clean repository. Do not copy this development workspace's hidden directories. Upload the `.tar.gz` and its checksum as release assets.
 7. Enable private vulnerability reporting, choose a maintainer contact, and set repository description/topics and the documented support scope. Do not label the combined Cosmograph distribution unrestricted open source.
 
-GitHub publication, commits, pushes, release uploads and marketplace submission are explicit owner actions. The builder does not perform them. The clean release marketplace is named `docworm`; the development workspace may use a separate local marketplace name.
+Commits, pushes and marketplace submission are explicit owner actions. Merging or
+pushing to main opts into automated candidate publication after CI passes; stable
+release promotion remains a manual GitHub UI action. The local builder never publishes. The clean release marketplace is named
+`docworm`; the development workspace may use a separate local marketplace name.
 
 The archive contains built UI files for easy installation and source/lockfiles for reproducibility. Python/model dependencies are installed/downloaded separately. Build metadata records file hashes; it is not a cryptographic publisher signature.

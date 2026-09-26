@@ -10,6 +10,11 @@ Graph construction and retrieval do not call a generative model. PostgreSQL runs
 
 Requirements: Linux, Python 3.12+, [uv](https://docs.astral.sh/uv/getting-started/installation/), and [Docker Engine with Compose](https://docs.docker.com/compose/install/). A source checkout also needs Node.js 22+ and npm to build the dashboard. Model weights and Python dependencies require a substantial initial download; allow at least 15 GB free disk space. CUDA is optional; CPU inference is slower.
 
+Download `docworm-X.Y.Z.tar.gz` and its checksum from
+[GitHub Releases](https://github.com/cogniloom/Graf/releases), then follow the
+[verification and extraction steps](docs/RELEASING.md). Release archives include
+the built dashboard, so Node.js is only needed for source checkouts.
+
 From an extracted release archive or checkout:
 
 ```sh

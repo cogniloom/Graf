@@ -14,6 +14,27 @@ Tools include workspace status, source listing/add/remove/rescan, discovery, wor
 
 The registry format and commands are based on the installed Codex plugin specification; see the [official plugin documentation](https://developers.openai.com/plugins). This is a local Codex integration, not a hosted ChatGPT connector. GitHub publication and Codex directory submission are separate actions.
 
+## Distribution
+
+For this local application, distribute the GitHub release archive and have users
+run `./docworm plugin-install` after installation. The archive already includes
+the plugin and a `.agents/plugins/marketplace.json` catalog.
+
+For direct Git-backed discovery, publish that catalog and `plugins/docworm` in a
+public repository; users can register it with
+`codex plugin marketplace add OWNER/REPO`, then install from that marketplace.
+The local application and runtime pointer are still required. The development
+repository ignores `.agents/`, so a GitHub source checkout alone does not contain
+the generated catalog. See [official marketplace packaging guidance](https://developers.openai.com/plugins/build/plugins).
+
+For searchable public discovery in the shared ChatGPT/Codex Plugins Directory,
+submit through the OpenAI Platform plugin submission portal, complete review,
+then publish the approved listing. GitHub releases do not create that listing.
+The documented MCP submission route requires a public HTTPS endpoint; Docworm's
+current local stdio server would require OpenAI's local MCP support before using
+that route. A skills-only submission is also supported. See
+[official submission instructions](https://developers.openai.com/plugins/deploy/submission).
+
 ## Privacy boundary
 
 Parsing, graph construction, embeddings and reranking run locally. When Codex reads tool results, selected evidence becomes part of the Codex conversation and may be sent to its configured model provider. Account, retention and subscription policies remain those of that provider. Docworm does not automatically switch to API-key billing or invoke third-party inference.
