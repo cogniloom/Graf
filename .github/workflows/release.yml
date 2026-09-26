@@ -11,6 +11,12 @@ permissions:
 jobs:
   build:
     runs-on: self-hosted
+    container:
+      image: node:22-bookworm-slim
+      options: --security-opt=no-new-privileges
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 30
     outputs:
       tag: ${{ steps.archive.outputs.tag }}
@@ -21,9 +27,6 @@ jobs:
       EVIDENCEKG_APP_TEST_PYTHON: ''
       EVIDENCEKG_APP_TEST_MODELS: ''
     steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
       - name: Install parser prerequisites
         shell: bash
         run: |
@@ -31,13 +34,12 @@ jobs:
             echo '::error::The build runner must provide apt-get (Debian/Ubuntu).'
             exit 1
           fi
-          privilege=()
-          if [ "$(id -u)" -ne 0 ]; then
-            privilege=(sudo -n)
-          fi
-          "${privilege[@]}" apt-get update
-          "${privilege[@]}" apt-get install -y --no-install-recommends \
-            poppler-utils tesseract-ocr tesseract-ocr-eng libseccomp2
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ca-certificates git poppler-utils tesseract-ocr tesseract-ocr-eng libseccomp2
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -68,7 +70,7 @@ jobs:
           CANDIDATE_NUMBER: ${{ github.run_number }}
         run: |
           output=$(mktemp -d "$RUNNER_TEMP/docworm-release.XXXXXX")
-          version=$(python3 -c 'import tomllib; print(tomllib.load(open("evidencekg/pyproject.toml", "rb"))["project"]["version"])')
+          version=$(uv run --project evidencekg --frozen --extra app python -c 'import tomllib; print(tomllib.load(open("evidencekg/pyproject.toml", "rb"))["project"]["version"])')
           tag="v${version}-rc.${CANDIDATE_NUMBER}"
           uv run --project evidencekg --frozen --extra app python scripts/build_release.py --output "$output" --tag "$tag"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"

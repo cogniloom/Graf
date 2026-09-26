@@ -33,9 +33,11 @@ not need a version bump for each merge. The builder rejects mismatched component
 versions and tags.
 
 Both jobs select only the exact `self-hosted` runner label. The build runner must
-provide Debian/Ubuntu with Git, `apt-get`, package repository access, and either
-root execution or existing noninteractive `sudo` access for `apt-get`, plus the
-standard GitHub Actions runner prerequisites. The build job installs
+provide Linux with Docker job-container support and network access to the image
+and package repositories, plus the standard GitHub Actions runner prerequisites.
+The build runs in `node:22-bookworm-slim` with `no-new-privileges` enabled. It
+installs packages as the container's root user without `sudo` or host package
+changes. The build job installs Git, CA certificates, and
 `poppler-utils tesseract-ocr tesseract-ocr-eng libseccomp2` before checking
 Poppler (`pdftoppm`), English OCR data, and `libseccomp.so.2`.
 Actions also installs Node 22, uv and
@@ -61,6 +63,19 @@ Releases in a private repository are accessible only to people with repository
 access. Public downloads require a public, reviewed distribution repository.
 
 ## Local acceptance and clean publication
+
+Before committing workflow changes, run the build job with `act` and Docker:
+
+```sh
+act workflow_dispatch -W .github/workflows/release.yml -j build \
+  -P self-hosted=catthehacker/ubuntu:act-24.04 \
+  --env-file /dev/null --secret-file /dev/null --input-file /dev/null \
+  --artifact-server-path "$(mktemp -d /tmp/graf-action-artifacts.XXXXXX)"
+```
+
+This executes tests, packaging, and a local artifact upload without publishing.
+It does not verify the hosted runner's Docker access or GitHub artifact service;
+those require a manual Actions run on a reviewed, pushed branch.
 
 Do not publish an existing research workspace wholesale. Private corpora, credentials, benchmark receipts and historical artifacts may be present beside the source code. The release builder copies only named product paths into a fresh staging tree.
 
