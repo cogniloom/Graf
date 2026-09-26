@@ -32,10 +32,13 @@ For the next version series, update the matching base version in
 not need a version bump for each merge. The builder rejects mismatched component
 versions and tags.
 
-Both jobs select only the exact `self-hosted` runner label. The runner must provide
-a Linux environment with Git, Tesseract with English data, Poppler (`pdftoppm`), `libseccomp.so.2`, and
-the standard GitHub Actions runner prerequisites. On Ubuntu, the parser packages
-are `tesseract-ocr-eng poppler-utils libseccomp2`. Actions installs Node 22, uv and
+Both jobs select only the exact `self-hosted` runner label. The build runner must
+provide Debian/Ubuntu with Git, `apt-get`, package repository access, and either
+root execution or existing noninteractive `sudo` access for `apt-get`, plus the
+standard GitHub Actions runner prerequisites. The build job installs
+`poppler-utils tesseract-ocr tesseract-ocr-eng libseccomp2` before checking
+Poppler (`pdftoppm`), English OCR data, and `libseccomp.so.2`.
+Actions also installs Node 22, uv and
 Python 3.12. Only the publishing job gets `contents: write`, using the built-in
 `GITHUB_TOKEN`; no personal token is needed. Repository rules must permit this
 token to create candidate tags and releases. Pull requests do not run automatically
