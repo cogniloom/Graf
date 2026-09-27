@@ -1,5 +1,7 @@
 # Measured results
 
+[**Graf versus TrustGraph, LightRAG, Cognee and Graphiti**](2026-09-27-competitors/REPORT.md): same Luna/high model, 30-document configuration pilot, 80 answers and 160 repeated-context measurements. Includes indexing/query latency, tokens, evidence coverage, strict quality, retained failures and [comparison chart](2026-09-27-competitors/comparison.png).
+
 [**Graf versus all 35 native Codex configurations**](2026-09-27-native/REPORT.md): visible document/code tables with strict passes, input/cached/output and total tokens, mean tokens, median and summed time. [Exact native totals](2026-09-27-native/summary.csv) · [Per-case measurements](2026-09-27-native/per-case-execution.csv). 32 configurations completed both workloads; three halted under the exact-token policy.
 
 [Read the measured pilot report](2026-09-26/REPORT.md), [view the chart](2026-09-26/comparison.png), or [inspect all 52 original trials](2026-09-26/per-case.csv).

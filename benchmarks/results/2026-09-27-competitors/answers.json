@@ -1,0 +1,3736 @@
+[
+  {
+    "system": "graf",
+    "trial": "query-0-doc-01",
+    "reference": {
+      "answerable": true,
+      "category": "temporal_approval",
+      "expected_answer": "100 sensors and EUR 42,000 excluding VAT; A1 was not effective until 15 February.",
+      "id": "doc-01",
+      "question": "For PR-417, what quantity and spending ceiling applied on 14 February 2025?",
+      "required_evidence": [
+        {
+          "path": "procurement/02_approval.txt",
+          "quote": "Approved ceiling: EUR 42,000 excluding VAT for 100 sensors."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 takes effect on 2025-02-15; all other FIN-82 terms remain unchanged."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "On 14 February 2025, the approved quantity was 100 sensors, with a spending ceiling of EUR 42,000 excluding VAT.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "procurement/02_approval.txt",
+          "quote": "Approved ceiling: EUR 42,000 excluding VAT for 100 sensors."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": false,
+      "rationale": "The quantity and ceiling are right for 14 February, but the answer omits that A1 took effect only on 15 February. Its citation supports the quantity and ceiling, but not the date-specific conclusion; it neither cites the amendment nor abstains from that conclusion."
+    }
+  },
+  {
+    "system": "graf",
+    "trial": "query-0-doc-02",
+    "reference": {
+      "answerable": true,
+      "category": "amendment",
+      "expected_answer": "Lena Ortiz approved EUR 46,200 excluding VAT for 110 sensors, effective 15 February.",
+      "id": "doc-02",
+      "question": "What was PR-417's authorized ceiling and quantity on 16 February, and who approved the increase?",
+      "required_evidence": [
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "Signed: Lena Ortiz, 2025-02-12; acknowledged by Vale Instruments on 2025-02-13."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 increases the approved ceiling to EUR 46,200 excluding VAT for 110 sensors."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 takes effect on 2025-02-15; all other FIN-82 terms remain unchanged."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "On 16 February, PR-417's authorized ceiling was EUR 46,200 excluding VAT for 110 sensors. Lena Ortiz approved the increase.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "Signed: Lena Ortiz, 2025-02-12; acknowledged by Vale Instruments on 2025-02-13."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 increases the approved ceiling to EUR 46,200 excluding VAT for 110 sensors."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 takes effect on 2025-02-15; all other FIN-82 terms remain unchanged."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate gives the authorized ceiling, quantity, effective date context for 16 February, and approver. Each material claim is supported by the cited quotations."
+    }
+  },
+  {
+    "system": "graf",
+    "trial": "query-0-doc-03",
+    "reference": {
+      "answerable": true,
+      "category": "conflicting_request",
+      "expected_answer": "No; 120 was a preference, not an approved quantity, and the email did not amend approval.",
+      "id": "doc-03",
+      "question": "Did the supplier email authorize 120 sensors for PR-417?",
+      "required_evidence": [
+        {
+          "path": "procurement/04_supplier_email.txt",
+          "quote": "The annex team would prefer 120 units, but that is not an approved quantity."
+        },
+        {
+          "path": "procurement/04_supplier_email.txt",
+          "quote": "This email does not amend FIN-82 or A1."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "No. The supplier email says 120 units were not an approved quantity. A1 approved 110 sensors, effective 2025-02-15, and the email says it does not amend FIN-82 or A1.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "procurement/04_supplier_email.txt",
+          "quote": "The annex team would prefer 120 units, but that is not an approved quantity."
+        },
+        {
+          "path": "procurement/04_supplier_email.txt",
+          "quote": "This email does not amend FIN-82 or A1."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 increases the approved ceiling to EUR 46,200 excluding VAT for 110 sensors."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate correctly answers no: the supplier email says 120 was only preferred, not approved, and did not amend FIN-82 or A1. It includes the required conditions and cites quotations that support its claims; the additional A1 approval detail is supported by the cited amendment."
+    }
+  },
+  {
+    "system": "graf",
+    "trial": "query-0-doc-04",
+    "reference": {
+      "answerable": true,
+      "category": "reconciliation",
+      "expected_answer": "107 entered service; EUR 1,260 excluding VAT was disputed for the 3 rejected sensors.",
+      "id": "doc-04",
+      "question": "How many PR-417 sensors entered service and what invoice amount was disputed?",
+      "required_evidence": [
+        {
+          "path": "procurement/05_receipt.txt",
+          "quote": "Accepted into service: 107 sensors. Replacement of the 3 units remains open."
+        },
+        {
+          "path": "procurement/06_invoice.md",
+          "quote": "The unit price is EUR 420; the disputed amount for 3 rejected sensors is EUR 1,260."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "107 sensors entered service; EUR 1,260 was disputed.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "procurement/05_receipt.txt",
+          "quote": "Accepted into service: 107 sensors."
+        },
+        {
+          "path": "procurement/06_invoice.md",
+          "quote": "The unit price is EUR 420; the disputed amount for 3 rejected sensors is EUR 1,260."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The answer gives the correct service count and disputed amount, with no material factual error. It omits that the EUR 1,260 is excluding VAT and relates to the 3 rejected sensors, so it is incomplete. The cited quotations support both claims the candidate makes."
+    }
+  },
+  {
+    "system": "graf",
+    "trial": "query-0-doc-05",
+    "reference": {
+      "answerable": true,
+      "category": "incident_timeline",
+      "expected_answer": "44 minutes (08:12–08:56 UTC); rollback completed at 08:39 without recovery, which followed the 08:47 pool-limit increase.",
+      "id": "doc-05",
+      "question": "How long did INC-73 degradation last, and did rollback restore service?",
+      "required_evidence": [
+        {
+          "path": "incident/01_alert.txt",
+          "quote": "08:12 — Monitor detected elevated checkout errors in the Birch region."
+        },
+        {
+          "path": "incident/02_bridge.txt",
+          "quote": "08:39 — Rollback completed; errors remained above baseline.\n08:47 — Connection pool limit increased from 40 to 80.\n08:56 — Error rate returned to baseline and stayed there for the observation window."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "INC-73 degradation lasted 44 minutes, from 08:12 to 08:56 UTC. Rollback did not restore service; recovery followed the connection pool limit increase.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "incident/03_review.md",
+          "quote": "The customer-visible degradation lasted from 08:12 to 08:56 UTC on 2025-03-04."
+        },
+        {
+          "path": "incident/03_review.md",
+          "quote": "Rollback alone did not restore service; recovery followed the pool-limit increase."
+        },
+        {
+          "path": "incident/02_bridge.txt",
+          "quote": "08:47 — Connection pool limit increased from 40 to 80.\n08:56 — Error rate returned to baseline and stayed there for the observation window."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate gives the correct 44-minute interval, states that rollback did not restore service, and says recovery followed the pool-limit increase. Its cited quotations support each claim."
+    }
+  },
+  {
+    "system": "graf",
+    "trial": "query-0-doc-06",
+    "reference": {
+      "answerable": false,
+      "category": "unanswerable_causality",
+      "expected_answer": "Cannot establish a confirmed cause: sampling was disabled; recovery after mitigation does not establish causality.",
+      "id": "doc-06",
+      "question": "What was the confirmed root cause of INC-73?",
+      "required_evidence": [
+        {
+          "path": "incident/03_review.md",
+          "quote": "Root cause remains unconfirmed because database sampling was disabled during the event."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The root cause of INC-73 remains unconfirmed.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "incident/03_review.md",
+          "quote": "Root cause remains unconfirmed because database sampling was disabled during the event."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": false,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The cited review supports that the root cause remains unconfirmed, so the answer has no material factual error and its claim is supported. It is incomplete because it does not explicitly abstain as required, and it omits that recovery after mitigation does not establish causality."
+    }
+  },
+  {
+    "system": "graf",
+    "trial": "query-0-doc-07",
+    "reference": {
+      "answerable": true,
+      "category": "version_conflict",
+      "expected_answer": "30 days under version 2; version 1 is superseded and version 3 is only a draft.",
+      "id": "doc-07",
+      "question": "As of 3 March 2025, what approved retention applies to diagnostic logs under RP-9?",
+      "required_evidence": [
+        {
+          "path": "versions/retention_v2.md",
+          "quote": "Diagnostic logs are retained for 30 days; this supersedes version 1."
+        },
+        {
+          "path": "versions/retention_draft.md",
+          "quote": "The privacy council has not voted; version 2 remains the approved policy."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "30 days under approved version 2, effective 2025-02-01.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "versions/retention_v2.md",
+          "quote": "Approved by privacy council 2025-01-10; effective 2025-02-01.\nDiagnostic logs are retained for 30 days; this supersedes version 1."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The cited source supports the 30-day retention under approved version 2 and the stated effective date. The answer omits that version 1 is superseded and version 3 is only a draft."
+    }
+  },
+  {
+    "system": "graf",
+    "trial": "query-0-doc-08",
+    "reference": {
+      "answerable": false,
+      "category": "ambiguous_identity",
+      "expected_answer": "Cannot disambiguate E-104 and E-208: the minutes contain no employee ID or department.",
+      "id": "doc-08",
+      "question": "Which employee ID belongs to the A. Kim who approved the loading-bay change?",
+      "required_evidence": [
+        {
+          "path": "people/directory.txt",
+          "quote": "Alex Kim (employee E-104) works in procurement, based in Dublin.\nAlex Kim (employee E-208) works in platform engineering, based in Oslo."
+        },
+        {
+          "path": "people/signoff.txt",
+          "quote": "A. Kim approved the loading-bay access change; no employee ID or department was recorded."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The employee ID is not recorded, and the context does not identify which Alex Kim approved the change.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "people/signoff.txt",
+          "quote": "A. Kim approved the loading-bay access change; no employee ID or department was recorded."
+        },
+        {
+          "path": "people/directory.txt",
+          "quote": "Both appear as A. Kim in older minutes; initials alone do not identify either employee."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The candidate correctly abstains and states that the minutes do not identify which Alex Kim approved the change. It omits the two possible IDs, E-104 and E-208, so it does not fully state the required ambiguity. Its cited quotations support its claims."
+    }
+  },
+  {
+    "system": "graf",
+    "trial": "query-0-doc-09",
+    "reference": {
+      "answerable": true,
+      "category": "identity_resolution",
+      "expected_answer": "Alex Kim E-208 in platform engineering.",
+      "id": "doc-09",
+      "question": "Which Alex Kim approved CHG-311 and in what department?",
+      "required_evidence": [
+        {
+          "path": "people/technical_review.txt",
+          "quote": "Alex Kim, employee E-208, approved the connection-pool monitoring change."
+        },
+        {
+          "path": "people/directory.txt",
+          "quote": "Alex Kim (employee E-208) works in platform engineering, based in Oslo."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "Alex Kim, employee E-208, approved CHG-311. The directory lists E-208 in platform engineering.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "people/technical_review.txt",
+          "quote": "Alex Kim, employee E-208, approved the connection-pool monitoring change."
+        },
+        {
+          "path": "people/directory.txt",
+          "quote": "Alex Kim (employee E-208) works in platform engineering, based in Oslo."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The cited review identifies Alex Kim as employee E-208 and says he approved the connection-pool monitoring change under the CHG-311 heading. The cited directory identifies E-208 as working in platform engineering. The answer includes both the identity and department, and its citations support the claims."
+    }
+  },
+  {
+    "system": "graf",
+    "trial": "query-0-doc-10",
+    "reference": {
+      "answerable": true,
+      "category": "multilingual_join",
+      "expected_answer": "19 May 2025 replaced 12 May; 22 of 24 pumps were accepted and two quarantined.",
+      "id": "doc-10",
+      "question": "For PO-608, what delivery date replaced the original proposal and how many pumps were accepted? Answer in English.",
+      "required_evidence": [
+        {
+          "path": "multilingual/order_de.txt",
+          "quote": "Der bestätigte Liefertermin ist der 19. Mai 2025.\nDie ursprünglich vorgeschlagene Lieferung am 12. Mai ist damit ersetzt."
+        },
+        {
+          "path": "multilingual/inspection_fr.txt",
+          "quote": "Sur les 24 pompes reçues, deux présentent une fuite et restent en quarantaine.\nLes 22 autres pompes sont acceptées pour installation."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The confirmed delivery date replacing the original proposal was May 19, 2025, and 22 pumps were accepted for installation.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "multilingual/order_de.txt",
+          "quote": "Der bestätigte Liefertermin ist der 19. Mai 2025.\nDie ursprünglich vorgeschlagene Lieferung am 12. Mai ist damit ersetzt."
+        },
+        {
+          "path": "multilingual/inspection_fr.txt",
+          "quote": "Les 22 autres pompes sont acceptées pour installation."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The date and accepted-pump count are correct and supported by the cited quotations. The answer omits that 22 of 24 pumps were accepted and that two were quarantined, so it is incomplete."
+    }
+  },
+  {
+    "system": "graf",
+    "trial": "query-0-doc-11",
+    "reference": {
+      "answerable": false,
+      "category": "unanswerable_proposal",
+      "expected_answer": "No confirmed delivery date is recorded; 27 May is a proposed shipment date subject to customer confirmation.",
+      "id": "doc-11",
+      "question": "What is the confirmed delivery date for PO-608 replacement pumps?",
+      "required_evidence": [
+        {
+          "path": "multilingual/replacement_es.txt",
+          "quote": "Podemos enviar dos bombas de sustitución el 27 de mayo, sujeto a confirmación del cliente.\nEsta propuesta no constituye una fecha de entrega confirmada."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "19 May 2025",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "multilingual/order_de.txt",
+          "quote": "Der bestätigte Liefertermin ist der 19. Mai 2025."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": false,
+    "grading": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "The reference says no confirmed delivery date is recorded and identifies 27 May only as a proposed shipment date subject to customer confirmation. The candidate gives 19 May without abstaining. Its citation concerns a 24-pump delivery and does not establish the date for the replacement pumps."
+    }
+  },
+  {
+    "system": "graf",
+    "trial": "query-0-doc-12",
+    "reference": {
+      "answerable": true,
+      "category": "closure_criteria",
+      "expected_answer": "No: restoration failed despite checksum verification; Farah Singh must request a compatible importer.",
+      "id": "doc-12",
+      "question": "Should Alder risk R-12 be closed after EX-14, and who owns the next action?",
+      "required_evidence": [
+        {
+          "path": "governance/risk_register.md",
+          "quote": "R-12 is open until an export can be restored into the replacement environment."
+        },
+        {
+          "path": "governance/risk_test.txt",
+          "quote": "Restore into the replacement environment failed because the schema version was unsupported.\nR-12 remains open; Farah Singh will request a compatible importer."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "R-12 should remain open: the restore into the replacement environment failed because the schema version was unsupported, and the closure criterion requires a successful restore. Farah Singh owns the next action and will request a compatible importer.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "governance/risk_register.md",
+          "quote": "R-12 is open until an export can be restored into the replacement environment."
+        },
+        {
+          "path": "governance/risk_register.md",
+          "quote": "A successful download alone does not meet the closure criterion."
+        },
+        {
+          "path": "governance/risk_test.txt",
+          "quote": "Restore into the replacement environment failed because the schema version was unsupported."
+        },
+        {
+          "path": "governance/risk_test.txt",
+          "quote": "R-12 remains open; Farah Singh will request a compatible importer."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The answer correctly says R-12 remains open and identifies Farah Singh’s next action, with citations supporting its claims. It omits that the archive checksum matched despite the failed restore, a required condition in the reference."
+    }
+  },
+  {
+    "system": "graf",
+    "trial": "query-0-doc-13",
+    "reference": {
+      "answerable": true,
+      "category": "contract_time_arithmetic",
+      "expected_answer": "Yes: 74 hours' notice exceeds the 72-hour requirement; actual downtime is not established by the notice.",
+      "id": "doc-13",
+      "question": "Was Harbor M-18 announced early enough for the S-22 planned-maintenance exclusion?",
+      "required_evidence": [
+        {
+          "path": "contracts/service.md",
+          "quote": "Planned maintenance announced at least 72 hours in advance is excluded from availability."
+        },
+        {
+          "path": "contracts/maintenance.txt",
+          "quote": "Harbor maintenance notice M-18 | sent 2025-07-07 08:00 UTC\nPlanned start: 2025-07-10 10:00 UTC; planned duration: 45 minutes."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "Yes. M-18 was sent 74 hours before the planned start, meeting S-22’s 72-hour advance-notice requirement.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "contracts/maintenance.txt",
+          "quote": "Harbor maintenance notice M-18 | sent 2025-07-07 08:00 UTC\nPlanned start: 2025-07-10 10:00 UTC; planned duration: 45 minutes."
+        },
+        {
+          "path": "contracts/service.md",
+          "quote": "Planned maintenance announced at least 72 hours in advance is excluded from availability."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The cited notice shows 74 hours between sending and the planned start, and the cited schedule sets a 72-hour threshold, so the conclusion is correct and supported. The answer omits that the notice does not establish actual downtime, so it is incomplete."
+    }
+  },
+  {
+    "system": "graf",
+    "trial": "query-0-doc-14",
+    "reference": {
+      "answerable": false,
+      "category": "unanswerable_missing_record",
+      "expected_answer": "Cannot determine payment date; no payment release or bank transfer confirmation is in the collection.",
+      "id": "doc-14",
+      "question": "On what date was the PR-417 invoice paid?",
+      "required_evidence": [
+        {
+          "path": "procurement/06_invoice.md",
+          "quote": "No payment release is recorded in this reconciliation note."
+        },
+        {
+          "path": "archive/coverage.txt",
+          "quote": "The archive contains no PR-417 bank transfer confirmation and no Alder signed rebate agreement."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The payment date cannot be determined from the supplied context.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "procurement/06_invoice.md",
+          "quote": "No payment release is recorded in this reconciliation note."
+        },
+        {
+          "path": "archive/coverage.txt",
+          "quote": "The archive contains no PR-417 bank transfer confirmation"
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate correctly abstains from naming a payment date. It states the date cannot be determined from the supplied context, and both cited quotations support that conclusion: no payment release is recorded, and no PR-417 bank transfer confirmation is in the archive."
+    }
+  },
+  {
+    "system": "graf",
+    "trial": "query-0-doc-15",
+    "reference": {
+      "answerable": true,
+      "category": "forecast_vs_commitment",
+      "expected_answer": "No; it is a conditional forecast without a signed agreement or evidence that the volume threshold was achieved.",
+      "id": "doc-15",
+      "question": "Can finance recognize the EUR 18,000 Alder rebate as a receivable from this archive?",
+      "required_evidence": [
+        {
+          "path": "finance/forecast.md",
+          "quote": "No signed rebate agreement or achieved annual volume is included in this archive.\nDo not recognize the modeled rebate as a receivable."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "No. The archive says the EUR 18,000 rebate is only a forecast scenario conditional on reaching the annual volume threshold, and no signed agreement or achieved volume is included. It expressly says not to recognize it as a receivable. The archive also reports no signed Alder rebate agreement.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "finance/forecast.md",
+          "quote": "Finance modeled a potential EUR 18,000 rebate if the annual volume threshold is reached."
+        },
+        {
+          "path": "finance/forecast.md",
+          "quote": "No signed rebate agreement or achieved annual volume is included in this archive."
+        },
+        {
+          "path": "finance/forecast.md",
+          "quote": "Do not recognize the modeled rebate as a receivable."
+        },
+        {
+          "path": "archive/coverage.txt",
+          "quote": "The archive contains no PR-417 bank transfer confirmation and no Alder signed rebate agreement."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate correctly concludes that finance should not recognize the EUR 18,000 rebate as a receivable, and includes both required conditions: no signed agreement and no achieved annual volume. Its cited forecast quotations directly support the conditional forecast, the missing agreement and volume, and the instruction not to recognize the rebate. The additional claim that the archive reports no signed Alder agreement is supported by the cited coverage note."
+    }
+  },
+  {
+    "system": "graf",
+    "trial": "query-0-doc-16",
+    "reference": {
+      "answerable": true,
+      "category": "scope_boundary",
+      "expected_answer": "No; financial ledger retention is outside RP-9, and no ledger retention period is established here.",
+      "id": "doc-16",
+      "question": "Does RP-9 establish the retention period for financial ledgers?",
+      "required_evidence": [
+        {
+          "path": "versions/retention_v2.md",
+          "quote": "Financial ledger retention is outside the scope of RP-9."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "No. RP-9 explicitly places financial ledger retention outside its scope, so it does not establish a retention period for financial ledgers.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "versions/retention_v2.md",
+          "quote": "Financial ledger retention is outside the scope of RP-9."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The cited quotation says financial ledger retention is outside RP-9's scope, supporting the conclusion that RP-9 establishes no retention period for ledgers. The answer addresses the question directly and includes all required information."
+    }
+  },
+  {
+    "system": "trustgraph",
+    "trial": "query-0-doc-01",
+    "reference": {
+      "answerable": true,
+      "category": "temporal_approval",
+      "expected_answer": "100 sensors and EUR 42,000 excluding VAT; A1 was not effective until 15 February.",
+      "id": "doc-01",
+      "question": "For PR-417, what quantity and spending ceiling applied on 14 February 2025?",
+      "required_evidence": [
+        {
+          "path": "procurement/02_approval.txt",
+          "quote": "Approved ceiling: EUR 42,000 excluding VAT for 100 sensors."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 takes effect on 2025-02-15; all other FIN-82 terms remain unchanged."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "100 sensors, with an approved ceiling of EUR 42,000 excluding VAT.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "procurement/02_approval.txt",
+          "quote": "Approved ceiling: EUR 42,000 excluding VAT for 100 sensors."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": false,
+      "rationale": "The stated quantity and ceiling match the approval record and do not contain a material factual error. The answer omits that A1 was not effective until 15 February, which is required to establish the terms applicable on 14 February. Its cited quotation supports the quantity and ceiling but not the effective-date claim needed for the complete answer."
+    }
+  },
+  {
+    "system": "trustgraph",
+    "trial": "query-0-doc-02",
+    "reference": {
+      "answerable": true,
+      "category": "amendment",
+      "expected_answer": "Lena Ortiz approved EUR 46,200 excluding VAT for 110 sensors, effective 15 February.",
+      "id": "doc-02",
+      "question": "What was PR-417's authorized ceiling and quantity on 16 February, and who approved the increase?",
+      "required_evidence": [
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "Signed: Lena Ortiz, 2025-02-12; acknowledged by Vale Instruments on 2025-02-13."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 increases the approved ceiling to EUR 46,200 excluding VAT for 110 sensors."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 takes effect on 2025-02-15; all other FIN-82 terms remain unchanged."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "On 16 February, the authorized ceiling was EUR 46,200 excluding VAT for 110 sensors. Lena Ortiz approved the increase.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 increases the approved ceiling to EUR 46,200 excluding VAT for 110 sensors."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "Signed: Lena Ortiz, 2025-02-12; acknowledged by Vale Instruments on 2025-02-13."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 takes effect on 2025-02-15; all other FIN-82 terms remain unchanged."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate gives the authorized ceiling, quantity, effective status on 16 February, and approver. Its cited quotations support the amount and quantity, Lena Ortiz’s approval, and the 15 February effective date."
+    }
+  },
+  {
+    "system": "trustgraph",
+    "trial": "query-0-doc-03",
+    "reference": {
+      "answerable": true,
+      "category": "conflicting_request",
+      "expected_answer": "No; 120 was a preference, not an approved quantity, and the email did not amend approval.",
+      "id": "doc-03",
+      "question": "Did the supplier email authorize 120 sensors for PR-417?",
+      "required_evidence": [
+        {
+          "path": "procurement/04_supplier_email.txt",
+          "quote": "The annex team would prefer 120 units, but that is not an approved quantity."
+        },
+        {
+          "path": "procurement/04_supplier_email.txt",
+          "quote": "This email does not amend FIN-82 or A1."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The supplied context does not include the supplier email, so I can’t determine whether it authorized 120 sensors. The request itself was only a planning estimate, not authorization to order.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "procurement/01_request.md",
+          "quote": "The request is a planning estimate, not an authorization to place an order."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": false,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The candidate explicitly abstains because the supplier email is absent from its supplied sources, as required when evidence is missing. Its claim that the request was a planning estimate rather than authorization is supported by the cited quotation. It does not provide the required conclusion that 120 was only a preference and that the email did not amend approval, so it is incomplete."
+    }
+  },
+  {
+    "system": "trustgraph",
+    "trial": "query-0-doc-04",
+    "reference": {
+      "answerable": true,
+      "category": "reconciliation",
+      "expected_answer": "107 entered service; EUR 1,260 excluding VAT was disputed for the 3 rejected sensors.",
+      "id": "doc-04",
+      "question": "How many PR-417 sensors entered service and what invoice amount was disputed?",
+      "required_evidence": [
+        {
+          "path": "procurement/05_receipt.txt",
+          "quote": "Accepted into service: 107 sensors. Replacement of the 3 units remains open."
+        },
+        {
+          "path": "procurement/06_invoice.md",
+          "quote": "The unit price is EUR 420; the disputed amount for 3 rejected sensors is EUR 1,260."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "107 sensors entered service, and EUR 1,260 was disputed.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "procurement/05_receipt.txt",
+          "quote": "Accepted into service: 107 sensors."
+        },
+        {
+          "path": "procurement/06_invoice.md",
+          "quote": "The unit price is EUR 420; the disputed amount for 3 rejected sensors is EUR 1,260."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The answer gives the correct count and disputed amount, and its cited quotations support both claims. It omits that the EUR 1,260 concerns 3 rejected sensors and is excluding VAT, so it is incomplete."
+    }
+  },
+  {
+    "system": "trustgraph",
+    "trial": "query-0-doc-05",
+    "reference": {
+      "answerable": true,
+      "category": "incident_timeline",
+      "expected_answer": "44 minutes (08:12–08:56 UTC); rollback completed at 08:39 without recovery, which followed the 08:47 pool-limit increase.",
+      "id": "doc-05",
+      "question": "How long did INC-73 degradation last, and did rollback restore service?",
+      "required_evidence": [
+        {
+          "path": "incident/01_alert.txt",
+          "quote": "08:12 — Monitor detected elevated checkout errors in the Birch region."
+        },
+        {
+          "path": "incident/02_bridge.txt",
+          "quote": "08:39 — Rollback completed; errors remained above baseline.\n08:47 — Connection pool limit increased from 40 to 80.\n08:56 — Error rate returned to baseline and stayed there for the observation window."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The degradation lasted 44 minutes, from 08:12 to 08:56 UTC. Rollback did not restore service; errors returned to baseline after the connection pool limit was increased.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "incident/03_review.md",
+          "quote": "The customer-visible degradation lasted from 08:12 to 08:56 UTC on 2025-03-04."
+        },
+        {
+          "path": "incident/03_review.md",
+          "quote": "Rollback alone did not restore service; recovery followed the pool-limit increase."
+        },
+        {
+          "path": "incident/02_bridge.txt",
+          "quote": "08:39 — Rollback completed; errors remained above baseline."
+        },
+        {
+          "path": "incident/02_bridge.txt",
+          "quote": "08:47 — Connection pool limit increased from 40 to 80.\n08:56 — Error rate returned to baseline and stayed there for the observation window."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate gives the correct 44-minute interval and states that rollback did not restore service; recovery followed the pool-limit increase. Its cited quotations support the interval, rollback outcome, and recovery sequence."
+    }
+  },
+  {
+    "system": "trustgraph",
+    "trial": "query-0-doc-06",
+    "reference": {
+      "answerable": false,
+      "category": "unanswerable_causality",
+      "expected_answer": "Cannot establish a confirmed cause: sampling was disabled; recovery after mitigation does not establish causality.",
+      "id": "doc-06",
+      "question": "What was the confirmed root cause of INC-73?",
+      "required_evidence": [
+        {
+          "path": "incident/03_review.md",
+          "quote": "Root cause remains unconfirmed because database sampling was disabled during the event."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The root cause of INC-73 was not confirmed.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "incident/03_review.md",
+          "quote": "Root cause remains unconfirmed because database sampling was disabled during the event."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The answer correctly abstains from naming a confirmed cause, and its citation supports that conclusion. It omits that sampling was disabled and that recovery after mitigation does not establish causality, so it is incomplete."
+    }
+  },
+  {
+    "system": "trustgraph",
+    "trial": "query-0-doc-07",
+    "reference": {
+      "answerable": true,
+      "category": "version_conflict",
+      "expected_answer": "30 days under version 2; version 1 is superseded and version 3 is only a draft.",
+      "id": "doc-07",
+      "question": "As of 3 March 2025, what approved retention applies to diagnostic logs under RP-9?",
+      "required_evidence": [
+        {
+          "path": "versions/retention_v2.md",
+          "quote": "Diagnostic logs are retained for 30 days; this supersedes version 1."
+        },
+        {
+          "path": "versions/retention_draft.md",
+          "quote": "The privacy council has not voted; version 2 remains the approved policy."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "30 days.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "versions/retention_v2.md",
+          "quote": "Diagnostic logs are retained for 30 days; this supersedes version 1."
+        },
+        {
+          "path": "versions/retention_v2.md",
+          "quote": "Approved by privacy council 2025-01-10; effective 2025-02-01."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The 30-day retention period is correct and directly supported by the cited version 2 quotation. The answer omits that version 1 is superseded and version 3 is only a draft, so it is incomplete."
+    }
+  },
+  {
+    "system": "trustgraph",
+    "trial": "query-0-doc-08",
+    "reference": {
+      "answerable": false,
+      "category": "ambiguous_identity",
+      "expected_answer": "Cannot disambiguate E-104 and E-208: the minutes contain no employee ID or department.",
+      "id": "doc-08",
+      "question": "Which employee ID belongs to the A. Kim who approved the loading-bay change?",
+      "required_evidence": [
+        {
+          "path": "people/directory.txt",
+          "quote": "Alex Kim (employee E-104) works in procurement, based in Dublin.\nAlex Kim (employee E-208) works in platform engineering, based in Oslo."
+        },
+        {
+          "path": "people/signoff.txt",
+          "quote": "A. Kim approved the loading-bay access change; no employee ID or department was recorded."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The employee ID is not specified in the loading-bay review.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "people/signoff.txt",
+          "quote": "A. Kim approved the loading-bay access change; no employee ID or department was recorded."
+        },
+        {
+          "path": "people/directory.txt",
+          "quote": "Both appear as A. Kim in older minutes; initials alone do not identify either employee."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The candidate correctly abstains and says the review does not specify an employee ID. Its citations support that the minutes recorded no ID and that initials alone do not identify either Alex Kim. However, it omits the required ambiguity between E-104 and E-208."
+    }
+  },
+  {
+    "system": "trustgraph",
+    "trial": "query-0-doc-09",
+    "reference": {
+      "answerable": true,
+      "category": "identity_resolution",
+      "expected_answer": "Alex Kim E-208 in platform engineering.",
+      "id": "doc-09",
+      "question": "Which Alex Kim approved CHG-311 and in what department?",
+      "required_evidence": [
+        {
+          "path": "people/technical_review.txt",
+          "quote": "Alex Kim, employee E-208, approved the connection-pool monitoring change."
+        },
+        {
+          "path": "people/directory.txt",
+          "quote": "Alex Kim (employee E-208) works in platform engineering, based in Oslo."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "Alex Kim, employee E-208, in platform engineering.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "people/technical_review.txt",
+          "quote": "Alex Kim, employee E-208, approved the connection-pool monitoring change."
+        },
+        {
+          "path": "people/directory.txt",
+          "quote": "Alex Kim (employee E-208) works in platform engineering, based in Oslo."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": false,
+      "rationale": "The answer correctly identifies employee E-208 and platform engineering, and includes the required identity and department. But the quoted review sentence does not mention CHG-311; that link appears only in the source heading, which the candidate did not cite."
+    }
+  },
+  {
+    "system": "trustgraph",
+    "trial": "query-0-doc-10",
+    "reference": {
+      "answerable": true,
+      "category": "multilingual_join",
+      "expected_answer": "19 May 2025 replaced 12 May; 22 of 24 pumps were accepted and two quarantined.",
+      "id": "doc-10",
+      "question": "For PO-608, what delivery date replaced the original proposal and how many pumps were accepted? Answer in English.",
+      "required_evidence": [
+        {
+          "path": "multilingual/order_de.txt",
+          "quote": "Der bestätigte Liefertermin ist der 19. Mai 2025.\nDie ursprünglich vorgeschlagene Lieferung am 12. Mai ist damit ersetzt."
+        },
+        {
+          "path": "multilingual/inspection_fr.txt",
+          "quote": "Sur les 24 pompes reçues, deux présentent une fuite et restent en quarantaine.\nLes 22 autres pompes sont acceptées pour installation."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The confirmed delivery date replacing the original proposal was May 19, 2025, and 22 pumps were accepted for installation.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "multilingual/order_de.txt",
+          "quote": "Der bestätigte Liefertermin ist der 19. Mai 2025.\nDie ursprünglich vorgeschlagene Lieferung am 12. Mai ist damit ersetzt."
+        },
+        {
+          "path": "multilingual/inspection_fr.txt",
+          "quote": "Les 22 autres pompes sont acceptées pour installation."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The cited sources support the confirmed May 19 date replacing the proposal and that 22 pumps were accepted. The answer omits the original May 12 date and the full inspection quantities: 22 of 24 accepted, with two quarantined."
+    }
+  },
+  {
+    "system": "trustgraph",
+    "trial": "query-0-doc-11",
+    "reference": {
+      "answerable": false,
+      "category": "unanswerable_proposal",
+      "expected_answer": "No confirmed delivery date is recorded; 27 May is a proposed shipment date subject to customer confirmation.",
+      "id": "doc-11",
+      "question": "What is the confirmed delivery date for PO-608 replacement pumps?",
+      "required_evidence": [
+        {
+          "path": "multilingual/replacement_es.txt",
+          "quote": "Podemos enviar dos bombas de sustitución el 27 de mayo, sujeto a confirmación del cliente.\nEsta propuesta no constituye una fecha de entrega confirmada."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "No confirmed delivery date is stated. May 27, 2025 is only a proposed shipment date, subject to customer confirmation.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "multilingual/inspection_fr.txt",
+          "quote": "Le fournisseur doit proposer une date de remplacement ; aucune date n'est confirmée."
+        },
+        {
+          "path": "multilingual/replacement_es.txt",
+          "quote": "Podemos enviar dos bombas de sustitución el 27 de mayo, sujeto a confirmación del cliente."
+        },
+        {
+          "path": "multilingual/replacement_es.txt",
+          "quote": "Esta propuesta no constituye una fecha de entrega confirmada."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": false,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": false,
+      "rationale": "The answer correctly states that no delivery date is confirmed and that 27 May is only a proposed shipment date subject to customer confirmation. It is complete. However, the cited quotations do not state the year 2025, so that part of the answer is unsupported by the candidate’s citations."
+    }
+  },
+  {
+    "system": "trustgraph",
+    "trial": "query-0-doc-12",
+    "reference": {
+      "answerable": true,
+      "category": "closure_criteria",
+      "expected_answer": "No: restoration failed despite checksum verification; Farah Singh must request a compatible importer.",
+      "id": "doc-12",
+      "question": "Should Alder risk R-12 be closed after EX-14, and who owns the next action?",
+      "required_evidence": [
+        {
+          "path": "governance/risk_register.md",
+          "quote": "R-12 is open until an export can be restored into the replacement environment."
+        },
+        {
+          "path": "governance/risk_test.txt",
+          "quote": "Restore into the replacement environment failed because the schema version was unsupported.\nR-12 remains open; Farah Singh will request a compatible importer."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "No. R-12 should remain open until the export is restored into the replacement environment. Farah Singh owns the next action: request a compatible importer.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "governance/risk_register.md",
+          "quote": "R-12 is open until an export can be restored into the replacement environment."
+        },
+        {
+          "path": "governance/risk_test.txt",
+          "quote": "R-12 remains open; Farah Singh will request a compatible importer."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The answer correctly keeps R-12 open and assigns Farah Singh the importer request, and its cited quotations support those claims. It omits that restoration failed because the schema version was unsupported despite checksum verification."
+    }
+  },
+  {
+    "system": "trustgraph",
+    "trial": "query-0-doc-13",
+    "reference": {
+      "answerable": true,
+      "category": "contract_time_arithmetic",
+      "expected_answer": "Yes: 74 hours' notice exceeds the 72-hour requirement; actual downtime is not established by the notice.",
+      "id": "doc-13",
+      "question": "Was Harbor M-18 announced early enough for the S-22 planned-maintenance exclusion?",
+      "required_evidence": [
+        {
+          "path": "contracts/service.md",
+          "quote": "Planned maintenance announced at least 72 hours in advance is excluded from availability."
+        },
+        {
+          "path": "contracts/maintenance.txt",
+          "quote": "Harbor maintenance notice M-18 | sent 2025-07-07 08:00 UTC\nPlanned start: 2025-07-10 10:00 UTC; planned duration: 45 minutes."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "Yes. M-18 was sent 74 hours before the planned start, exceeding S-22’s 72-hour notice threshold by 2 hours.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "contracts/maintenance.txt",
+          "quote": "Harbor maintenance notice M-18 | sent 2025-07-07 08:00 UTC\nPlanned start: 2025-07-10 10:00 UTC; planned duration: 45 minutes."
+        },
+        {
+          "path": "contracts/service.md",
+          "quote": "Planned maintenance announced at least 72 hours in advance is excluded from availability."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The 74-hour interval exceeds the 72-hour requirement, and both claims are supported by the cited quotations. The answer omits the required qualification that actual downtime is not established by the notice."
+    }
+  },
+  {
+    "system": "trustgraph",
+    "trial": "query-0-doc-14",
+    "reference": {
+      "answerable": false,
+      "category": "unanswerable_missing_record",
+      "expected_answer": "Cannot determine payment date; no payment release or bank transfer confirmation is in the collection.",
+      "id": "doc-14",
+      "question": "On what date was the PR-417 invoice paid?",
+      "required_evidence": [
+        {
+          "path": "procurement/06_invoice.md",
+          "quote": "No payment release is recorded in this reconciliation note."
+        },
+        {
+          "path": "archive/coverage.txt",
+          "quote": "The archive contains no PR-417 bank transfer confirmation and no Alder signed rebate agreement."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The payment date is not stated in the supplied evidence.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "procurement/06_invoice.md",
+          "quote": "No payment release is recorded in this reconciliation note."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": false,
+      "rationale": "The candidate correctly abstains from giving a payment date. It omits the required absence of a bank transfer confirmation, so it is incomplete. Its citation supports only that no payment release is recorded in the reconciliation note; it does not support the broader claim that the date is not stated in the supplied evidence."
+    }
+  },
+  {
+    "system": "trustgraph",
+    "trial": "query-0-doc-15",
+    "reference": {
+      "answerable": true,
+      "category": "forecast_vs_commitment",
+      "expected_answer": "No; it is a conditional forecast without a signed agreement or evidence that the volume threshold was achieved.",
+      "id": "doc-15",
+      "question": "Can finance recognize the EUR 18,000 Alder rebate as a receivable from this archive?",
+      "required_evidence": [
+        {
+          "path": "finance/forecast.md",
+          "quote": "No signed rebate agreement or achieved annual volume is included in this archive.\nDo not recognize the modeled rebate as a receivable."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "No. The archive says no signed rebate agreement or achieved annual volume is included and instructs finance not to recognize the modeled rebate as a receivable.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "finance/forecast.md",
+          "quote": "No signed rebate agreement or achieved annual volume is included in this archive."
+        },
+        {
+          "path": "finance/forecast.md",
+          "quote": "Do not recognize the modeled rebate as a receivable."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate correctly says the rebate is not recognizable because the archive includes neither a signed agreement nor achieved annual volume. It includes both required conditions and cites source quotations that support its claims."
+    }
+  },
+  {
+    "system": "trustgraph",
+    "trial": "query-0-doc-16",
+    "reference": {
+      "answerable": true,
+      "category": "scope_boundary",
+      "expected_answer": "No; financial ledger retention is outside RP-9, and no ledger retention period is established here.",
+      "id": "doc-16",
+      "question": "Does RP-9 establish the retention period for financial ledgers?",
+      "required_evidence": [
+        {
+          "path": "versions/retention_v2.md",
+          "quote": "Financial ledger retention is outside the scope of RP-9."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "No. Approved version 2 places financial ledger retention outside RP-9’s scope, so RP-9 establishes no retention period for financial ledgers.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "versions/retention_v2.md",
+          "quote": "Approved by privacy council 2025-01-10; effective 2025-02-01.\nDiagnostic logs are retained for 30 days; this supersedes version 1.\nFinancial ledger retention is outside the scope of RP-9."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The cited text says financial ledger retention is outside RP-9’s scope, supporting both the negative answer and the conclusion that RP-9 establishes no ledger retention period."
+    }
+  },
+  {
+    "system": "lightrag",
+    "trial": "query-0-doc-01",
+    "reference": {
+      "answerable": true,
+      "category": "temporal_approval",
+      "expected_answer": "100 sensors and EUR 42,000 excluding VAT; A1 was not effective until 15 February.",
+      "id": "doc-01",
+      "question": "For PR-417, what quantity and spending ceiling applied on 14 February 2025?",
+      "required_evidence": [
+        {
+          "path": "procurement/02_approval.txt",
+          "quote": "Approved ceiling: EUR 42,000 excluding VAT for 100 sensors."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 takes effect on 2025-02-15; all other FIN-82 terms remain unchanged."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "On 14 February 2025, the applicable quantity was 100 sensors, with an approved ceiling of EUR 42,000 excluding VAT. Amendment A1's increase was not yet effective; it took effect on 15 February 2025.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "02_approval.txt",
+          "quote": "Approved ceiling: EUR 42,000 excluding VAT for 100 sensors."
+        },
+        {
+          "path": "03_amendment.md",
+          "quote": "A1 takes effect on 2025-02-15; all other FIN-82 terms remain unchanged."
+        }
+      ]
+    },
+    "native_citation_aliases": {
+      "02_approval.txt": "procurement/02_approval.txt",
+      "03_amendment.md": "procurement/03_amendment.md",
+      "forecast.md": "finance/forecast.md",
+      "04_supplier_email.txt": "procurement/04_supplier_email.txt",
+      "06_invoice.md": "procurement/06_invoice.md",
+      "service.md": "contracts/service.md",
+      "record_00003.md": "operations/000/record_00003.md",
+      "replacement_es.txt": "multilingual/replacement_es.txt",
+      "coverage.txt": "archive/coverage.txt",
+      "record_00000.txt": "operations/000/record_00000.txt",
+      "01_alert.txt": "incident/01_alert.txt",
+      "01_request.md": "procurement/01_request.md"
+    },
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer gives the applicable 100 sensors and EUR 42,000 ceiling excluding VAT, and correctly states that A1 was not effective until 15 February. Both cited quotations support these claims."
+    }
+  },
+  {
+    "system": "lightrag",
+    "trial": "query-0-doc-02",
+    "reference": {
+      "answerable": true,
+      "category": "amendment",
+      "expected_answer": "Lena Ortiz approved EUR 46,200 excluding VAT for 110 sensors, effective 15 February.",
+      "id": "doc-02",
+      "question": "What was PR-417's authorized ceiling and quantity on 16 February, and who approved the increase?",
+      "required_evidence": [
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "Signed: Lena Ortiz, 2025-02-12; acknowledged by Vale Instruments on 2025-02-13."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 increases the approved ceiling to EUR 46,200 excluding VAT for 110 sensors."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 takes effect on 2025-02-15; all other FIN-82 terms remain unchanged."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "On 16 February, PR-417's authorized ceiling was EUR 46,200 excluding VAT for 110 sensors. Lena Ortiz approved the increase by signing Amendment A1.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "03_amendment.md",
+          "quote": "Signed: Lena Ortiz, 2025-02-12; acknowledged by Vale Instruments on 2025-02-13."
+        },
+        {
+          "path": "03_amendment.md",
+          "quote": "A1 increases the approved ceiling to EUR 46,200 excluding VAT for 110 sensors.\nA1 takes effect on 2025-02-15; all other FIN-82 terms remain unchanged."
+        }
+      ]
+    },
+    "native_citation_aliases": {
+      "02_approval.txt": "procurement/02_approval.txt",
+      "03_amendment.md": "procurement/03_amendment.md",
+      "01_alert.txt": "incident/01_alert.txt",
+      "04_supplier_email.txt": "procurement/04_supplier_email.txt",
+      "06_invoice.md": "procurement/06_invoice.md",
+      "02_bridge.txt": "incident/02_bridge.txt",
+      "01_request.md": "procurement/01_request.md",
+      "record_00003.md": "operations/000/record_00003.md",
+      "forecast.md": "finance/forecast.md",
+      "coverage.txt": "archive/coverage.txt",
+      "record_00000.txt": "operations/000/record_00000.txt",
+      "05_receipt.txt": "procurement/05_receipt.txt"
+    },
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The ceiling, quantity, and approver are accurate and supported by the cited quotations. The answer omits that A1 took effect on 15 February, a required condition in the reference."
+    }
+  },
+  {
+    "system": "lightrag",
+    "trial": "query-0-doc-03",
+    "reference": {
+      "answerable": true,
+      "category": "conflicting_request",
+      "expected_answer": "No; 120 was a preference, not an approved quantity, and the email did not amend approval.",
+      "id": "doc-03",
+      "question": "Did the supplier email authorize 120 sensors for PR-417?",
+      "required_evidence": [
+        {
+          "path": "procurement/04_supplier_email.txt",
+          "quote": "The annex team would prefer 120 units, but that is not an approved quantity."
+        },
+        {
+          "path": "procurement/04_supplier_email.txt",
+          "quote": "This email does not amend FIN-82 or A1."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "No. The email said 120 units were not an approved quantity and expressly stated it did not amend FIN-82 or A1. A1 approved 110 sensors.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "04_supplier_email.txt",
+          "quote": "The annex team would prefer 120 units, but that is not an approved quantity."
+        },
+        {
+          "path": "04_supplier_email.txt",
+          "quote": "This email does not amend FIN-82 or A1."
+        },
+        {
+          "path": "03_amendment.md",
+          "quote": "A1 increases the approved ceiling to EUR 46,200 excluding VAT for 110 sensors."
+        }
+      ]
+    },
+    "native_citation_aliases": {
+      "05_receipt.txt": "procurement/05_receipt.txt",
+      "01_request.md": "procurement/01_request.md",
+      "06_invoice.md": "procurement/06_invoice.md",
+      "02_approval.txt": "procurement/02_approval.txt",
+      "03_amendment.md": "procurement/03_amendment.md",
+      "04_supplier_email.txt": "procurement/04_supplier_email.txt",
+      "01_alert.txt": "incident/01_alert.txt",
+      "record_00000.txt": "operations/000/record_00000.txt",
+      "record_00003.md": "operations/000/record_00003.md",
+      "inspection_fr.txt": "multilingual/inspection_fr.txt",
+      "directory.txt": "people/directory.txt",
+      "record_00001.md": "operations/000/record_00001.md"
+    },
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate correctly answers no, explains that 120 was only a preference and the email did not amend FIN-82 or A1, and gives the approved quantity of 110 sensors. Its cited quotations match the supplied source text and support each claim."
+    }
+  },
+  {
+    "system": "lightrag",
+    "trial": "query-0-doc-04",
+    "reference": {
+      "answerable": true,
+      "category": "reconciliation",
+      "expected_answer": "107 entered service; EUR 1,260 excluding VAT was disputed for the 3 rejected sensors.",
+      "id": "doc-04",
+      "question": "How many PR-417 sensors entered service and what invoice amount was disputed?",
+      "required_evidence": [
+        {
+          "path": "procurement/05_receipt.txt",
+          "quote": "Accepted into service: 107 sensors. Replacement of the 3 units remains open."
+        },
+        {
+          "path": "procurement/06_invoice.md",
+          "quote": "The unit price is EUR 420; the disputed amount for 3 rejected sensors is EUR 1,260."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "107 sensors entered service; the disputed amount was EUR 1,260.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "05_receipt.txt",
+          "quote": "Accepted into service: 107 sensors."
+        },
+        {
+          "path": "06_invoice.md",
+          "quote": "The unit price is EUR 420; the disputed amount for 3 rejected sensors is EUR 1,260."
+        }
+      ]
+    },
+    "native_citation_aliases": {
+      "06_invoice.md": "procurement/06_invoice.md",
+      "05_receipt.txt": "procurement/05_receipt.txt",
+      "01_request.md": "procurement/01_request.md",
+      "02_approval.txt": "procurement/02_approval.txt",
+      "record_00003.md": "operations/000/record_00003.md",
+      "03_amendment.md": "procurement/03_amendment.md",
+      "record_00005.md": "operations/000/record_00005.md",
+      "04_supplier_email.txt": "procurement/04_supplier_email.txt",
+      "inspection_fr.txt": "multilingual/inspection_fr.txt",
+      "forecast.md": "finance/forecast.md",
+      "01_alert.txt": "incident/01_alert.txt",
+      "record_00001.md": "operations/000/record_00001.md"
+    },
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The stated figures are accurate and supported by the cited quotations. The answer omits that the EUR 1,260 dispute concerns the 3 rejected sensors and is excluding VAT, so it is incomplete."
+    }
+  },
+  {
+    "system": "lightrag",
+    "trial": "query-0-doc-05",
+    "reference": {
+      "answerable": true,
+      "category": "incident_timeline",
+      "expected_answer": "44 minutes (08:12–08:56 UTC); rollback completed at 08:39 without recovery, which followed the 08:47 pool-limit increase.",
+      "id": "doc-05",
+      "question": "How long did INC-73 degradation last, and did rollback restore service?",
+      "required_evidence": [
+        {
+          "path": "incident/01_alert.txt",
+          "quote": "08:12 — Monitor detected elevated checkout errors in the Birch region."
+        },
+        {
+          "path": "incident/02_bridge.txt",
+          "quote": "08:39 — Rollback completed; errors remained above baseline.\n08:47 — Connection pool limit increased from 40 to 80.\n08:56 — Error rate returned to baseline and stayed there for the observation window."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "INC-73 degradation lasted 44 minutes (08:12–08:56 UTC). Rollback alone did not restore service; recovery followed the pool-limit increase.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "03_review.md",
+          "quote": "The customer-visible degradation lasted from 08:12 to 08:56 UTC on 2025-03-04."
+        },
+        {
+          "path": "03_review.md",
+          "quote": "Rollback alone did not restore service; recovery followed the pool-limit increase."
+        }
+      ]
+    },
+    "native_citation_aliases": {
+      "03_review.md": "incident/03_review.md",
+      "02_bridge.txt": "incident/02_bridge.txt",
+      "retention_v2.md": "versions/retention_v2.md",
+      "01_alert.txt": "incident/01_alert.txt",
+      "record_00003.md": "operations/000/record_00003.md",
+      "retention_v1.md": "versions/retention_v1.md",
+      "record_00002.txt": "operations/000/record_00002.txt",
+      "retention_draft.md": "versions/retention_draft.md",
+      "risk_register.md": "governance/risk_register.md",
+      "service.md": "contracts/service.md",
+      "05_receipt.txt": "procurement/05_receipt.txt",
+      "coverage.txt": "archive/coverage.txt"
+    },
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate gives the 44-minute interval, states rollback did not restore service, and says recovery followed the pool-limit increase. Its cited quotations support each claim."
+    }
+  },
+  {
+    "system": "lightrag",
+    "trial": "query-0-doc-06",
+    "reference": {
+      "answerable": false,
+      "category": "unanswerable_causality",
+      "expected_answer": "Cannot establish a confirmed cause: sampling was disabled; recovery after mitigation does not establish causality.",
+      "id": "doc-06",
+      "question": "What was the confirmed root cause of INC-73?",
+      "required_evidence": [
+        {
+          "path": "incident/03_review.md",
+          "quote": "Root cause remains unconfirmed because database sampling was disabled during the event."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "No root cause was confirmed; the review says database sampling was disabled during the event. CHG-209 was only identified as a possible contributor.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "03_review.md",
+          "quote": "Root cause remains unconfirmed because database sampling was disabled during the event."
+        },
+        {
+          "path": "01_alert.txt",
+          "quote": "Change CHG-209 was identified as a possible contributor, not a confirmed cause."
+        }
+      ]
+    },
+    "native_citation_aliases": {
+      "01_alert.txt": "incident/01_alert.txt",
+      "02_bridge.txt": "incident/02_bridge.txt",
+      "03_amendment.md": "procurement/03_amendment.md",
+      "03_review.md": "incident/03_review.md",
+      "record_00003.md": "operations/000/record_00003.md",
+      "coverage.txt": "archive/coverage.txt",
+      "retention_v1.md": "versions/retention_v1.md",
+      "05_receipt.txt": "procurement/05_receipt.txt",
+      "retention_draft.md": "versions/retention_draft.md",
+      "retention_v2.md": "versions/retention_v2.md",
+      "technical_review.txt": "people/technical_review.txt",
+      "06_invoice.md": "procurement/06_invoice.md"
+    },
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The candidate correctly states that no root cause was confirmed because database sampling was disabled, and its citations support both that claim and CHG-209 being only a possible contributor. It omits the required caveat that recovery after mitigation does not establish causality."
+    }
+  },
+  {
+    "system": "lightrag",
+    "trial": "query-0-doc-07",
+    "reference": {
+      "answerable": true,
+      "category": "version_conflict",
+      "expected_answer": "30 days under version 2; version 1 is superseded and version 3 is only a draft.",
+      "id": "doc-07",
+      "question": "As of 3 March 2025, what approved retention applies to diagnostic logs under RP-9?",
+      "required_evidence": [
+        {
+          "path": "versions/retention_v2.md",
+          "quote": "Diagnostic logs are retained for 30 days; this supersedes version 1."
+        },
+        {
+          "path": "versions/retention_draft.md",
+          "quote": "The privacy council has not voted; version 2 remains the approved policy."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "30 days.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "retention_v2.md",
+          "quote": "Diagnostic logs are retained for 30 days; this supersedes version 1."
+        },
+        {
+          "path": "retention_v2.md",
+          "quote": "Approved by privacy council 2025-01-10; effective 2025-02-01."
+        }
+      ]
+    },
+    "native_citation_aliases": {
+      "retention_v2.md": "versions/retention_v2.md",
+      "retention_v1.md": "versions/retention_v1.md",
+      "retention_draft.md": "versions/retention_draft.md",
+      "01_alert.txt": "incident/01_alert.txt",
+      "03_review.md": "incident/03_review.md",
+      "risk_register.md": "governance/risk_register.md",
+      "02_bridge.txt": "incident/02_bridge.txt",
+      "05_receipt.txt": "procurement/05_receipt.txt",
+      "service.md": "contracts/service.md",
+      "04_supplier_email.txt": "procurement/04_supplier_email.txt",
+      "01_request.md": "procurement/01_request.md",
+      "risk_test.txt": "governance/risk_test.txt"
+    },
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The cited version 2 quotation directly supports the 30-day retention period, so the answer is correct and its stated claim is supported. It is incomplete because it omits that version 1 is superseded and version 3 is only a draft."
+    }
+  },
+  {
+    "system": "lightrag",
+    "trial": "query-0-doc-08",
+    "reference": {
+      "answerable": false,
+      "category": "ambiguous_identity",
+      "expected_answer": "Cannot disambiguate E-104 and E-208: the minutes contain no employee ID or department.",
+      "id": "doc-08",
+      "question": "Which employee ID belongs to the A. Kim who approved the loading-bay change?",
+      "required_evidence": [
+        {
+          "path": "people/directory.txt",
+          "quote": "Alex Kim (employee E-104) works in procurement, based in Dublin.\nAlex Kim (employee E-208) works in platform engineering, based in Oslo."
+        },
+        {
+          "path": "people/signoff.txt",
+          "quote": "A. Kim approved the loading-bay access change; no employee ID or department was recorded."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The employee ID cannot be determined from the supplied evidence. The loading-bay minutes record no employee ID, and the directory says the initials A. Kim do not identify either employee.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "signoff.txt",
+          "quote": "A. Kim approved the loading-bay access change; no employee ID or department was recorded."
+        },
+        {
+          "path": "directory.txt",
+          "quote": "Both appear as A. Kim in older minutes; initials alone do not identify either employee."
+        }
+      ]
+    },
+    "native_citation_aliases": {
+      "signoff.txt": "people/signoff.txt",
+      "directory.txt": "people/directory.txt",
+      "technical_review.txt": "people/technical_review.txt",
+      "01_alert.txt": "incident/01_alert.txt",
+      "03_amendment.md": "procurement/03_amendment.md",
+      "record_00003.md": "operations/000/record_00003.md",
+      "04_supplier_email.txt": "procurement/04_supplier_email.txt",
+      "02_approval.txt": "procurement/02_approval.txt",
+      "03_review.md": "incident/03_review.md",
+      "01_request.md": "procurement/01_request.md",
+      "record_00001.md": "operations/000/record_00001.md",
+      "record_00000.txt": "operations/000/record_00000.txt"
+    },
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The candidate correctly abstains because the minutes do not identify which Alex Kim approved the change, and its cited quotations support that conclusion. It is incomplete because it does not name the two possible IDs, E-104 and E-208, or state that no department was recorded."
+    }
+  },
+  {
+    "system": "lightrag",
+    "trial": "query-0-doc-09",
+    "reference": {
+      "answerable": true,
+      "category": "identity_resolution",
+      "expected_answer": "Alex Kim E-208 in platform engineering.",
+      "id": "doc-09",
+      "question": "Which Alex Kim approved CHG-311 and in what department?",
+      "required_evidence": [
+        {
+          "path": "people/technical_review.txt",
+          "quote": "Alex Kim, employee E-208, approved the connection-pool monitoring change."
+        },
+        {
+          "path": "people/directory.txt",
+          "quote": "Alex Kim (employee E-208) works in platform engineering, based in Oslo."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "Alex Kim, employee E-208, approved CHG-311 and works in platform engineering.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "technical_review.txt",
+          "quote": "Alex Kim, employee E-208, approved the connection-pool monitoring change."
+        },
+        {
+          "path": "directory.txt",
+          "quote": "Alex Kim (employee E-208) works in platform engineering, based in Oslo."
+        }
+      ]
+    },
+    "native_citation_aliases": {
+      "directory.txt": "people/directory.txt",
+      "technical_review.txt": "people/technical_review.txt",
+      "signoff.txt": "people/signoff.txt",
+      "01_alert.txt": "incident/01_alert.txt",
+      "02_approval.txt": "procurement/02_approval.txt",
+      "02_bridge.txt": "incident/02_bridge.txt",
+      "03_amendment.md": "procurement/03_amendment.md",
+      "05_receipt.txt": "procurement/05_receipt.txt",
+      "04_supplier_email.txt": "procurement/04_supplier_email.txt",
+      "risk_register.md": "governance/risk_register.md",
+      "record_00003.md": "operations/000/record_00003.md",
+      "retention_v2.md": "versions/retention_v2.md"
+    },
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate identifies Alex Kim as employee E-208 and names platform engineering, matching the reference. The cited quotations support both the approval and department claims; the approval quotation is provided from the cited source, and the directory quotation identifies E-208's department."
+    }
+  },
+  {
+    "system": "lightrag",
+    "trial": "query-0-doc-10",
+    "reference": {
+      "answerable": true,
+      "category": "multilingual_join",
+      "expected_answer": "19 May 2025 replaced 12 May; 22 of 24 pumps were accepted and two quarantined.",
+      "id": "doc-10",
+      "question": "For PO-608, what delivery date replaced the original proposal and how many pumps were accepted? Answer in English.",
+      "required_evidence": [
+        {
+          "path": "multilingual/order_de.txt",
+          "quote": "Der bestätigte Liefertermin ist der 19. Mai 2025.\nDie ursprünglich vorgeschlagene Lieferung am 12. Mai ist damit ersetzt."
+        },
+        {
+          "path": "multilingual/inspection_fr.txt",
+          "quote": "Sur les 24 pompes reçues, deux présentent une fuite et restent en quarantaine.\nLes 22 autres pompes sont acceptées pour installation."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The replacement date proposed was May 27, 2025, but it was not confirmed. Twenty-two pumps were accepted for installation.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "replacement_es.txt",
+          "quote": "Podemos enviar dos bombas de sustitución el 27 de mayo, sujeto a confirmación del cliente. Esta propuesta no constituye una fecha de entrega confirmada."
+        },
+        {
+          "path": "inspection_fr.txt",
+          "quote": "Les 22 autres pompes sont acceptées pour installation."
+        }
+      ]
+    },
+    "native_citation_aliases": {
+      "04_supplier_email.txt": "procurement/04_supplier_email.txt",
+      "replacement_es.txt": "multilingual/replacement_es.txt",
+      "06_invoice.md": "procurement/06_invoice.md",
+      "inspection_fr.txt": "multilingual/inspection_fr.txt",
+      "record_00003.md": "operations/000/record_00003.md",
+      "03_amendment.md": "procurement/03_amendment.md",
+      "coverage.txt": "archive/coverage.txt",
+      "05_receipt.txt": "procurement/05_receipt.txt",
+      "record_00000.txt": "operations/000/record_00000.txt",
+      "01_request.md": "procurement/01_request.md",
+      "record_00002.txt": "operations/000/record_00002.txt",
+      "02_approval.txt": "procurement/02_approval.txt"
+    },
+    "strict_pass": false,
+    "citations_valid": false,
+    "abstention_valid": true,
+    "grading": {
+      "correct": false,
+      "complete": false,
+      "supported": true,
+      "rationale": "The cited Spanish text supports that 27 May was an unconfirmed proposal, and the French text supports that 22 pumps were accepted. But the confirmed delivery date was 19 May, replacing 12 May. The answer omits that replacement and gives the wrong date."
+    }
+  },
+  {
+    "system": "lightrag",
+    "trial": "query-0-doc-11",
+    "reference": {
+      "answerable": false,
+      "category": "unanswerable_proposal",
+      "expected_answer": "No confirmed delivery date is recorded; 27 May is a proposed shipment date subject to customer confirmation.",
+      "id": "doc-11",
+      "question": "What is the confirmed delivery date for PO-608 replacement pumps?",
+      "required_evidence": [
+        {
+          "path": "multilingual/replacement_es.txt",
+          "quote": "Podemos enviar dos bombas de sustitución el 27 de mayo, sujeto a confirmación del cliente.\nEsta propuesta no constituye una fecha de entrega confirmada."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "No confirmed delivery date is provided for the replacement pumps. May 27 was proposed, subject to customer confirmation.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "replacement_es.txt",
+          "quote": "Podemos enviar dos bombas de sustitución el 27 de mayo, sujeto a confirmación del cliente."
+        },
+        {
+          "path": "replacement_es.txt",
+          "quote": "Esta propuesta no constituye una fecha de entrega confirmada."
+        }
+      ]
+    },
+    "native_citation_aliases": {
+      "04_supplier_email.txt": "procurement/04_supplier_email.txt",
+      "replacement_es.txt": "multilingual/replacement_es.txt",
+      "service.md": "contracts/service.md",
+      "inspection_fr.txt": "multilingual/inspection_fr.txt",
+      "maintenance.txt": "contracts/maintenance.txt",
+      "01_request.md": "procurement/01_request.md",
+      "record_00000.txt": "operations/000/record_00000.txt",
+      "record_00002.txt": "operations/000/record_00002.txt",
+      "05_receipt.txt": "procurement/05_receipt.txt",
+      "record_00003.md": "operations/000/record_00003.md",
+      "06_invoice.md": "procurement/06_invoice.md",
+      "technical_review.txt": "people/technical_review.txt"
+    },
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate correctly states that no delivery date is confirmed and identifies May 27 as a proposal subject to customer confirmation. It abstains from giving a confirmed date, and both cited quotations support its claims."
+    }
+  },
+  {
+    "system": "lightrag",
+    "trial": "query-0-doc-12",
+    "reference": {
+      "answerable": true,
+      "category": "closure_criteria",
+      "expected_answer": "No: restoration failed despite checksum verification; Farah Singh must request a compatible importer.",
+      "id": "doc-12",
+      "question": "Should Alder risk R-12 be closed after EX-14, and who owns the next action?",
+      "required_evidence": [
+        {
+          "path": "governance/risk_register.md",
+          "quote": "R-12 is open until an export can be restored into the replacement environment."
+        },
+        {
+          "path": "governance/risk_test.txt",
+          "quote": "Restore into the replacement environment failed because the schema version was unsupported.\nR-12 remains open; Farah Singh will request a compatible importer."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "No. R-12 should remain open: EX-14's restore into the replacement environment failed because the schema version was unsupported. Farah Singh owns the next action and will request a compatible importer.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "risk_register.md",
+          "quote": "R-12 is open until an export can be restored into the replacement environment."
+        },
+        {
+          "path": "risk_test.txt",
+          "quote": "Restore into the replacement environment failed because the schema version was unsupported."
+        },
+        {
+          "path": "risk_test.txt",
+          "quote": "R-12 remains open; Farah Singh will request a compatible importer."
+        }
+      ]
+    },
+    "native_citation_aliases": {
+      "risk_register.md": "governance/risk_register.md",
+      "risk_test.txt": "governance/risk_test.txt",
+      "forecast.md": "finance/forecast.md",
+      "retention_v2.md": "versions/retention_v2.md",
+      "record_00003.md": "operations/000/record_00003.md",
+      "retention_v1.md": "versions/retention_v1.md",
+      "coverage.txt": "archive/coverage.txt",
+      "04_supplier_email.txt": "procurement/04_supplier_email.txt",
+      "03_amendment.md": "procurement/03_amendment.md",
+      "record_00000.txt": "operations/000/record_00000.txt",
+      "02_bridge.txt": "incident/02_bridge.txt",
+      "05_receipt.txt": "procurement/05_receipt.txt"
+    },
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The answer correctly says R-12 remains open and identifies Farah Singh’s next action, with quotations that support those claims. It omits the required detail that restoration failed despite checksum verification."
+    }
+  },
+  {
+    "system": "lightrag",
+    "trial": "query-0-doc-13",
+    "reference": {
+      "answerable": true,
+      "category": "contract_time_arithmetic",
+      "expected_answer": "Yes: 74 hours' notice exceeds the 72-hour requirement; actual downtime is not established by the notice.",
+      "id": "doc-13",
+      "question": "Was Harbor M-18 announced early enough for the S-22 planned-maintenance exclusion?",
+      "required_evidence": [
+        {
+          "path": "contracts/service.md",
+          "quote": "Planned maintenance announced at least 72 hours in advance is excluded from availability."
+        },
+        {
+          "path": "contracts/maintenance.txt",
+          "quote": "Harbor maintenance notice M-18 | sent 2025-07-07 08:00 UTC\nPlanned start: 2025-07-10 10:00 UTC; planned duration: 45 minutes."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "Yes. M-18 was sent 74 hours before the planned start, meeting S-22’s 72-hour advance-notice requirement for the planned-maintenance exclusion.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "maintenance.txt",
+          "quote": "Harbor maintenance notice M-18 | sent 2025-07-07 08:00 UTC"
+        },
+        {
+          "path": "maintenance.txt",
+          "quote": "Planned start: 2025-07-10 10:00 UTC"
+        },
+        {
+          "path": "service.md",
+          "quote": "Planned maintenance announced at least 72 hours in advance is excluded from availability."
+        }
+      ]
+    },
+    "native_citation_aliases": {
+      "maintenance.txt": "contracts/maintenance.txt",
+      "service.md": "contracts/service.md",
+      "04_supplier_email.txt": "procurement/04_supplier_email.txt",
+      "03_amendment.md": "procurement/03_amendment.md",
+      "record_00002.txt": "operations/000/record_00002.txt",
+      "02_bridge.txt": "incident/02_bridge.txt",
+      "01_request.md": "procurement/01_request.md",
+      "technical_review.txt": "people/technical_review.txt",
+      "01_alert.txt": "incident/01_alert.txt",
+      "05_receipt.txt": "procurement/05_receipt.txt",
+      "record_00003.md": "operations/000/record_00003.md",
+      "record_00000.txt": "operations/000/record_00000.txt"
+    },
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The cited timestamps show 74 hours' notice, exceeding the 72-hour requirement, and the cited schedule supports the exclusion. The answer omits that the notice does not establish actual downtime."
+    }
+  },
+  {
+    "system": "lightrag",
+    "trial": "query-0-doc-14",
+    "reference": {
+      "answerable": false,
+      "category": "unanswerable_missing_record",
+      "expected_answer": "Cannot determine payment date; no payment release or bank transfer confirmation is in the collection.",
+      "id": "doc-14",
+      "question": "On what date was the PR-417 invoice paid?",
+      "required_evidence": [
+        {
+          "path": "procurement/06_invoice.md",
+          "quote": "No payment release is recorded in this reconciliation note."
+        },
+        {
+          "path": "archive/coverage.txt",
+          "quote": "The archive contains no PR-417 bank transfer confirmation and no Alder signed rebate agreement."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The payment date cannot be determined from the supplied records.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "06_invoice.md",
+          "quote": "No payment release is recorded in this reconciliation note."
+        },
+        {
+          "path": "coverage.txt",
+          "quote": "The archive contains no PR-417 bank transfer confirmation"
+        }
+      ]
+    },
+    "native_citation_aliases": {
+      "06_invoice.md": "procurement/06_invoice.md",
+      "04_supplier_email.txt": "procurement/04_supplier_email.txt",
+      "coverage.txt": "archive/coverage.txt",
+      "record_00003.md": "operations/000/record_00003.md",
+      "01_alert.txt": "incident/01_alert.txt",
+      "01_request.md": "procurement/01_request.md",
+      "02_bridge.txt": "incident/02_bridge.txt",
+      "service.md": "contracts/service.md",
+      "05_receipt.txt": "procurement/05_receipt.txt",
+      "02_approval.txt": "procurement/02_approval.txt",
+      "03_review.md": "incident/03_review.md",
+      "record_00000.txt": "operations/000/record_00000.txt"
+    },
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate correctly abstains from giving a payment date. Its answer and citations establish that no payment release is recorded and no PR-417 bank transfer confirmation is in the collection, so the date cannot be determined."
+    }
+  },
+  {
+    "system": "lightrag",
+    "trial": "query-0-doc-15",
+    "reference": {
+      "answerable": true,
+      "category": "forecast_vs_commitment",
+      "expected_answer": "No; it is a conditional forecast without a signed agreement or evidence that the volume threshold was achieved.",
+      "id": "doc-15",
+      "question": "Can finance recognize the EUR 18,000 Alder rebate as a receivable from this archive?",
+      "required_evidence": [
+        {
+          "path": "finance/forecast.md",
+          "quote": "No signed rebate agreement or achieved annual volume is included in this archive.\nDo not recognize the modeled rebate as a receivable."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "No. This archive does not support recognizing the EUR 18,000 modeled rebate as a receivable: the forecast says not to recognize it and records no signed agreement or achieved annual volume. This answers what the archive supports; it does not establish whether an agreement or qualifying volume exists outside the archive.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "forecast.md",
+          "quote": "No signed rebate agreement or achieved annual volume is included in this archive."
+        },
+        {
+          "path": "forecast.md",
+          "quote": "Do not recognize the modeled rebate as a receivable."
+        },
+        {
+          "path": "coverage.txt",
+          "quote": "Absence from this collection does not establish that an event never happened."
+        }
+      ]
+    },
+    "native_citation_aliases": {
+      "forecast.md": "finance/forecast.md",
+      "06_invoice.md": "procurement/06_invoice.md",
+      "coverage.txt": "archive/coverage.txt",
+      "record_00003.md": "operations/000/record_00003.md",
+      "04_supplier_email.txt": "procurement/04_supplier_email.txt",
+      "02_approval.txt": "procurement/02_approval.txt",
+      "03_amendment.md": "procurement/03_amendment.md",
+      "record_00000.txt": "operations/000/record_00000.txt",
+      "risk_register.md": "governance/risk_register.md",
+      "05_receipt.txt": "procurement/05_receipt.txt",
+      "retention_v2.md": "versions/retention_v2.md",
+      "01_request.md": "procurement/01_request.md"
+    },
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": false,
+      "rationale": "The candidate correctly says the archive does not support recognizing the rebate and includes both missing conditions and the caveat about evidence outside the archive. Its cited quotations support the nonrecognition conclusion and missing agreement or volume, but do not quote the EUR 18,000 amount or the conditional forecast terms, so not every material claim is supported by its citations."
+    }
+  },
+  {
+    "system": "lightrag",
+    "trial": "query-0-doc-16",
+    "reference": {
+      "answerable": true,
+      "category": "scope_boundary",
+      "expected_answer": "No; financial ledger retention is outside RP-9, and no ledger retention period is established here.",
+      "id": "doc-16",
+      "question": "Does RP-9 establish the retention period for financial ledgers?",
+      "required_evidence": [
+        {
+          "path": "versions/retention_v2.md",
+          "quote": "Financial ledger retention is outside the scope of RP-9."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "No. RP-9 does not establish a retention period for financial ledgers; their retention is outside its scope.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "retention_v2.md",
+          "quote": "Financial ledger retention is outside the scope of RP-9."
+        }
+      ]
+    },
+    "native_citation_aliases": {
+      "retention_v2.md": "versions/retention_v2.md",
+      "retention_v1.md": "versions/retention_v1.md",
+      "retention_draft.md": "versions/retention_draft.md",
+      "service.md": "contracts/service.md",
+      "record_00001.md": "operations/000/record_00001.md",
+      "forecast.md": "finance/forecast.md",
+      "05_receipt.txt": "procurement/05_receipt.txt",
+      "03_review.md": "incident/03_review.md",
+      "04_supplier_email.txt": "procurement/04_supplier_email.txt",
+      "risk_test.txt": "governance/risk_test.txt",
+      "03_amendment.md": "procurement/03_amendment.md",
+      "coverage.txt": "archive/coverage.txt"
+    },
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate correctly states that RP-9 does not establish a financial-ledger retention period because ledger retention is outside its scope. It includes the required uncertainty and cites a quotation that supports the scope claim."
+    }
+  },
+  {
+    "system": "cognee",
+    "trial": "query-0-doc-01",
+    "reference": {
+      "answerable": true,
+      "category": "temporal_approval",
+      "expected_answer": "100 sensors and EUR 42,000 excluding VAT; A1 was not effective until 15 February.",
+      "id": "doc-01",
+      "question": "For PR-417, what quantity and spending ceiling applied on 14 February 2025?",
+      "required_evidence": [
+        {
+          "path": "procurement/02_approval.txt",
+          "quote": "Approved ceiling: EUR 42,000 excluding VAT for 100 sensors."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 takes effect on 2025-02-15; all other FIN-82 terms remain unchanged."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "On 14 February 2025, the approved quantity was 100 sensors, with a ceiling of EUR 42,000 excluding VAT.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "procurement/02_approval.txt",
+          "quote": "Approved ceiling: EUR 42,000 excluding VAT for 100 sensors."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 takes effect on 2025-02-15; all other FIN-82 terms remain unchanged."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The quantity and ceiling are correct for 14 February, and the cited approval and amendment quotations support them. The answer omits the required condition that A1 took effect on 15 February."
+    }
+  },
+  {
+    "system": "cognee",
+    "trial": "query-0-doc-02",
+    "reference": {
+      "answerable": true,
+      "category": "amendment",
+      "expected_answer": "Lena Ortiz approved EUR 46,200 excluding VAT for 110 sensors, effective 15 February.",
+      "id": "doc-02",
+      "question": "What was PR-417's authorized ceiling and quantity on 16 February, and who approved the increase?",
+      "required_evidence": [
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "Signed: Lena Ortiz, 2025-02-12; acknowledged by Vale Instruments on 2025-02-13."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 increases the approved ceiling to EUR 46,200 excluding VAT for 110 sensors."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 takes effect on 2025-02-15; all other FIN-82 terms remain unchanged."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "On 16 February, PR-417's authorized ceiling was EUR 46,200 excluding VAT for 110 sensors. Lena Ortiz approved the increase.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "Signed: Lena Ortiz, 2025-02-12; acknowledged by Vale Instruments on 2025-02-13.\nA1 increases the approved ceiling to EUR 46,200 excluding VAT for 110 sensors.\nA1 takes effect on 2025-02-15; all other FIN-82 terms remain unchanged."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The ceiling, quantity, effective date relevant to 16 February, and approver are all stated correctly. The cited amendment quotes directly support each material claim."
+    }
+  },
+  {
+    "system": "cognee",
+    "trial": "query-0-doc-03",
+    "reference": {
+      "answerable": true,
+      "category": "conflicting_request",
+      "expected_answer": "No; 120 was a preference, not an approved quantity, and the email did not amend approval.",
+      "id": "doc-03",
+      "question": "Did the supplier email authorize 120 sensors for PR-417?",
+      "required_evidence": [
+        {
+          "path": "procurement/04_supplier_email.txt",
+          "quote": "The annex team would prefer 120 units, but that is not an approved quantity."
+        },
+        {
+          "path": "procurement/04_supplier_email.txt",
+          "quote": "This email does not amend FIN-82 or A1."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The supplied context contains no supplier email, so I cannot determine whether it authorized 120 sensors. The request describes 120 as a planning estimate, and the finance decision approves a ceiling for 100 sensors.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "procurement/01_request.md",
+          "quote": "The request is a planning estimate, not an authorization to place an order."
+        },
+        {
+          "path": "procurement/02_approval.txt",
+          "quote": "Approved ceiling: EUR 42,000 excluding VAT for 100 sensors."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": false,
+    "grading": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "The reference establishes that the email did not authorize 120 sensors, but the candidate abstains instead of giving that answer and omits the email’s statements that 120 was only preferred and that the email did not amend approval. Its citations support the planning estimate and 100-sensor ceiling, but not the material claim that the supplied context contains no supplier email."
+    }
+  },
+  {
+    "system": "cognee",
+    "trial": "query-0-doc-04",
+    "reference": {
+      "answerable": true,
+      "category": "reconciliation",
+      "expected_answer": "107 entered service; EUR 1,260 excluding VAT was disputed for the 3 rejected sensors.",
+      "id": "doc-04",
+      "question": "How many PR-417 sensors entered service and what invoice amount was disputed?",
+      "required_evidence": [
+        {
+          "path": "procurement/05_receipt.txt",
+          "quote": "Accepted into service: 107 sensors. Replacement of the 3 units remains open."
+        },
+        {
+          "path": "procurement/06_invoice.md",
+          "quote": "The unit price is EUR 420; the disputed amount for 3 rejected sensors is EUR 1,260."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "107 sensors entered service, and EUR 1,260 was disputed.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "procurement/05_receipt.txt",
+          "quote": "Accepted into service: 107 sensors."
+        },
+        {
+          "path": "procurement/06_invoice.md",
+          "quote": "The unit price is EUR 420; the disputed amount for 3 rejected sensors is EUR 1,260."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The cited quotes support that 107 sensors entered service and that EUR 1,260 was disputed for 3 rejected sensors. The answer omits that the amount excludes VAT, a required qualification."
+    }
+  },
+  {
+    "system": "cognee",
+    "trial": "query-0-doc-05",
+    "reference": {
+      "answerable": true,
+      "category": "incident_timeline",
+      "expected_answer": "44 minutes (08:12–08:56 UTC); rollback completed at 08:39 without recovery, which followed the 08:47 pool-limit increase.",
+      "id": "doc-05",
+      "question": "How long did INC-73 degradation last, and did rollback restore service?",
+      "required_evidence": [
+        {
+          "path": "incident/01_alert.txt",
+          "quote": "08:12 — Monitor detected elevated checkout errors in the Birch region."
+        },
+        {
+          "path": "incident/02_bridge.txt",
+          "quote": "08:39 — Rollback completed; errors remained above baseline.\n08:47 — Connection pool limit increased from 40 to 80.\n08:56 — Error rate returned to baseline and stayed there for the observation window."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The degradation lasted 44 minutes, from 08:12 to 08:56 UTC. Rollback alone did not restore service; recovery followed the connection pool limit increase.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "incident/03_review.md",
+          "quote": "The customer-visible degradation lasted from 08:12 to 08:56 UTC on 2025-03-04."
+        },
+        {
+          "path": "incident/03_review.md",
+          "quote": "Rollback alone did not restore service; recovery followed the pool-limit increase."
+        },
+        {
+          "path": "incident/02_bridge.txt",
+          "quote": "08:39 — Rollback completed; errors remained above baseline.\n08:47 — Connection pool limit increased from 40 to 80.\n08:56 — Error rate returned to baseline and stayed there for the observation window."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer gives the correct 44-minute interval, states that rollback did not restore service, and says recovery followed the pool-limit increase. The cited quotations support each claim."
+    }
+  },
+  {
+    "system": "cognee",
+    "trial": "query-0-doc-06",
+    "reference": {
+      "answerable": false,
+      "category": "unanswerable_causality",
+      "expected_answer": "Cannot establish a confirmed cause: sampling was disabled; recovery after mitigation does not establish causality.",
+      "id": "doc-06",
+      "question": "What was the confirmed root cause of INC-73?",
+      "required_evidence": [
+        {
+          "path": "incident/03_review.md",
+          "quote": "Root cause remains unconfirmed because database sampling was disabled during the event."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The root cause of INC-73 remains unconfirmed.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "incident/03_review.md",
+          "quote": "Root cause remains unconfirmed because database sampling was disabled during the event."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": false,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The answer correctly states that the root cause remains unconfirmed, and its citation directly supports that claim. It omits why causality cannot be established: sampling was disabled, and recovery after mitigation does not confirm a cause. The answer also does not explicitly mark abstention."
+    }
+  },
+  {
+    "system": "cognee",
+    "trial": "query-0-doc-07",
+    "reference": {
+      "answerable": true,
+      "category": "version_conflict",
+      "expected_answer": "30 days under version 2; version 1 is superseded and version 3 is only a draft.",
+      "id": "doc-07",
+      "question": "As of 3 March 2025, what approved retention applies to diagnostic logs under RP-9?",
+      "required_evidence": [
+        {
+          "path": "versions/retention_v2.md",
+          "quote": "Diagnostic logs are retained for 30 days; this supersedes version 1."
+        },
+        {
+          "path": "versions/retention_draft.md",
+          "quote": "The privacy council has not voted; version 2 remains the approved policy."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "30 days under RP-9 version 2, effective 2025-02-01.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "versions/retention_v2.md",
+          "quote": "Approved by privacy council 2025-01-10; effective 2025-02-01."
+        },
+        {
+          "path": "versions/retention_v2.md",
+          "quote": "Diagnostic logs are retained for 30 days; this supersedes version 1."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The candidate correctly identifies 30 days under version 2 and its effective date is supported by the cited source. The answer omits that version 1 is superseded and version 3 is only a draft, so it is incomplete. Its stated claims are supported by its citations."
+    }
+  },
+  {
+    "system": "cognee",
+    "trial": "query-0-doc-08",
+    "reference": {
+      "answerable": false,
+      "category": "ambiguous_identity",
+      "expected_answer": "Cannot disambiguate E-104 and E-208: the minutes contain no employee ID or department.",
+      "id": "doc-08",
+      "question": "Which employee ID belongs to the A. Kim who approved the loading-bay change?",
+      "required_evidence": [
+        {
+          "path": "people/directory.txt",
+          "quote": "Alex Kim (employee E-104) works in procurement, based in Dublin.\nAlex Kim (employee E-208) works in platform engineering, based in Oslo."
+        },
+        {
+          "path": "people/signoff.txt",
+          "quote": "A. Kim approved the loading-bay access change; no employee ID or department was recorded."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "Cannot determine which employee ID belongs to the A. Kim who approved the loading-bay change.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "people/signoff.txt",
+          "quote": "A. Kim approved the loading-bay access change; no employee ID or department was recorded."
+        },
+        {
+          "path": "people/directory.txt",
+          "quote": "Both appear as A. Kim in older minutes; initials alone do not identify either employee."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The candidate correctly abstains, and its cited quotations support that the approval record lacks identifying details and that initials do not distinguish the two employees. It does not name E-104 and E-208 as the unresolved possibilities, so it omits required ambiguity details."
+    }
+  },
+  {
+    "system": "cognee",
+    "trial": "query-0-doc-09",
+    "reference": {
+      "answerable": true,
+      "category": "identity_resolution",
+      "expected_answer": "Alex Kim E-208 in platform engineering.",
+      "id": "doc-09",
+      "question": "Which Alex Kim approved CHG-311 and in what department?",
+      "required_evidence": [
+        {
+          "path": "people/technical_review.txt",
+          "quote": "Alex Kim, employee E-208, approved the connection-pool monitoring change."
+        },
+        {
+          "path": "people/directory.txt",
+          "quote": "Alex Kim (employee E-208) works in platform engineering, based in Oslo."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "Alex Kim (employee E-208), in platform engineering.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "people/technical_review.txt",
+          "quote": "Alex Kim, employee E-208, approved the connection-pool monitoring change."
+        },
+        {
+          "path": "people/directory.txt",
+          "quote": "Alex Kim (employee E-208) works in platform engineering, based in Oslo."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer identifies Alex Kim as E-208 in platform engineering, matching the reference. Both cited quotations appear in the provided sources and support the approval and department claims."
+    }
+  },
+  {
+    "system": "cognee",
+    "trial": "query-0-doc-10",
+    "reference": {
+      "answerable": true,
+      "category": "multilingual_join",
+      "expected_answer": "19 May 2025 replaced 12 May; 22 of 24 pumps were accepted and two quarantined.",
+      "id": "doc-10",
+      "question": "For PO-608, what delivery date replaced the original proposal and how many pumps were accepted? Answer in English.",
+      "required_evidence": [
+        {
+          "path": "multilingual/order_de.txt",
+          "quote": "Der bestätigte Liefertermin ist der 19. Mai 2025.\nDie ursprünglich vorgeschlagene Lieferung am 12. Mai ist damit ersetzt."
+        },
+        {
+          "path": "multilingual/inspection_fr.txt",
+          "quote": "Sur les 24 pompes reçues, deux présentent une fuite et restent en quarantaine.\nLes 22 autres pompes sont acceptées pour installation."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The confirmed delivery date replacing the original May 12 proposal was May 19, 2025. The number of pumps accepted is not established in the supplied context: the archive says the PO-608 replacement acceptance is missing. The order lists 24 pumps, but does not say that 24 were accepted.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "multilingual/order_de.txt",
+          "quote": "Der bestätigte Liefertermin ist der 19. Mai 2025. Die ursprünglich vorgeschlagene Lieferung am 12. Mai ist damit ersetzt."
+        },
+        {
+          "path": "multilingual/order_de.txt",
+          "quote": "Die Lieferung umfasst 24 Pumpen für das Werk Süd."
+        },
+        {
+          "path": "archive/coverage.txt",
+          "quote": "Missing: INC-73 database samples and payment-provider logs; PO-608 replacement acceptance."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": false,
+    "abstention_valid": false,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The May 19, 2025 date replacing May 12 is correct and supported. The candidate explicitly abstains on the accepted count because its cited context lacks the inspection evidence, and its citations support that limitation. It does not provide the required count of 22 accepted pumps, so the answer is incomplete."
+    }
+  },
+  {
+    "system": "cognee",
+    "trial": "query-0-doc-11",
+    "reference": {
+      "answerable": false,
+      "category": "unanswerable_proposal",
+      "expected_answer": "No confirmed delivery date is recorded; 27 May is a proposed shipment date subject to customer confirmation.",
+      "id": "doc-11",
+      "question": "What is the confirmed delivery date for PO-608 replacement pumps?",
+      "required_evidence": [
+        {
+          "path": "multilingual/replacement_es.txt",
+          "quote": "Podemos enviar dos bombas de sustitución el 27 de mayo, sujeto a confirmación del cliente.\nEsta propuesta no constituye una fecha de entrega confirmada."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "2025-05-19",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "multilingual/order_de.txt",
+          "quote": "Der bestätigte Liefertermin ist der 19. Mai 2025."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": false,
+    "grading": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "The candidate gives 19 May 2025 as confirmed for the replacement pumps, but the reference says no confirmed delivery date is recorded and 27 May is only proposed subject to customer confirmation. It omits that uncertainty and does not abstain. The cited quote confirms a date for the order but does not establish that it applies to the replacement pumps."
+    }
+  },
+  {
+    "system": "cognee",
+    "trial": "query-0-doc-12",
+    "reference": {
+      "answerable": true,
+      "category": "closure_criteria",
+      "expected_answer": "No: restoration failed despite checksum verification; Farah Singh must request a compatible importer.",
+      "id": "doc-12",
+      "question": "Should Alder risk R-12 be closed after EX-14, and who owns the next action?",
+      "required_evidence": [
+        {
+          "path": "governance/risk_register.md",
+          "quote": "R-12 is open until an export can be restored into the replacement environment."
+        },
+        {
+          "path": "governance/risk_test.txt",
+          "quote": "Restore into the replacement environment failed because the schema version was unsupported.\nR-12 remains open; Farah Singh will request a compatible importer."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "R-12 should remain open after EX-14 because restoration into the replacement environment failed. Farah Singh owns the next action: request a compatible importer.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "governance/risk_test.txt",
+          "quote": "Restore into the replacement environment failed because the schema version was unsupported."
+        },
+        {
+          "path": "governance/risk_test.txt",
+          "quote": "R-12 remains open; Farah Singh will request a compatible importer."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The answer correctly says R-12 remains open and Farah Singh must request a compatible importer, and its citations support those claims. It omits that the archive checksum was verified, a required detail of the expected answer, so it is incomplete."
+    }
+  },
+  {
+    "system": "cognee",
+    "trial": "query-0-doc-13",
+    "reference": {
+      "answerable": true,
+      "category": "contract_time_arithmetic",
+      "expected_answer": "Yes: 74 hours' notice exceeds the 72-hour requirement; actual downtime is not established by the notice.",
+      "id": "doc-13",
+      "question": "Was Harbor M-18 announced early enough for the S-22 planned-maintenance exclusion?",
+      "required_evidence": [
+        {
+          "path": "contracts/service.md",
+          "quote": "Planned maintenance announced at least 72 hours in advance is excluded from availability."
+        },
+        {
+          "path": "contracts/maintenance.txt",
+          "quote": "Harbor maintenance notice M-18 | sent 2025-07-07 08:00 UTC\nPlanned start: 2025-07-10 10:00 UTC; planned duration: 45 minutes."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "Yes. M-18 was sent 74 hours before the planned start, meeting S-22’s 72-hour advance-notice requirement.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "contracts/maintenance.txt",
+          "quote": "Harbor maintenance notice M-18 | sent 2025-07-07 08:00 UTC\nPlanned start: 2025-07-10 10:00 UTC; planned duration: 45 minutes."
+        },
+        {
+          "path": "contracts/service.md",
+          "quote": "Planned maintenance announced at least 72 hours in advance is excluded from availability."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The cited timestamps show 74 hours' notice, exceeding the cited 72-hour requirement, so the answer is factually correct and its claims are supported. It omits that the notice does not establish actual downtime, a required uncertainty."
+    }
+  },
+  {
+    "system": "cognee",
+    "trial": "query-0-doc-14",
+    "reference": {
+      "answerable": false,
+      "category": "unanswerable_missing_record",
+      "expected_answer": "Cannot determine payment date; no payment release or bank transfer confirmation is in the collection.",
+      "id": "doc-14",
+      "question": "On what date was the PR-417 invoice paid?",
+      "required_evidence": [
+        {
+          "path": "procurement/06_invoice.md",
+          "quote": "No payment release is recorded in this reconciliation note."
+        },
+        {
+          "path": "archive/coverage.txt",
+          "quote": "The archive contains no PR-417 bank transfer confirmation and no Alder signed rebate agreement."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The supplied context does not establish a payment date.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "procurement/06_invoice.md",
+          "quote": "No payment release is recorded in this reconciliation note."
+        },
+        {
+          "path": "archive/coverage.txt",
+          "quote": "The archive contains no PR-417 bank transfer confirmation"
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate explicitly abstains from giving a payment date. Its cited quotations establish that no payment release is recorded and that the collection contains no PR-417 bank transfer confirmation, supporting the conclusion that the date cannot be determined."
+    }
+  },
+  {
+    "system": "cognee",
+    "trial": "query-0-doc-15",
+    "reference": {
+      "answerable": true,
+      "category": "forecast_vs_commitment",
+      "expected_answer": "No; it is a conditional forecast without a signed agreement or evidence that the volume threshold was achieved.",
+      "id": "doc-15",
+      "question": "Can finance recognize the EUR 18,000 Alder rebate as a receivable from this archive?",
+      "required_evidence": [
+        {
+          "path": "finance/forecast.md",
+          "quote": "No signed rebate agreement or achieved annual volume is included in this archive.\nDo not recognize the modeled rebate as a receivable."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "No. The archive supports that this is a planning estimate, not a receivable: the forecast says the rebate is modeled only if the annual volume threshold is reached, no signed agreement or achieved volume is included, and it explicitly says not to recognize it. This conclusion is limited to the supplied archive.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "finance/forecast.md",
+          "quote": "Finance modeled a potential EUR 18,000 rebate if the annual volume threshold is reached."
+        },
+        {
+          "path": "finance/forecast.md",
+          "quote": "No signed rebate agreement or achieved annual volume is included in this archive."
+        },
+        {
+          "path": "finance/forecast.md",
+          "quote": "Do not recognize the modeled rebate as a receivable."
+        },
+        {
+          "path": "archive/coverage.txt",
+          "quote": "The archive contains no PR-417 bank transfer confirmation and no Alder signed rebate agreement."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate correctly concludes that the rebate is not a receivable based on this archive, and includes the conditional threshold, lack of a signed agreement or achieved volume, and the explicit instruction not to recognize it. Its cited quotations support those claims, and it appropriately limits the conclusion to the supplied archive."
+    }
+  },
+  {
+    "system": "cognee",
+    "trial": "query-0-doc-16",
+    "reference": {
+      "answerable": true,
+      "category": "scope_boundary",
+      "expected_answer": "No; financial ledger retention is outside RP-9, and no ledger retention period is established here.",
+      "id": "doc-16",
+      "question": "Does RP-9 establish the retention period for financial ledgers?",
+      "required_evidence": [
+        {
+          "path": "versions/retention_v2.md",
+          "quote": "Financial ledger retention is outside the scope of RP-9."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "No. RP-9 does not establish a retention period for financial ledgers; version 2 states that their retention is outside its scope.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "versions/retention_v2.md",
+          "quote": "Financial ledger retention is outside the scope of RP-9."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate correctly says RP-9 does not establish a financial ledger retention period and that ledger retention is outside its scope. The cited quotation directly supports the material claims."
+    }
+  },
+  {
+    "system": "graphiti",
+    "trial": "query-0-doc-01",
+    "reference": {
+      "answerable": true,
+      "category": "temporal_approval",
+      "expected_answer": "100 sensors and EUR 42,000 excluding VAT; A1 was not effective until 15 February.",
+      "id": "doc-01",
+      "question": "For PR-417, what quantity and spending ceiling applied on 14 February 2025?",
+      "required_evidence": [
+        {
+          "path": "procurement/02_approval.txt",
+          "quote": "Approved ceiling: EUR 42,000 excluding VAT for 100 sensors."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 takes effect on 2025-02-15; all other FIN-82 terms remain unchanged."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "On 14 February 2025, PR-417 remained subject to FIN-82’s ceiling of EUR 42,000 excluding VAT for 100 sensors; A1’s increase had not yet taken effect.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "procurement/02_approval.txt",
+          "quote": "Approved ceiling: EUR 42,000 excluding VAT for 100 sensors."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 takes effect on 2025-02-15; all other FIN-82 terms remain unchanged."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate gives the 100-sensor quantity and EUR 42,000 ceiling excluding VAT, and correctly states that A1 was not yet effective on 14 February. Both cited quotations support these claims."
+    }
+  },
+  {
+    "system": "graphiti",
+    "trial": "query-0-doc-02",
+    "reference": {
+      "answerable": true,
+      "category": "amendment",
+      "expected_answer": "Lena Ortiz approved EUR 46,200 excluding VAT for 110 sensors, effective 15 February.",
+      "id": "doc-02",
+      "question": "What was PR-417's authorized ceiling and quantity on 16 February, and who approved the increase?",
+      "required_evidence": [
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "Signed: Lena Ortiz, 2025-02-12; acknowledged by Vale Instruments on 2025-02-13."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 increases the approved ceiling to EUR 46,200 excluding VAT for 110 sensors."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 takes effect on 2025-02-15; all other FIN-82 terms remain unchanged."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "On 16 February, the authorized ceiling was EUR 46,200 excluding VAT for 110 sensors. Lena Ortiz approved the increase; Amendment A1 was signed by her and took effect on 15 February.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 increases the approved ceiling to EUR 46,200 excluding VAT for 110 sensors."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "Signed: Lena Ortiz, 2025-02-12; acknowledged by Vale Instruments on 2025-02-13."
+        },
+        {
+          "path": "procurement/03_amendment.md",
+          "quote": "A1 takes effect on 2025-02-15; all other FIN-82 terms remain unchanged."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The cited amendment states the ceiling, quantity, Lena Ortiz’s signature, and the 15 February effective date; it also says all other terms remain unchanged, supporting the authorized terms on 16 February."
+    }
+  },
+  {
+    "system": "graphiti",
+    "trial": "query-0-doc-03",
+    "reference": {
+      "answerable": true,
+      "category": "conflicting_request",
+      "expected_answer": "No; 120 was a preference, not an approved quantity, and the email did not amend approval.",
+      "id": "doc-03",
+      "question": "Did the supplier email authorize 120 sensors for PR-417?",
+      "required_evidence": [
+        {
+          "path": "procurement/04_supplier_email.txt",
+          "quote": "The annex team would prefer 120 units, but that is not an approved quantity."
+        },
+        {
+          "path": "procurement/04_supplier_email.txt",
+          "quote": "This email does not amend FIN-82 or A1."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "No. The supplier email says 120 units were preferred but not approved, and that it did not amend FIN-82 or A1.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "procurement/04_supplier_email.txt",
+          "quote": "The annex team would prefer 120 units, but that is not an approved quantity."
+        },
+        {
+          "path": "procurement/04_supplier_email.txt",
+          "quote": "This email does not amend FIN-82 or A1."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate correctly concludes that the email did not authorize 120 sensors: it says 120 was preferred but not approved and that the email did not amend FIN-82 or A1. Both material claims are supported by the cited quotations."
+    }
+  },
+  {
+    "system": "graphiti",
+    "trial": "query-0-doc-04",
+    "reference": {
+      "answerable": true,
+      "category": "reconciliation",
+      "expected_answer": "107 entered service; EUR 1,260 excluding VAT was disputed for the 3 rejected sensors.",
+      "id": "doc-04",
+      "question": "How many PR-417 sensors entered service and what invoice amount was disputed?",
+      "required_evidence": [
+        {
+          "path": "procurement/05_receipt.txt",
+          "quote": "Accepted into service: 107 sensors. Replacement of the 3 units remains open."
+        },
+        {
+          "path": "procurement/06_invoice.md",
+          "quote": "The unit price is EUR 420; the disputed amount for 3 rejected sensors is EUR 1,260."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "107 sensors entered service; EUR 1,260 was disputed.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "procurement/05_receipt.txt",
+          "quote": "Accepted into service: 107 sensors."
+        },
+        {
+          "path": "procurement/06_invoice.md",
+          "quote": "The unit price is EUR 420; the disputed amount for 3 rejected sensors is EUR 1,260."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The stated count and disputed amount are factually correct and supported by the cited quotations. The answer is incomplete because it omits that the dispute concerns the 3 rejected sensors and that EUR 1,260 is excluding VAT."
+    }
+  },
+  {
+    "system": "graphiti",
+    "trial": "query-0-doc-05",
+    "reference": {
+      "answerable": true,
+      "category": "incident_timeline",
+      "expected_answer": "44 minutes (08:12–08:56 UTC); rollback completed at 08:39 without recovery, which followed the 08:47 pool-limit increase.",
+      "id": "doc-05",
+      "question": "How long did INC-73 degradation last, and did rollback restore service?",
+      "required_evidence": [
+        {
+          "path": "incident/01_alert.txt",
+          "quote": "08:12 — Monitor detected elevated checkout errors in the Birch region."
+        },
+        {
+          "path": "incident/02_bridge.txt",
+          "quote": "08:39 — Rollback completed; errors remained above baseline.\n08:47 — Connection pool limit increased from 40 to 80.\n08:56 — Error rate returned to baseline and stayed there for the observation window."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "INC-73 customer-visible degradation lasted 44 minutes, from 08:12 to 08:56 UTC. Rollback alone did not restore service; recovery followed the pool-limit increase.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "incident/03_review.md",
+          "quote": "The customer-visible degradation lasted from 08:12 to 08:56 UTC on 2025-03-04.\nRollback alone did not restore service; recovery followed the pool-limit increase."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The duration and conclusion that rollback did not restore service are correct and directly supported by the cited review. The answer omits the required times: rollback completed at 08:39 and the pool limit was increased at 08:47."
+    }
+  },
+  {
+    "system": "graphiti",
+    "trial": "query-0-doc-06",
+    "reference": {
+      "answerable": false,
+      "category": "unanswerable_causality",
+      "expected_answer": "Cannot establish a confirmed cause: sampling was disabled; recovery after mitigation does not establish causality.",
+      "id": "doc-06",
+      "question": "What was the confirmed root cause of INC-73?",
+      "required_evidence": [
+        {
+          "path": "incident/03_review.md",
+          "quote": "Root cause remains unconfirmed because database sampling was disabled during the event."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The root cause of INC-73 was not confirmed.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "incident/03_review.md",
+          "quote": "Root cause remains unconfirmed because database sampling was disabled during the event."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The candidate correctly abstains and says the root cause was not confirmed, which the cited quotation supports. It omits that sampling was disabled and that recovery after mitigation does not establish causality, so it does not include all required uncertainty."
+    }
+  },
+  {
+    "system": "graphiti",
+    "trial": "query-0-doc-07",
+    "reference": {
+      "answerable": true,
+      "category": "version_conflict",
+      "expected_answer": "30 days under version 2; version 1 is superseded and version 3 is only a draft.",
+      "id": "doc-07",
+      "question": "As of 3 March 2025, what approved retention applies to diagnostic logs under RP-9?",
+      "required_evidence": [
+        {
+          "path": "versions/retention_v2.md",
+          "quote": "Diagnostic logs are retained for 30 days; this supersedes version 1."
+        },
+        {
+          "path": "versions/retention_draft.md",
+          "quote": "The privacy council has not voted; version 2 remains the approved policy."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The supplied context contains no evidence about RP-9 or diagnostic log retention.",
+      "abstain": true,
+      "citations": []
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": false,
+    "abstention_valid": false,
+    "grading": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "The candidate abstains even though the reference identifies approved evidence establishing 30 days under version 2. It omits the superseded status of version 1 and draft status of version 3, and provides no citations to support its claim that the supplied context contains no evidence."
+    }
+  },
+  {
+    "system": "graphiti",
+    "trial": "query-0-doc-08",
+    "reference": {
+      "answerable": false,
+      "category": "ambiguous_identity",
+      "expected_answer": "Cannot disambiguate E-104 and E-208: the minutes contain no employee ID or department.",
+      "id": "doc-08",
+      "question": "Which employee ID belongs to the A. Kim who approved the loading-bay change?",
+      "required_evidence": [
+        {
+          "path": "people/directory.txt",
+          "quote": "Alex Kim (employee E-104) works in procurement, based in Dublin.\nAlex Kim (employee E-208) works in platform engineering, based in Oslo."
+        },
+        {
+          "path": "people/signoff.txt",
+          "quote": "A. Kim approved the loading-bay access change; no employee ID or department was recorded."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "Insufficient evidence to identify the employee ID: the sources say both Alex Kims appear as A. Kim in older minutes, and the review naming E-208 explicitly says it is not the loading-bay review.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "people/directory.txt",
+          "quote": "Both appear as A. Kim in older minutes; initials alone do not identify either employee."
+        },
+        {
+          "path": "people/technical_review.txt",
+          "quote": "this is not the loading-bay review."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate abstains from assigning an ID, matching the reference’s ambiguous-identity conclusion. It explains that initials do not distinguish the two Alex Kims and cites the E-208 review’s explicit statement that it is not the loading-bay review. The cited quotations support those claims."
+    }
+  },
+  {
+    "system": "graphiti",
+    "trial": "query-0-doc-09",
+    "reference": {
+      "answerable": true,
+      "category": "identity_resolution",
+      "expected_answer": "Alex Kim E-208 in platform engineering.",
+      "id": "doc-09",
+      "question": "Which Alex Kim approved CHG-311 and in what department?",
+      "required_evidence": [
+        {
+          "path": "people/technical_review.txt",
+          "quote": "Alex Kim, employee E-208, approved the connection-pool monitoring change."
+        },
+        {
+          "path": "people/directory.txt",
+          "quote": "Alex Kim (employee E-208) works in platform engineering, based in Oslo."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "Alex Kim (employee E-208), in platform engineering.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "people/technical_review.txt",
+          "quote": "Alex Kim, employee E-208, approved the connection-pool monitoring change."
+        },
+        {
+          "path": "people/directory.txt",
+          "quote": "Alex Kim (employee E-208) works in platform engineering, based in Oslo."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate identifies Alex Kim as employee E-208 and gives platform engineering as the department. The cited review confirms E-208 approved the change, and the directory confirms E-208 works in platform engineering."
+    }
+  },
+  {
+    "system": "graphiti",
+    "trial": "query-0-doc-10",
+    "reference": {
+      "answerable": true,
+      "category": "multilingual_join",
+      "expected_answer": "19 May 2025 replaced 12 May; 22 of 24 pumps were accepted and two quarantined.",
+      "id": "doc-10",
+      "question": "For PO-608, what delivery date replaced the original proposal and how many pumps were accepted? Answer in English.",
+      "required_evidence": [
+        {
+          "path": "multilingual/order_de.txt",
+          "quote": "Der bestätigte Liefertermin ist der 19. Mai 2025.\nDie ursprünglich vorgeschlagene Lieferung am 12. Mai ist damit ersetzt."
+        },
+        {
+          "path": "multilingual/inspection_fr.txt",
+          "quote": "Sur les 24 pompes reçues, deux présentent une fuite et restent en quarantaine.\nLes 22 autres pompes sont acceptées pour installation."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The confirmed delivery date replacing the original proposal was 19 May 2025, and 22 pumps were accepted for installation.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "multilingual/order_de.txt",
+          "quote": "Der bestätigte Liefertermin ist der 19. Mai 2025.\nDie ursprünglich vorgeschlagene Lieferung am 12. Mai ist damit ersetzt."
+        },
+        {
+          "path": "multilingual/inspection_fr.txt",
+          "quote": "Les 22 autres pompes sont acceptées pour installation."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The date and accepted pump count are factually correct and supported by the cited quotations. The answer does not state that 19 May replaced the original proposed date of 12 May, so it omits a required detail."
+    }
+  },
+  {
+    "system": "graphiti",
+    "trial": "query-0-doc-11",
+    "reference": {
+      "answerable": false,
+      "category": "unanswerable_proposal",
+      "expected_answer": "No confirmed delivery date is recorded; 27 May is a proposed shipment date subject to customer confirmation.",
+      "id": "doc-11",
+      "question": "What is the confirmed delivery date for PO-608 replacement pumps?",
+      "required_evidence": [
+        {
+          "path": "multilingual/replacement_es.txt",
+          "quote": "Podemos enviar dos bombas de sustitución el 27 de mayo, sujeto a confirmación del cliente.\nEsta propuesta no constituye una fecha de entrega confirmada."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "No confirmed delivery date is stated for the replacement pumps. May 27 was proposed, subject to customer confirmation.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "multilingual/replacement_es.txt",
+          "quote": "Podemos enviar dos bombas de sustitución el 27 de mayo, sujeto a confirmación del cliente."
+        },
+        {
+          "path": "multilingual/replacement_es.txt",
+          "quote": "Esta propuesta no constituye una fecha de entrega confirmada."
+        },
+        {
+          "path": "multilingual/inspection_fr.txt",
+          "quote": "Le fournisseur doit proposer une date de remplacement ; aucune date n'est confirmée."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": false,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer correctly states that no delivery date is confirmed and that May 27 is a proposed shipment date subject to customer confirmation. Its cited quotations support both claims and preserve the relevant uncertainty."
+    }
+  },
+  {
+    "system": "graphiti",
+    "trial": "query-0-doc-12",
+    "reference": {
+      "answerable": true,
+      "category": "closure_criteria",
+      "expected_answer": "No: restoration failed despite checksum verification; Farah Singh must request a compatible importer.",
+      "id": "doc-12",
+      "question": "Should Alder risk R-12 be closed after EX-14, and who owns the next action?",
+      "required_evidence": [
+        {
+          "path": "governance/risk_register.md",
+          "quote": "R-12 is open until an export can be restored into the replacement environment."
+        },
+        {
+          "path": "governance/risk_test.txt",
+          "quote": "Restore into the replacement environment failed because the schema version was unsupported.\nR-12 remains open; Farah Singh will request a compatible importer."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "R-12 should remain open because restoration into the replacement environment failed; Farah Singh owns the next action, requesting a compatible importer. The risk owners may propose but not self-approve closure.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "governance/risk_test.txt",
+          "quote": "Restore into the replacement environment failed because the schema version was unsupported.\nR-12 remains open; Farah Singh will request a compatible importer."
+        },
+        {
+          "path": "governance/risk_register.md",
+          "quote": "R-12 is open until an export can be restored into the replacement environment.\nA successful download alone does not meet the closure criterion.\nNext review: 2025-06-23. Risk owners may propose but not self-approve closure."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "The candidate correctly says R-12 remains open and that Farah Singh must request a compatible importer. Its citations support those claims and the added point about risk owners not self-approving closure. It omits that the checksum matched despite the failed restoration, a required condition for a complete answer."
+    }
+  },
+  {
+    "system": "graphiti",
+    "trial": "query-0-doc-13",
+    "reference": {
+      "answerable": true,
+      "category": "contract_time_arithmetic",
+      "expected_answer": "Yes: 74 hours' notice exceeds the 72-hour requirement; actual downtime is not established by the notice.",
+      "id": "doc-13",
+      "question": "Was Harbor M-18 announced early enough for the S-22 planned-maintenance exclusion?",
+      "required_evidence": [
+        {
+          "path": "contracts/service.md",
+          "quote": "Planned maintenance announced at least 72 hours in advance is excluded from availability."
+        },
+        {
+          "path": "contracts/maintenance.txt",
+          "quote": "Harbor maintenance notice M-18 | sent 2025-07-07 08:00 UTC\nPlanned start: 2025-07-10 10:00 UTC; planned duration: 45 minutes."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "M-18 was sent 74 hours before the planned start, but the supplied context does not state S-22’s notice-period requirement for the planned-maintenance exclusion, so whether that was early enough cannot be determined.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "contracts/maintenance.txt",
+          "quote": "Harbor maintenance notice M-18 | sent 2025-07-07 08:00 UTC\nPlanned start: 2025-07-10 10:00 UTC; planned duration: 45 minutes."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": false,
+    "grading": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "The reference establishes a 72-hour requirement, and the notice was sent 74 hours before the planned start, so the candidate’s abstention gives the wrong conclusion. It also omits that actual downtime is unestablished. The cited notice supports the dates and 74-hour calculation, but does not support the claim that the requirement is absent from the supplied context."
+    }
+  },
+  {
+    "system": "graphiti",
+    "trial": "query-0-doc-14",
+    "reference": {
+      "answerable": false,
+      "category": "unanswerable_missing_record",
+      "expected_answer": "Cannot determine payment date; no payment release or bank transfer confirmation is in the collection.",
+      "id": "doc-14",
+      "question": "On what date was the PR-417 invoice paid?",
+      "required_evidence": [
+        {
+          "path": "procurement/06_invoice.md",
+          "quote": "No payment release is recorded in this reconciliation note."
+        },
+        {
+          "path": "archive/coverage.txt",
+          "quote": "The archive contains no PR-417 bank transfer confirmation and no Alder signed rebate agreement."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The supplied evidence does not state when the PR-417 invoice was paid.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "procurement/06_invoice.md",
+          "quote": "No payment release is recorded in this reconciliation note."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": true,
+    "citations_valid": true,
+    "abstention_valid": true,
+    "grading": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The candidate explicitly abstains from identifying a payment date and correctly says the evidence does not state when payment occurred. The cited quote confirms that no payment release is recorded, which supports the abstention; the missing bank-transfer confirmation is not needed to support this conclusion."
+    }
+  },
+  {
+    "system": "graphiti",
+    "trial": "query-0-doc-15",
+    "reference": {
+      "answerable": true,
+      "category": "forecast_vs_commitment",
+      "expected_answer": "No; it is a conditional forecast without a signed agreement or evidence that the volume threshold was achieved.",
+      "id": "doc-15",
+      "question": "Can finance recognize the EUR 18,000 Alder rebate as a receivable from this archive?",
+      "required_evidence": [
+        {
+          "path": "finance/forecast.md",
+          "quote": "No signed rebate agreement or achieved annual volume is included in this archive.\nDo not recognize the modeled rebate as a receivable."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The archive does not establish an EUR 18,000 rebate receivable for Project Alder. The only rebate-like item in the supplied original sources is a EUR 4,914 service credit for Project Willow, recorded as a discussion item that had not been agreed. Evidence for an Alder rebate is insufficient.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "operations/000/record_00003.md",
+          "quote": "A service credit of EUR 4,914 is a discussion item and has not been agreed."
+        }
+      ]
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": true,
+    "abstention_valid": false,
+    "grading": {
+      "correct": true,
+      "complete": false,
+      "supported": false,
+      "rationale": "The candidate correctly abstains from recognizing the Alder rebate as a receivable, but omits the required reason that there is no signed agreement or evidence that the volume threshold was achieved. Its cited Willow service-credit quotation supports the Willow detail only and does not support the Alder conclusion or the missing-evidence rationale."
+    }
+  },
+  {
+    "system": "graphiti",
+    "trial": "query-0-doc-16",
+    "reference": {
+      "answerable": true,
+      "category": "scope_boundary",
+      "expected_answer": "No; financial ledger retention is outside RP-9, and no ledger retention period is established here.",
+      "id": "doc-16",
+      "question": "Does RP-9 establish the retention period for financial ledgers?",
+      "required_evidence": [
+        {
+          "path": "versions/retention_v2.md",
+          "quote": "Financial ledger retention is outside the scope of RP-9."
+        }
+      ]
+    },
+    "answer": {
+      "answer": "The supplied context contains no evidence about RP-9 or financial-ledger retention periods.",
+      "abstain": true,
+      "citations": []
+    },
+    "native_citation_aliases": {},
+    "strict_pass": false,
+    "citations_valid": false,
+    "abstention_valid": false,
+    "grading": {
+      "correct": false,
+      "complete": false,
+      "supported": true,
+      "rationale": "The reference establishes that ledger retention is outside RP-9 and gives no retention period. The candidate abstains but claims there is no evidence about RP-9, although the required evidence supports the scope conclusion. It therefore fails to answer the question; its cited sources are empty, so no unsupported claim is attributed to a quotation."
+    }
+  }
+]

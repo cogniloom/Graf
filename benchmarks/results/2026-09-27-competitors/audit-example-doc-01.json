@@ -1,0 +1,36 @@
+{
+  "run_sha256": "7a9d439947bee642c6529048bab0bff350507b284ec6b72e82a9cb28aece00a2",
+  "run_seal_sha256": "b2afbbe3e5f45305f0b8d735f6f8940ef7d5fff2c9499807a9888df06b876a62",
+  "query_result_sha256": "e287cabd592f9ace376779f783e52e85ca1f986af150790b0810d687416d1ed2",
+  "answer_intent_sha256": "ea2dc9d4a86c63f43f908486dd833b6542a3aa707ce39d376f37f4132500fd00",
+  "answer_sha256": "29b041c4aea3a0d89fb2c0c5c5dd40859af49caf9b91b4e401e3bec78d43c54a",
+  "snapshot_id": "N87d191a9756a74a209701cdc2f27e9012a977de6c2ce3a4adf6a59dea1467c02",
+  "workset_id": "c0b7958f1690e544847f1ac4852850a9d7728db40cb1993de23630b7ad45da65",
+  "candidate_accounting": {
+    "scope_segments": 30,
+    "nonempty": 30,
+    "route_counts": {
+      "lexical": 23,
+      "literal": 24,
+      "identifier": 0,
+      "dense": 30,
+      "explicit_graph": 0,
+      "structural": 30
+    },
+    "union": 30,
+    "not_discovered": [],
+    "empty_or_gap": [],
+    "unreranked": 0,
+    "pending_expansions": [],
+    "unresolved_links": [],
+    "dense_cutoff": 100,
+    "dense_scope_scored": 30,
+    "scope": "bounded discovery; not exhaustive semantic review"
+  },
+  "inventory_documents": 30,
+  "documents_in_answer_context": 12,
+  "documents_not_in_answer_context": 18,
+  "documents_cited": 1,
+  "raw_query_path": "/home/wenga/orca/workspaces/Graf/compare/.evidencekg-benchmarks/competitors/runs/graf/query-0-doc-01",
+  "scope": "Verified benchmark transport evidence; no claim of model comprehension or exhaustive semantic relevance."
+}
