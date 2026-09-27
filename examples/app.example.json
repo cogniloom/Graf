@@ -4,7 +4,6 @@
   "database_config": "/home/your-user/.local/share/graf/evidencekg.json",
   "models": "/home/your-user/.local/share/graf/models",
   "device": "cpu",
-  "allowed_roots": ["/home/your-user/Documents/cases"],
   "host": "127.0.0.1",
   "port": 8765,
   "token_file": "/home/your-user/.local/share/graf/secrets/session-token",

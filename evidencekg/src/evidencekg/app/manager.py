@@ -18,7 +18,7 @@ from evidencekg.hybrid.postgres import PostgresWorkset, _connect, _lock_id
 from evidencekg.hybrid.runtime import Runtime, database_dsn, prepare
 
 from .config import AppConfig
-from .files import MAX_FILE_BYTES, inventory, restricted_hashes, restricted_paths, stage
+from .files import inventory, restricted_hashes, restricted_paths, stage
 
 
 class NotReady(ValueError):
@@ -95,7 +95,6 @@ class Manager:
         with _connect(self.dsn) as db:
             return {
                 "items": [self._source_view(r) for r in self._sources(db)],
-                "allowed_roots": [str(p) for p in self.config.allowed_roots],
             }
 
     def register(self, path):
@@ -254,7 +253,8 @@ class Manager:
 
     def _build(self, job, sources, progress):
         from evidencekg.config import initialize
-        from evidencekg.ingest import ingest
+
+        from .ingestion import ingest_isolated
 
         generation = self.config.home / "generations" / (job["id"] + "-" + uuid.uuid4().hex)
         staging, state = generation / "staging", generation / "vault"
@@ -264,11 +264,13 @@ class Manager:
             copied += stage(self.config, source, staging, self.stop_event.is_set)
             progress("staging", files=copied, total_files=sum(s["file_count"] for s in sources))
         progress("ingesting", files=copied)
-        # File acquisition is 100 MB; max_input_bytes is the existing segment/
-        # context budget and must not be confused with a file-size ceiling.
-        store = initialize(state, staging, {"max_file_bytes": MAX_FILE_BYTES})
+        # Size the parser acquisition bound to this verified inventory, rather than
+        # imposing a product file-size ceiling. Context and archive guards remain.
+        largest = max((item["size"] for source in sources for item in source["inventory"].values()), default=1)
+        store = initialize(state, staging, {"max_file_bytes": max(100_000_000, largest)})
         try:
-            snapshot = ingest(store)
+            ingest_isolated(state, self.stop_event.is_set)
+            snapshot = store.one("SELECT snapshot_id FROM current_snapshot WHERE singleton=1")["snapshot_id"]
             manifest = store.manifest(snapshot)
         finally:
             store.close()

@@ -424,7 +424,7 @@ def test_unsupported_file_is_an_explicit_gap(manager):
     assert any(d["status"] == "unsupported" for d in manager.documents()["items"])
 
 
-def test_pdf_larger_than_context_budget_is_ingested(manager):
+def test_pdf_larger_than_100mb_is_ingested(manager):
     from reportlab.pdfgen.canvas import Canvas
 
     path = manager.config.allowed_roots[0] / "ordinary.pdf"
@@ -432,7 +432,16 @@ def test_pdf_larger_than_context_budget_is_ingested(manager):
     canvas.drawString(40, 700, "Large PDF acquisition is independent of segment budgets.")
     canvas._code.append("%" + "padding" * 20000)
     canvas.save()
-    assert path.stat().st_size > 100_000
+    # Preserve the real PDF objects/xref, then add inert padding and a valid
+    # final startxref marker. Extraction must still return the original text.
+    original = path.read_bytes()
+    xref = original.rsplit(b"startxref", 1)[1].split()[0]
+    with path.open("ab") as stream:
+        stream.write(b"\n%")
+        for _ in range(100):
+            stream.write(b"x" * 1_000_000)
+        stream.write(b"\nstartxref\n" + xref + b"\n%%EOF\n")
+    assert path.stat().st_size > 100_000_000
     manager.register(str(path))
     assert manager.run_once(), manager.jobs()
     doc = manager.document(manager.documents()["items"][0]["id"])
@@ -443,18 +452,17 @@ def test_pdf_larger_than_context_budget_is_ingested(manager):
     assert "Large PDF acquisition" in doc["passages"][0]["text"]
 
 
-def test_oversized_source_has_visible_block_and_never_stages(manager):
-    from evidencekg.app.files import MAX_FILE_BYTES
-
-    path = manager.config.allowed_roots[0] / "oversized.pdf"
+def test_source_over_100mb_outside_legacy_roots_is_ingested(manager, tmp_path):
+    path = tmp_path / "large source.bin"
     with path.open("wb") as stream:
-        stream.truncate(MAX_FILE_BYTES + 1)
+        stream.truncate(100_000_001)
     manager.register(str(path))
-    assert not manager.run_once()
-    assert manager.status()["state"] == "blocked"
-    assert manager.status()["counts"]["gaps"] == 1
-    assert "100 MB" in manager.sources()["items"][0]["error"]
-    assert not (manager.config.home / "generations").exists()
+    assert manager.run_once(), manager.jobs()
+    source = manager.sources()["items"][0]
+    assert source["file_count"] == 1
+    assert source["error"] is None
+    assert manager.status()["state"] == "ready_with_gaps"  # Unsupported binary, not an acquisition failure.
+    assert path.stat().st_size == 100_000_001
 
 
 def test_detailed_graph_includes_passages_before_any_investigation(manager):

@@ -1,12 +1,14 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
+  import SourcePicker from "./SourcePicker.svelte";
+  let picker: "file" | "directory" | null = null;
   import { api, type Source, type Job, type Status } from "./api";
   export let view: string;
   export let tick: number;
   export let status: Status;
   export let refresh: () => Promise<void>;
   export let logout: () => Promise<void>;
-  let sources: { items: Source[]; allowed_roots: string[] } | null = null;
+  let sources: { items: Source[] } | null = null;
   let jobs: Job[] | null = null,
     settings: Record<string, unknown> | null = null;
   let path = "",
@@ -121,14 +123,24 @@
         >
       </div>
     </form>
-    <details>
-      <summary>Allowed locations</summary
-      >{#each sources?.allowed_roots || [] as root}<code class="block"
-          >{root}</code
-        >{/each}{#if sources?.allowed_roots.length === 0}<p>
-          No locations configured. Update the local workspace configuration.
-        </p>{/if}
-    </details>
+    <div class="row">
+      <button disabled={busy} on:click={() => (picker = "directory")}
+        >Choose folder…</button
+      >
+      <button disabled={busy} on:click={() => (picker = "file")}
+        >Choose file…</button
+      >
+    </div>
+    {#if picker}
+      <SourcePicker
+        kind={picker}
+        close={() => (picker = null)}
+        select={(selected) => {
+          path = selected;
+          picker = null;
+        }}
+      />
+    {/if}
     <div class="section-heading">
       <h2>Registered sources</h2>
       <span>{sources?.items.length ?? "—"}</span>
@@ -136,10 +148,7 @@
     {#if !sources && !error}<p role="status">Loading sources…</p>{/if}
     {#if sources?.items.length === 0}<div class="empty">
         <h3>Start with your first source</h3>
-        <p>
-          Add an allowed file or directory above to build your evidence
-          workspace.
-        </p>
+        <p>Add a file or directory above to build your evidence workspace.</p>
       </div>{/if}
     <div class="table-scroll">
       <table class="source-table">

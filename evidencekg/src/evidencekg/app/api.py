@@ -18,6 +18,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from pydantic import BaseModel, ConfigDict, Field, StrictBool
 
 from .config import AppConfig, absolute
+from .files import browse
 from .manager import Manager, Missing, NotReady
 
 COOKIE = "docworm_session"
@@ -239,12 +240,18 @@ def create_app(config, *, manager=None, start_background=True, investigations=No
     def jobs():
         return manager.jobs()
 
+    @app.get("/api/filesystem")
+    def filesystem(
+        path: str | None = Query(None, max_length=4096),
+        offset: int = Query(0, ge=0),
+    ):
+        return browse(config, path, offset)
+
     @app.get("/api/settings")
     def settings():
         return {
             "workspace_name": config.workspace_name or config.home.name,
             "codex_instructions": "Run ./graf plugin-install, then ask Codex to use Graf.",
-            "allowed_roots": [str(p) for p in config.allowed_roots],
             "device": config.device,
             "host": config.host,
             "port": config.port,

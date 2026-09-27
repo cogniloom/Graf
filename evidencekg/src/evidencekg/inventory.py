@@ -63,7 +63,7 @@ def capture(root, relative, limit):
             if before.st_size > limit:
                 raise ValueError("File-size acquisition limit reached")
             with os.fdopen(os.dup(source), "rb") as stream:
-                data = stream.read(limit + 1)
+                data = stream.read(min(limit, before.st_size) + 1)
             after = os.fstat(source)
             current = os.stat(parts[-1], dir_fd=fd, follow_symlinks=False)
 

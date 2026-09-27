@@ -6,11 +6,11 @@ Run `./graf open`. A short-lived browser navigation carries your private local t
 
 ## Add and manage evidence
 
-In **Sources**, add an absolute file or directory path within an allowed root. Directories are scanned recursively. Files are hashed, copied into a private staging generation, parsed and indexed. Originals are never modified. Avoid registering overlapping sources; register their common parent once instead.
+In **Sources**, click **Choose folder…** or **Choose file…**, browse to your source, select it, then click **Add source**. You can also enter any absolute local file or directory path. Directories are scanned recursively. Files are hashed, copied into a private staging generation, parsed and indexed. Originals are never modified. Avoid registering overlapping sources; register their common parent once instead.
 
 **Rescan** requests a new build. A periodic watcher also checks contents, including changes that preserve file size and modification time. **Pause** excludes a source from the next published revision; **Resume** includes it again. **Remove** unregisters a source and rebuilds the remaining collection. This is not secure erasure: old private generations and audit data remain until a separately planned retention procedure removes them.
 
-To authorize a new location, run `./graf allow-root /absolute/directory`. You can also manage sources using `./graf sources list`, `add PATH`, `rescan ID`, `pause ID`, `resume ID` and `remove ID`.
+No location allowlist or fixed 100 MB source-file ceiling applies. Graf skips its own private workspace when scanning a parent directory. Parsing still has time and archive-expansion guards; unsupported or incompletely extracted content is reported as gaps. You can also manage sources using `./graf sources list`, `add PATH`, `rescan ID`, `pause ID`, `resume ID` and `remove ID`.
 
 ## Understand readiness
 
