@@ -59,7 +59,9 @@ Graph construction and retrieval do not call a generative model. PostgreSQL runs
 
 *Measured pilot · 26 September 2026 · one repetition · same-model automated grading · two paired rubric exclusions.* These figures describe the tested workloads. Code latency is sensitive to the exclusions; it does not establish a general code-speed advantage.
 
-[![Graf benchmark: model tokens, elapsed time and automated answer quality for documents and source code](benchmarks/results/2026-09-26/comparison.png)](benchmarks/results/2026-09-26/REPORT.md)
+[![GPT-6-astra medium and GPT-6-luna low, with and without Graf: paired comparisons of mean tokens, strict automated passes and median elapsed time for documents and source code. Exact values are in the tables below.](docs/assets/graf-model-comparison.png)](docs/assets/graf-model-comparison.svg)
+
+**Compare within each model:** Astra medium uses the controlled file-search baseline; Luna low uses native Codex. Each pair shares its questions and sources, but the two models use different protocols and denominators. Graf reduced mean tokens in all four comparisons; Luna's code pass count stayed at 4/10 while its median time increased. One repetition, automated grading, human review pending. [Exact values and methodology below](#graf-versus-native-codex-every-model-and-reasoning-level) · [Rebuild this chart](benchmarks/render_model_comparison.py).
 
 [**Full report**](benchmarks/results/2026-09-26/REPORT.md) · [**All 52 original trials**](benchmarks/results/2026-09-26/per-case.csv) · [**Methodology**](benchmarks/METHODOLOGY.md) · [**Run it yourself**](benchmarks/README.md)
 
