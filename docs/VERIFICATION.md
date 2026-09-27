@@ -44,3 +44,58 @@ Final frontend checks: **10 unit tests** plus typecheck/build/format checks pass
 Browser scripts are shipped under `product/ui/tests/`. For reproducible graphics checks, install Chromium and run `uv run --no-project --with playwright python product/ui/tests/browser-smoke.py` from the repository root after building the UI. This script uses synthetic API fixtures. `live-browser.py APP_CONFIG OUTPUT_DIRECTORY` instead exercises a running eight-document fictional demo against the real API and writes screenshots; never use private evidence for public screenshots.
 
 Final standalone Chromium real-API acceptance also passed five viewport changes, three graph remounts, actual document/passages, source listing and Codex instructions with **zero page errors, external requests or failed responses**. The sign-in fragment was removed. One Orca embedded tab crashed after repeated earlier reload/resize operations; standalone Chromium did not reproduce that crash. Embedded-browser stability is therefore not included in the supported-browser claim.
+
+## Investigation workspace verification — 27 September 2026
+
+The current source worktree adds durable investigations, a Codex subscription
+adapter, signed packages, and attributed erasure. Checks used fictional or synthetic
+sources and disposable storage, never a private corpus.
+
+- Full Python suite: **502 passed, 12 skipped, 1 failed**. The failing
+  `test_acceptance.py::test_pdf_docx_image_adapters` OCR assertion also fails against
+  an extracted copy of unchanged commit `7f2bcf0` in the same environment.
+- After review fixes, all affected investigation/vault/adapter/API/lifecycle and
+  distribution checks: **123 passed**, including real disposable PostgreSQL.
+- Original React frontend: **14 component tests**, TypeScript/build and formatting passed. The subsequent Svelte redesign is documented below.
+  Cosmograph's existing large-bundle warning remains.
+- Independent security review reproduced and then rechecked fixes for pending
+  erasure access, partial-snapshot path exclusions, orphan exports, and interrupted
+  administrative cleanup. No reproduced P1 remained open at settlement.
+- A real subscription-backed synthetic investigation completed, retained observable
+  events, validated a source quotation, generated a document, and produced an
+  independently verified package under a pinned key. This does not attest the
+  provider's effective model identity or general answer accuracy.
+- Real local UI/API browser checks covered source registration/readiness, a completed
+  session, original-source inspection, literal HTML previews, package HTTP 200, and
+  Cosmograph rendering/fullscreen. An embedded target crashed during an earlier
+  fullscreen refresh; removing the unnecessary graph recreation allowed entering
+  and exiting fullscreen with both canvases retained. Broader embedded-browser
+  stability is not certified.
+- A disposable recovery journey used real `pg_dump`/`pg_restore`, verified backup
+  checksums, reopened restored investigation storage with its original signing key,
+  resumed an authorized interrupted deletion, retained exclusions, and verified a
+  new signed package. The routine backup verifier still checks checksums and the
+  PostgreSQL restore; operators must reconcile newer erasures/external checkpoints
+  when restoring an older backup.
+
+README screenshots use the bundled eight-document fictional demo, actual ingestion,
+verified PostgreSQL snapshot import, and an actual Codex-generated investigation.
+The screenshot fixture substitutes deterministic candidate retrieval for local model
+ranking. Screenshots are UI illustrations, not retrieval benchmark evidence.
+
+Final standalone Chromium screenshot acceptance passed against the actual demo API:
+source/session/graph pages at 390px had no horizontal overflow, Cosmograph rendered,
+and no page errors were observed. The captures are stored in `docs/assets/ui/` with
+fixture provenance. The demo investigation returned five verified exact quotations
+and a retained Markdown report through the existing Codex subscription.
+
+## Svelte workbench redesign — 27 September 2026
+
+The replacement uses Svelte 5 and a restrained typographic app wordmark. Its session panes,
+source table, document inspector, and full/miniature Cosmograph views were checked
+in standalone Chromium against the real local API. The component suite was migrated
+to Svelte and expanded to 18 tests, including stale-response and erasure regressions.
+The strict-CSP synthetic browser journey also passes with no external requests or
+uncaught page errors. Build/type checking and formatting pass. The existing graph
+bundle warning remains. See [frontend verification](../product/ui/VERIFICATION.md)
+for commands, design comparison, and the precise verification boundary.

@@ -1,32 +1,25 @@
-import { useEffect, useRef, useState } from "react";
-import type { Cosmograph } from "@cosmograph/cosmograph";
-import { Maximize, Pause, Play, Tags, Info } from "lucide-react";
-import { GraphData } from "./api";
-import wasmUrl from "@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url";
-import workerUrl from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
-export function Graph({
-  data,
-  onSelect,
-}: {
-  data: GraphData;
-  onSelect: (id: string) => void;
-}) {
-  const host = useRef<HTMLDivElement>(null);
-  const graph = useRef<Cosmograph>();
-  const pendingUpdate = useRef(Promise.resolve());
-  const select = useRef(onSelect);
-  select.current = onSelect;
-  const [error, setError] = useState("");
-  const [loaded, setLoaded] = useState(false);
-  const [paused, setPaused] = useState(
-    () => matchMedia("(prefers-reduced-motion: reduce)").matches,
-  );
-  const [labels, setLabels] = useState(true);
-  useEffect(() => {
+<script lang="ts">
+  import { onMount } from "svelte";
+  import type { Cosmograph } from "@cosmograph/cosmograph";
+  import type { GraphData } from "./api";
+  import wasmUrl from "@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url";
+  import workerUrl from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
+  export let data: GraphData;
+  export let compact = false;
+  export let onSelect: (id: string) => void = () => {};
+  export let onSelectEdge: (id: string) => void = () => {};
+  let host: HTMLDivElement;
+  let graph: Cosmograph | undefined;
+  let pendingUpdate = Promise.resolve();
+  let error = "";
+  let loaded = false;
+  let labels = !compact;
+  let paused = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  onMount(() => {
     let disposed = false;
     let cleanup: (() => Promise<void>) | undefined;
-    setLoaded(false);
-    setError("");
+    loaded = false;
+    error = "";
     const initialize = (async () => {
       const [{ Cosmograph }, duckdb, arrow] = await Promise.all([
         import("@cosmograph/cosmograph"),
@@ -73,11 +66,13 @@ export function Graph({
             : n.label,
         index,
         color:
-          n.kind === "document"
-            ? "#9867ff"
-            : n.kind === "passage"
-              ? "#b18aff"
-              : "#46cdd0",
+          n.highlighted === false
+            ? "#c5c6c1"
+            : n.kind === "document"
+              ? "#a64c2e"
+              : n.kind === "passage"
+                ? "#cf9378"
+                : "#567968",
         size: n.kind === "document" ? 9 : 4,
       }));
       const links = data.edges.map((e) => ({
@@ -121,6 +116,11 @@ export function Graph({
             target: strings(links.map((e) => e.target)),
             sourceIndex: numbers(links.map((e) => e.sourceIndex)),
             targetIndex: numbers(links.map((e) => e.targetIndex)),
+            color: strings(
+              links.map((e) =>
+                e.highlighted === false ? "#d4d4ce" : "#a1aaa1",
+              ),
+            ),
           }),
           { name: "graf_links" },
         );
@@ -128,7 +128,7 @@ export function Graph({
         return;
       }
       const instance = new Cosmograph(
-        host.current!,
+        host,
         {
           points: "graf_points",
           links: links.length ? "graf_links" : undefined,
@@ -142,15 +142,18 @@ export function Graph({
           linkTargetBy: "target",
           linkSourceIndexBy: "sourceIndex",
           linkTargetIndexBy: "targetIndex",
-          backgroundColor: "#070f1c",
+          backgroundColor: "#f7f6f2",
           // Avoid degree/count aggregation paths that invoke Arrow's dynamic null checker.
-          linkColorStrategy: "single",
+          linkColorStrategy: "direct",
+          linkColorBy: "color",
+          linkColorByFn: (value: unknown) => String(value),
           linkWidthStrategy: "single",
-          linkDefaultColor: "#6b91b3",
+          linkDefaultColor: "#a1aaa1",
           linkDefaultWidth: 1.3,
           pointColorStrategy: "direct",
           pointSizeStrategy: "direct",
-          pointLabelColor: "#e4eaff",
+          pointLabelColor: "#353a37",
+          showLabels: !compact,
           showDynamicLabels: false,
           showTopLabels: false,
           showLabelsFor: data.nodes
@@ -169,7 +172,7 @@ export function Graph({
           onSimulationEnd: () => {
             if (!disposed) {
               instance.fitView(0);
-              setPaused(true);
+              paused = true;
             }
           },
           enableSimulation: !matchMedia("(prefers-reduced-motion: reduce)")
@@ -177,14 +180,18 @@ export function Graph({
           onClick: (index) => {
             if (index !== undefined) {
               const n = data.nodes[index];
-              if (n?.document_id) select.current(n.document_id);
-              else if (n?.kind === "document") select.current(n.id);
+              if (n?.document_id) onSelect(n.document_id);
+              else if (n) onSelect(n.id);
             }
           },
           onLabelClick: (index) => {
             const n = data.nodes[index];
-            if (n?.document_id) select.current(n.document_id);
-            else if (n?.kind === "document") select.current(n.id);
+            if (n?.document_id) onSelect(n.document_id);
+            else if (n) onSelect(n.id);
+          },
+          onLinkClick: (index) => {
+            if (index !== undefined && data.edges[index])
+              onSelectEdge?.(data.edges[index].id);
           },
         },
         { duckdb: db, connection },
@@ -201,111 +208,72 @@ export function Graph({
       }
       if (instance.stats.pointsCount !== data.nodes.length)
         throw new Error("Graph engine did not load the expected node count");
-      graph.current = instance;
-      setLoaded(true);
+      graph = instance;
+      loaded = true;
       instance.fitView(0);
     })().catch(async (e) => {
       if (!disposed)
-        setError(
-          `Graph unavailable: ${e.message}. Use the document list to inspect sources.`,
-        );
+        error = `Graph unavailable: ${e.message}. Use the record list to inspect sources.`;
       await cleanup?.().catch(() => {});
       cleanup = undefined;
     });
     return () => {
       disposed = true;
-      graph.current = undefined;
+      graph = undefined;
       void initialize
-        .then(() => pendingUpdate.current)
+        .then(() => pendingUpdate)
         .then(() => cleanup?.())
         .catch(() => {
           /* Teardown can race browser context loss. */
         });
     };
-  }, [data]);
-  return (
-    <div className="graph-wrap">
-      <div className="graph-toolbar">
-        <button
-          disabled={!loaded}
-          onClick={() => graph.current?.fitView(paused ? 0 : 250)}
-        >
-          <Maximize size={16} />
-          Fit graph
-        </button>
-        <button
-          disabled={!loaded}
-          onClick={() => {
-            if (paused) graph.current?.unpause();
-            else graph.current?.pause();
-            setPaused(!paused);
-          }}
-        >
-          {paused ? <Play size={16} /> : <Pause size={16} />}{" "}
-          {paused ? "Resume motion" : "Pause motion"}
-        </button>
-        <button
-          aria-pressed={labels}
-          disabled={!loaded}
-          onClick={() => {
-            const instance = graph.current;
-            if (instance)
-              pendingUpdate.current = instance
-                .setConfig({ showLabels: !labels })
-                .catch((e) => {
-                  if (graph.current === instance)
-                    setError(`Label update failed: ${e.message}`);
-                });
-            setLabels(!labels);
-          }}
-        >
-          <Tags size={16} />
-          Labels <span className={labels ? "switch on" : "switch"} />
-        </button>
-      </div>
-      <div
-        className="graph-canvas"
-        ref={host}
-        aria-label="Evidence graph; use the Documents view for keyboard access"
-      />
-      {(!loaded || error) && (
-        <div className="graph-notice" role="status">
-          {error || "Loading local graph engine…"}
-        </div>
-      )}
-      <div className="graph-footer">
-        <span className="legend">
-          {Array.from(new Set(data.nodes.map((n) => n.kind))).map((kind) => (
-            <span key={kind}>
-              <i
-                style={{
-                  background:
-                    kind === "document"
-                      ? "#9867ff"
-                      : kind === "passage"
-                        ? "#b18aff"
-                        : "#46cdd0",
-                }}
-              />
-              {kind === "document"
-                ? "Documents"
-                : kind === "passage"
-                  ? "Passages"
-                  : kind === "reference"
-                    ? "References"
-                    : kind.replaceAll("_", " ")}
-            </span>
-          ))}
-        </span>
-        <span>
-          <Info size={15} />
-          Layout proximity is not evidence.
-        </span>
-      </div>
-      <div className="graph-count">
-        {data.nodes.length} of {data.total_nodes} nodes · {data.edges.length} of{" "}
-        {data.total_edges} connections{data.truncated ? " · Bounded view" : ""}
-      </div>
-    </div>
-  );
-}
+  });
+  function toggleLabels() {
+    if (!graph) return;
+    labels = !labels;
+    pendingUpdate = graph.setConfig({ showLabels: labels }).catch((e) => {
+      error = e.message;
+    });
+  }
+</script>
+
+<div class="graph-wrap">
+  <div class="graph-toolbar">
+    <button disabled={!loaded} on:click={() => graph?.fitView(paused ? 0 : 250)}
+      >Fit graph</button
+    >
+    <button
+      disabled={!loaded}
+      on:click={() => {
+        if (paused) graph?.unpause();
+        else graph?.pause();
+        paused = !paused;
+      }}>{paused ? "Resume motion" : "Pause motion"}</button
+    >
+    <button disabled={!loaded} aria-pressed={labels} on:click={toggleLabels}
+      >Labels</button
+    >
+  </div>
+  <div
+    class="graph-canvas"
+    bind:this={host}
+    aria-label="Evidence graph; use the record lists for keyboard access"
+  ></div>
+  {#if !loaded || error}<div class="graph-notice" role="status">
+      {error || "Loading local graph engine…"}
+    </div>{/if}
+  <div class="graph-footer">
+    <span class="legend"
+      >{#each [...new Set(data.nodes.map((n) => n.kind))] as kind}<span
+          ><i
+            class:document={kind === "document"}
+            class:passage={kind === "passage"}
+          ></i>{kind.replaceAll("_", " ")}</span
+        >{/each}</span
+    ><span>Layout proximity is not evidence.</span>
+  </div>
+  <div class="graph-count">
+    {data.nodes.length} of {data.total_nodes} nodes · {data.edges.length} of {data.total_edges}
+    connections{data.truncated ? " · Bounded view" : ""}
+  </div>
+</div>

@@ -1,9 +1,9 @@
 import { it, expect, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/svelte";
 import userEvent from "@testing-library/user-event";
-import { Explore } from "./Explore";
+import Explore from "./Explore.svelte";
 import { Status } from "./api";
-vi.mock("./Graph", () => ({ Graph: () => <div>Graph view</div> }));
+
 it("discards late source previews when evidence becomes unpublished", async () => {
   let resolveDetail: (x: Response) => void = () => {};
   vi.stubGlobal(
@@ -41,18 +41,18 @@ it("discards late source previews when evidence becomes unpublished", async () =
     published_revision: 1,
     snapshot_id: "snapshot",
   } as Status;
-  const { rerender } = render(
-    <Explore status={status} query="test" onSources={() => {}} />,
-  );
+  const { rerender } = render(Explore, {
+    status,
+    query: "test",
+    onSources: () => {},
+  });
   await userEvent.click(await screen.findByText("test.txt"));
   await screen.findByText("Loading source…");
-  rerender(
-    <Explore
-      status={{ ...status, state: "updating", revision: 2 }}
-      query="test"
-      onSources={() => {}}
-    />,
-  );
+  await rerender({
+    status: { ...status, state: "updating", revision: 2 },
+    query: "test",
+    onSources: () => {},
+  });
   resolveDetail(
     new Response(
       JSON.stringify({

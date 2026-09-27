@@ -4,11 +4,33 @@ from __future__ import annotations
 
 import hashlib
 import os
+import sqlite3
 import stat
 from contextlib import contextmanager
 from pathlib import Path
 
 MAX_FILE_BYTES = 100_000_000
+
+
+def restricted_hashes(config):
+    """Persist erasure exclusions across watcher scans and application restarts."""
+    path = config.home / "investigations" / "sessions.sqlite3"
+    if not path.exists():
+        return set()
+    if path.is_symlink() or path.parent.is_symlink():
+        raise ValueError("Unsafe investigation restriction store")
+    with sqlite3.connect(path.as_uri() + "?mode=ro", uri=True) as db:
+        return {r[0] for r in db.execute("SELECT digest FROM restrictions")}
+
+
+def restricted_paths(config):
+    path = config.home / "investigations" / "sessions.sqlite3"
+    if not path.exists():
+        return set()
+    if path.is_symlink() or path.parent.is_symlink():
+        raise ValueError("Unsafe investigation restriction store")
+    with sqlite3.connect(path.as_uri() + "?mode=ro", uri=True) as db:
+        return {r[0] for r in db.execute("SELECT path FROM restricted_paths")}
 
 
 @contextmanager
@@ -90,15 +112,28 @@ def inventory(config, source, stopped=lambda: False):
             walk(fd)
         else:
             rows[path.name] = read_file(fd, stopped=stopped)
-    return rows
+    blocked = restricted_hashes(config)
+    paths = restricted_paths(config)
+    return {
+        name: item
+        for name, item in rows.items()
+        if item["sha256"] not in blocked
+        and str(path / name if source["kind"] == "directory" else path) not in paths
+    }
 
 
 def stage(config, source, target, stopped=lambda: False):
     """Copy only the exact checksummed inventory; drift invalidates the entire build."""
     base = config.source(source["path"])
     count = 0
+    blocked = restricted_hashes(config)
+    paths = restricted_paths(config)
     for rel, expected in sorted(source["inventory"].items()):
+        if expected["sha256"] in blocked:
+            raise ValueError("Source became restricted after inventory; rebuild is required")
         original = base / rel if source["kind"] == "directory" else base
+        if str(original) in paths:
+            raise ValueError("Source path is restricted; rebuild is required")
         target_file = Path(target) / source["id"] / rel
         target_file.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
         with opened(original) as fd, target_file.open("xb") as output:

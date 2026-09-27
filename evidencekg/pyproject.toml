@@ -10,7 +10,7 @@ requires-python = ">=3.12"
 dependencies = ["mcp>=2,<3", "pypdf>=6,<7", "python-docx>=1,<2", "pillow>=11,<13", "beautifulsoup4>=4,<5", "jsonschema>=4,<5"]
 
 [project.optional-dependencies]
-app = ["fastapi>=0.115,<1", "uvicorn>=0.34,<1", "httpx>=0.28,<1", "psycopg[binary]>=3.2,<4"]
+app = ["fastapi>=0.115,<1", "uvicorn>=0.34,<1", "httpx>=0.28,<1", "psycopg[binary]>=3.2,<4", "cryptography>=46,<48"]
 hybrid = ["psycopg[binary]>=3.2,<4", "numpy>=2,<3", "torch>=2.6,<3", "transformers>=4.50,<6", "huggingface-hub>=0.30,<2", "safetensors>=0.5,<1"]
 
 [project.scripts]

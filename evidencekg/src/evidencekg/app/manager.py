@@ -18,7 +18,7 @@ from evidencekg.hybrid.postgres import PostgresWorkset, _connect, _lock_id
 from evidencekg.hybrid.runtime import Runtime, database_dsn, prepare
 
 from .config import AppConfig
-from .files import MAX_FILE_BYTES, inventory, stage
+from .files import MAX_FILE_BYTES, inventory, restricted_hashes, restricted_paths, stage
 
 
 class NotReady(ValueError):
@@ -272,7 +272,17 @@ class Manager:
             manifest = store.manifest(snapshot)
         finally:
             store.close()
-        progress("preparing", documents=len(manifest["documents"]))
+        # A verified extraction snapshot can support explicitly consented lexical
+        # research while the dense serving projection is still being prepared.
+        progress(
+            "preparing",
+            documents=len(manifest["documents"]),
+            partial_publication={
+                "snapshot_id": snapshot,
+                "state": str(state),
+                "sources": [{k: s[k] for k in ("id", "path", "kind", "inventory")} for s in sources],
+            },
+        )
         prepared = prepare(
             state,
             self.config.models,
@@ -463,7 +473,118 @@ class Manager:
             row = self._row(db)
         if row["state"] not in ("ready", "ready_with_gaps") or row["published_revision"] != row["revision"]:
             raise NotReady("Current source revision is not ready")
+        blocked = restricted_hashes(self.config)
+        if any(
+            item["sha256"] in blocked
+            for source in (row["publication"] or {}).get("sources", [])
+            for item in source.get("inventory", {}).values()
+        ):
+            raise NotReady("Published evidence includes restricted content; rebuild is required")
         return row
+
+    def investigation_snapshot(self, question, allow_partial=False):
+        """Capture verified immutable inputs, independently of current-view gating.
+
+        The caller retains this snapshot for the lifetime of a run. No subsequent
+        source revision is silently substituted. Early research requires consent.
+        """
+        from evidencekg.hybrid.sources import ReadOnlyStore, load_sources
+
+        self.reconcile()
+        with _connect(self.dsn) as db:
+            row = self._row(db)
+            active = {s["id"] for s in self._sources(db) if s["enabled"]}
+            current = row["published_revision"] == row["revision"] and row["state"] in (
+                "ready",
+                "ready_with_gaps",
+            )
+            if not current and not allow_partial:
+                raise NotReady("Indexing is incomplete. Explicitly allow the available snapshot or wait.")
+            publication = row["publication"]
+            partial = db.execute(
+                "SELECT progress FROM public.docworm_jobs WHERE workspace=%s AND revision=%s "
+                "AND state='running' ORDER BY started_at DESC LIMIT 1",
+                (self.id, row["revision"]),
+            ).fetchone()
+            if not current and partial and isinstance(partial["progress"], dict):
+                publication = partial["progress"].get("partial_publication") or publication
+            if not publication:
+                raise NotReady("No consistent snapshot is available yet. Wait for extraction to finish.")
+            if not {s["id"] for s in publication["sources"]}.issubset(active):
+                raise NotReady("The previous snapshot includes removed sources. Wait for the new snapshot.")
+        frozen = dict(row, publication=publication, snapshot_id=publication["snapshot_id"])
+        state = Path(publication["state"])
+        if not state.is_relative_to(self.config.home / "generations"):
+            raise ValueError("Snapshot is outside the private generation store")
+        store = ReadOnlyStore(state)
+        try:
+            manifest, segments, links = load_sources(store, publication["snapshot_id"])
+            occurrences = store.rows(
+                "SELECT o.* FROM occurrences o JOIN snapshot_occurrences so ON so.occurrence_id=o.id "
+                "WHERE so.snapshot_id=? ORDER BY o.id",
+                (publication["snapshot_id"],),
+            )
+            features = store.rows(
+                "SELECT DISTINCT f.* FROM features f JOIN occurrences o ON o.feature_id=f.id "
+                "JOIN snapshot_occurrences so ON so.occurrence_id=o.id WHERE so.snapshot_id=? ORDER BY f.id",
+                (publication["snapshot_id"],),
+            )
+            originals = {}
+            total_bytes = 0
+            for doc in manifest["documents"]:
+                version = store.one(
+                    "SELECT original_blob_sha FROM document_versions WHERE id=?",
+                    (doc["document_version_id"],),
+                )
+                if version["original_blob_sha"]:
+                    size = store.one(
+                        "SELECT byte_length FROM blobs WHERE sha256=?", (version["original_blob_sha"],)
+                    )["byte_length"]
+                    total_bytes += size
+                    if total_bytes > 256 * 1024 * 1024:
+                        raise ValueError(
+                            "This collection exceeds the 256 MiB investigation capture limit. "
+                            "Select a smaller source collection; no evidence was silently omitted."
+                        )
+                    originals[doc["document_version_id"]] = store.get(version["original_blob_sha"])
+        finally:
+            store.close()
+        if "config" in publication:
+            result = self._with_runtime(frozen, lambda runtime: runtime.retrieve(question, limit=12))
+            chosen = [s.get("segment_id", s.get("id")) for s in result.get("segments", [])]
+            retrieval = "hybrid"
+        else:
+            # Explicitly labelled early lexical mode; never claim hybrid readiness.
+            words = set(question.casefold().split())
+            chosen = sorted(
+                segments, key=lambda k: (-sum(w in segments[k]["text"].casefold() for w in words), k)
+            )[:12]
+            retrieval = "early_lexical"
+        manifest = self._paths(manifest, frozen)
+        forbidden_paths = restricted_paths(self.config)
+        forbidden_hashes = restricted_hashes(self.config)
+        if any(doc["path"] in forbidden_paths for doc in manifest["documents"]) or any(
+            sha(content) in forbidden_hashes for content in originals.values()
+        ):
+            raise NotReady("This snapshot contains restricted evidence. Rebuild with those sources excluded.")
+        return {
+            "snapshot_id": publication["snapshot_id"],
+            "revision": row["revision"],
+            "published_revision": row["published_revision"],
+            "partial": not current,
+            "retrieval": retrieval,
+            "manifest": manifest,
+            "segments": self._paths(segments, frozen),
+            "links": links,
+            "originals": originals,
+            "occurrences": occurrences,
+            "features": features,
+            "selected_segments": [s for s in chosen if s in segments],
+            "known_source_files": sum(s["file_count"] for s in self.sources()["items"] if s["enabled"]),
+            "capture_limitations": [
+                "Retrieval ranks candidates; it is not an exhaustive relevance assessment."
+            ],
+        }
 
     def evidence(self, operation):
         """Pre/post source hashing and revision fence cover every evidence route."""
@@ -588,9 +709,11 @@ class Manager:
 
         return self.evidence(perform)
 
-    def graph(self, limit=2000):
+    def graph(self, limit=2000, *, detailed=False):
+        from evidencekg.hybrid.sources import ReadOnlyStore
+
         def perform(row):
-            manifest, _, links = self._snapshot(row)
+            manifest, segments, links = self._snapshot(row)
             nodes = {
                 d["document_version_id"]: {
                     "id": d["document_version_id"],
@@ -600,8 +723,97 @@ class Manager:
                 }
                 for d in manifest["documents"]
             }
+            structural = []
+            if detailed:
+                store = ReadOnlyStore(row["publication"]["state"])
+                try:
+                    occurrences = store.rows(
+                        "SELECT o.* FROM occurrences o JOIN snapshot_occurrences so ON so.occurrence_id=o.id "
+                        "WHERE so.snapshot_id=? ORDER BY o.id",
+                        (row["snapshot_id"],),
+                    )
+                    features = store.rows(
+                        "SELECT DISTINCT f.* FROM features f JOIN occurrences o ON o.feature_id=f.id "
+                        "JOIN snapshot_occurrences so ON so.occurrence_id=o.id WHERE so.snapshot_id=? ORDER BY f.id",
+                        (row["snapshot_id"],),
+                    )
+                finally:
+                    store.close()
+                for segment in segments.values():
+                    key = segment["id"]
+                    nodes[key] = {
+                        "id": key,
+                        "label": segment["text"][:100],
+                        "kind": "passage",
+                        "document_id": segment["document_version_id"],
+                    }
+                    structural.append(
+                        {
+                            "id": "contains:" + key,
+                            "source": segment["document_version_id"],
+                            "target": key,
+                            "type": "contains",
+                        }
+                    )
+                for feature in features:
+                    key = feature["id"]
+                    nodes[key] = {
+                        "id": key,
+                        "label": feature["canonical_value"],
+                        "kind": "feature",
+                        "document_id": None,
+                    }
+                for occurrence in occurrences:
+                    key = occurrence["id"]
+                    nodes[key] = {
+                        "id": key,
+                        "label": occurrence["raw_value"],
+                        "kind": "occurrence",
+                        "document_id": segments.get(occurrence["segment_id"], {}).get("document_version_id"),
+                    }
+                    structural.extend(
+                        [
+                            {
+                                "id": "occurrence:" + key,
+                                "source": occurrence["segment_id"],
+                                "target": key,
+                                "type": "contains_occurrence",
+                            },
+                            {
+                                "id": "feature:" + key,
+                                "source": key,
+                                "target": occurrence["feature_id"],
+                                "type": "feature_membership",
+                            },
+                        ]
+                    )
+                for link in links:
+                    for endpoint in (link["from_node"], link["to_node"]):
+                        if endpoint and endpoint not in nodes:
+                            nodes[endpoint] = {
+                                "id": endpoint,
+                                "label": endpoint,
+                                "kind": "relationship_endpoint",
+                                "document_id": None,
+                            }
+                    if not link["to_node"]:
+                        key = "unresolved:" + link["id"]
+                        nodes[key] = {
+                            "id": key,
+                            "label": "Unresolved relationship",
+                            "kind": "unresolved",
+                            "document_id": None,
+                        }
+                        structural.append(
+                            {
+                                "id": link["id"],
+                                "source": link["from_node"],
+                                "target": key,
+                                "type": link["relation_type"],
+                            }
+                        )
             # Unresolved relationships have no endpoint and are shown in document details.
-            edges = [
+            edges = structural + [
                 {"id": e["id"], "source": e["from_node"], "target": e["to_node"], "type": e["relation_type"]}
                 for e in links
                 if e["from_node"] in nodes and e["to_node"] in nodes

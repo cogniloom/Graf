@@ -5,13 +5,16 @@ from __future__ import annotations
 import hashlib
 import hmac
 import secrets
+import tempfile
 import threading
 import time
 from contextlib import asynccontextmanager
+from pathlib import Path
+from urllib.parse import quote
 
 import psycopg
 from fastapi import FastAPI, Query, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from pydantic import BaseModel, ConfigDict, Field, StrictBool
 
 from .config import AppConfig, absolute
@@ -42,22 +45,51 @@ class Search(Payload):
     limit: int = Field(default=12, ge=1, le=12, strict=True)
 
 
-def create_app(config, *, manager=None, start_background=True):
+class Investigation(Payload):
+    prompt: str = Field(min_length=1, max_length=16000)
+    allow_partial: StrictBool = False
+    parent_id: str | None = Field(default=None, max_length=64)
+    request_id: str = Field(min_length=16, max_length=64)
+    model: str = Field(default="gpt-6-astra", max_length=64)
+    effort: str = Field(default="medium", max_length=16)
+
+
+class Annotation(Payload):
+    text: str = Field(min_length=1, max_length=16000)
+
+
+class Revision(Payload):
+    text: str = Field(min_length=1, max_length=16000)
+
+
+class Erasure(Payload):
+    artifact_ids: list[str] = Field(min_length=1, max_length=1000)
+    reason: str = Field(min_length=1, max_length=4096)
+    preview_hash: str | None = Field(default=None, max_length=64)
+    confirmation: str | None = Field(default=None, max_length=100)
+
+
+def create_app(config, *, manager=None, start_background=True, investigations=None):
     config = config if isinstance(config, AppConfig) else AppConfig.load(config)
     token = config.token()
     manager = manager or Manager(config)
+    from evidencekg.investigations.service import Investigations
+
+    investigations = investigations or Investigations(manager)
     sessions = {}
     session_lock = threading.Lock()
     hosts = {f"127.0.0.1:{config.port}", f"localhost:{config.port}"}
 
     @asynccontextmanager
     async def lifespan(app):
-        if start_background:
-            manager.start()
         try:
+            if start_background:
+                investigations.start()
+                manager.start()
             yield
         finally:
             if start_background:
+                investigations.stop()
                 manager.stop()
 
     app = FastAPI(title="Graf", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
@@ -218,6 +250,8 @@ def create_app(config, *, manager=None, start_background=True):
             "port": config.port,
             "scan_interval_seconds": config.scan_interval_seconds,
             "generative_model_calls": 0,
+            "investigation_actor": investigations.actor,
+            "identity_boundary": "Authenticated local OS owner; not independently verified legal identity",
         }
 
     @app.get("/api/graph")
@@ -247,6 +281,118 @@ def create_app(config, *, manager=None, start_background=True):
         limit: int = Query(100, ge=1, le=1000),
     ):
         return manager.workset(workset_id, cursor, limit)
+
+    @app.get("/api/investigations")
+    def investigation_list():
+        return investigations.list()
+
+    @app.get("/api/investigation-graph")
+    def investigation_workspace_graph():
+        return investigations.workspace_graph()
+
+    @app.post("/api/investigations")
+    def investigation_create(body: Investigation):
+        return investigations.create(**body.model_dump())
+
+    @app.get("/api/investigations/{run_id}")
+    def investigation_detail(run_id: str):
+        return investigations.detail(run_id)
+
+    @app.post("/api/investigations/{run_id}/cancel")
+    def investigation_cancel(run_id: str):
+        return investigations.cancel(run_id)
+
+    @app.post("/api/investigations/{run_id}/annotations")
+    def investigation_annotation(run_id: str, body: Annotation):
+        return investigations.annotation(run_id, body.text)
+
+    @app.post("/api/investigations/{run_id}/withdraw")
+    def investigation_withdraw(run_id: str, body: Annotation):
+        return investigations.withdraw(run_id, body.text)
+
+    @app.post("/api/investigations/{run_id}/artifacts/{artifact_id}/revise")
+    def investigation_revise(run_id: str, artifact_id: str, body: Revision):
+        return investigations.revise(run_id, artifact_id, body.text)
+
+    @app.get("/api/investigations/{run_id}/graph")
+    def investigation_graph(run_id: str, mode: str = Query("supplied", pattern="^(supplied|cited)$")):
+        return investigations.graph(run_id, mode)
+
+    @app.get("/api/investigations/{run_id}/documents/{document_id}")
+    def investigation_document(run_id: str, document_id: str):
+        return investigations.document(run_id, document_id)
+
+    @app.get("/api/investigations/{run_id}/artifacts/{artifact_id}")
+    def investigation_artifact(run_id: str, artifact_id: str):
+        with investigations.lock:
+            investigations.require_readable(run_id)
+            try:
+                art = investigations.vault.artifact(artifact_id)
+            except KeyError as exc:
+                raise Missing("Unknown artifact") from exc
+            if art["run_id"] != run_id:
+                raise Missing("Artifact does not belong to this run")
+            if art.get("deleted"):
+                raise Missing("Artifact has been erased")
+            # Always download untrusted source/agent bytes; never serve active HTML.
+            data = investigations.vault.read_artifact(artifact_id)
+            return Response(
+                data,
+                media_type="application/octet-stream",
+                headers={
+                    "Content-Disposition": "attachment; filename*=UTF-8''"
+                    + quote(art.get("name", artifact_id), safe=""),
+                    "X-Content-Type-Options": "nosniff",
+                },
+            )
+
+    @app.get("/api/investigations/{run_id}/artifacts/{artifact_id}/preview")
+    def investigation_preview(run_id: str, artifact_id: str):
+        with investigations.lock:
+            investigations.require_readable(run_id)
+            try:
+                art = investigations.vault.artifact(artifact_id)
+            except KeyError as exc:
+                raise Missing("Unknown artifact") from exc
+            if art["run_id"] != run_id:
+                raise Missing("Artifact does not belong to this run")
+            if art.get("deleted"):
+                raise Missing("Artifact has been erased")
+            data = investigations.vault.read_artifact(artifact_id)
+            try:
+                text = data[:100000].decode("utf-8")
+            except UnicodeDecodeError:
+                text = "Binary artifact: download the original file to inspect it."
+            return {"text": text, "truncated": len(data) > 100000, "artifact": art}
+
+    @app.post("/api/investigations/{run_id}/package")
+    def investigation_package(run_id: str):
+        # Finish and unlink the managed copy before releasing the erasure fence.
+        # Once handed to HTTP, the response is an exported copy, like a download.
+        with (
+            investigations.lock,
+            tempfile.TemporaryDirectory(prefix="graf-export-", dir=investigations.home) as directory,
+        ):
+            path = investigations.export(run_id, Path(directory) / "evidence.zip")
+            data = path.read_bytes()
+        return Response(
+            data,
+            media_type="application/zip",
+            headers={"Content-Disposition": f'attachment; filename="graf-{run_id}.zip"'},
+        )
+
+    @app.get("/api/integrity/checkpoint")
+    def integrity_checkpoint():
+        with investigations.lock:
+            return investigations.vault.checkpoint()
+
+    @app.post("/api/investigations/{run_id}/erasure-preview")
+    def erasure_preview(run_id: str, body: Erasure):
+        return investigations.erasure_preview(run_id, body.artifact_ids, body.reason)
+
+    @app.post("/api/investigations/{run_id}/erase")
+    def erase(run_id: str, body: Erasure):
+        return investigations.erase(run_id, **body.model_dump())
 
     @app.get("/{path:path}")
     def ui(path: str):

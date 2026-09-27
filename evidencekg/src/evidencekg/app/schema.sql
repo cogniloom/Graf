@@ -28,3 +28,24 @@ CREATE TABLE IF NOT EXISTS public.docworm_worksets (
  revision bigint NOT NULL, snapshot_id text NOT NULL,
  PRIMARY KEY(workspace,id,revision)
 );
+
+-- Only the migration owner administers erasure. Runtime receives no privileges
+-- on this table and retains no DELETE grants on immutable serving tables.
+CREATE TABLE IF NOT EXISTS public.docworm_erasure_authorizations (
+ id text PRIMARY KEY, instruction_sha text NOT NULL, actor text NOT NULL,
+ authorized_role name NOT NULL DEFAULT current_user,
+ created_at timestamptz NOT NULL DEFAULT now(), completed_at timestamptz
+);
+REVOKE ALL ON public.docworm_erasure_authorizations FROM PUBLIC;
+DO $$
+DECLARE grantee_name text;
+BEGIN
+    FOR grantee_name IN
+        SELECT DISTINCT r.rolname FROM pg_class c,
+          LATERAL aclexplode(coalesce(c.relacl, acldefault('r', c.relowner))) a
+          JOIN pg_roles r ON r.oid=a.grantee
+        WHERE c.oid='public.docworm_erasure_authorizations'::regclass AND a.grantee<>c.relowner
+    LOOP
+        EXECUTE format('REVOKE ALL ON public.docworm_erasure_authorizations FROM %I', grantee_name);
+    END LOOP;
+END $$;

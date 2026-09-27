@@ -47,6 +47,17 @@ CREATE TABLE IF NOT EXISTS public.hybrid_results (
 CREATE OR REPLACE FUNCTION public.hybrid_reject_mutation() RETURNS trigger
 LANGUAGE plpgsql AS $$
 BEGIN
+    -- A narrowly attributed administrative erasure is an explicit exception to
+    -- retention, never an exception available to the normal runtime role.
+    IF TG_OP = 'DELETE' AND to_regclass('public.docworm_erasure_authorizations') IS NOT NULL
+       AND has_table_privilege(current_user, TG_RELID, 'DELETE')
+       AND current_setting('graf.erasure_action', true) IS NOT NULL THEN
+        IF EXISTS (SELECT 1 FROM public.docworm_erasure_authorizations
+                   WHERE id = current_setting('graf.erasure_action', true)
+                     AND authorized_role = current_user AND completed_at IS NULL) THEN
+            RETURN NULL;
+        END IF;
+    END IF;
     RAISE EXCEPTION 'Immutable hybrid persistence row';
 END;
 $$;

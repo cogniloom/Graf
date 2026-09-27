@@ -88,8 +88,15 @@ export type Node = {
   label: string;
   kind: string;
   document_id: string | null;
+  highlighted?: boolean;
 };
-export type Edge = { id: string; source: string; target: string; type: string };
+export type Edge = {
+  id: string;
+  source: string;
+  target: string;
+  type: string;
+  highlighted?: boolean;
+};
 export type GraphData = {
   nodes: Node[];
   edges: Edge[];
