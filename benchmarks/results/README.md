@@ -1,5 +1,7 @@
 # Measured results
 
+[**Graf versus all 35 native Codex configurations**](2026-09-27-native/REPORT.md): visible document/code tables with strict passes, input/cached/output and total tokens, mean tokens, median and summed time. [Exact native totals](2026-09-27-native/summary.csv) · [Per-case measurements](2026-09-27-native/per-case-execution.csv). 32 configurations completed both workloads; three halted under the exact-token policy.
+
 [Read the measured pilot report](2026-09-26/REPORT.md), [view the chart](2026-09-26/comparison.png), or [inspect all 52 original trials](2026-09-26/per-case.csv).
 
 Both arms requested GPT-6-astra at medium effort. Graf used its actual hybrid runtime; the baseline used controlled literal file search and reading without a graph.
