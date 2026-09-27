@@ -209,7 +209,9 @@ def create_app(config, *, manager=None, start_background=True, investigations=No
 
     @app.get("/api/status")
     def status():
-        manager.reconcile()
+        # Coalesce change checks in the watcher so polling never waits for a
+        # full checksum scan. Evidence reads still verify freshness via _ready.
+        manager.request_reconcile()
         return manager.status()
 
     @app.get("/api/sources")

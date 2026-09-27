@@ -43,6 +43,7 @@ class Manager:
         self.id = sha(str(config.home))
         self.stop_event = threading.Event()
         self.wake = threading.Event()
+        self._scan_requested = threading.Event()
         self.threads = []
         self.builder = builder or self._build
         self.runtime_factory = runtime_factory
@@ -150,6 +151,10 @@ class Manager:
             self._row(db, True)
             self._bump(db, "Rebuild requested.")
         return {"success": True}
+
+    def request_reconcile(self):
+        """Wake the existing watcher; repeated requests share one pending scan."""
+        self._scan_requested.set()
 
     def reconcile(self):
         """Checksums are authoritative; same-size/mtime edits still invalidate evidence.
@@ -432,12 +437,13 @@ class Manager:
 
         def watch():
             while not self.stop_event.is_set():
+                self._scan_requested.clear()
                 try:
                     self.reconcile()
                 except Exception:
                     # Requests still fail closed on DB/scan errors; retry next poll.
                     pass
-                self.stop_event.wait(self.config.scan_interval_seconds)
+                self._scan_requested.wait(self.config.scan_interval_seconds)
 
         def work():
             while not self.stop_event.is_set():
@@ -459,6 +465,7 @@ class Manager:
     def stop(self):
         self.stop_event.set()
         self.wake.set()
+        self._scan_requested.set()
         for thread in self.threads:
             thread.join(timeout=5)
         # Keep live thread references: start() cannot spawn a duplicate executor.

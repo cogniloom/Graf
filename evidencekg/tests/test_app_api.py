@@ -33,6 +33,51 @@ def test_public_health_and_protected_endpoints(client):
     assert client.get("/api/settings", headers=auth()).json().get("database_config") is None
 
 
+def test_status_responds_while_source_scan_is_busy(client, manager):
+    from concurrent.futures import ThreadPoolExecutor
+
+    # A watcher holds this lock while hashing sources. Polling must neither
+    # queue behind it nor start another full scan after it becomes available.
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        with manager._scan_lock:
+            response = pool.submit(client.get, "/api/status", headers=auth()).result(timeout=3)
+        assert response.status_code == 200
+        assert response.json()["state"] == "empty"
+        assert manager._scan_requested.is_set()
+
+
+def test_status_requests_background_change_check(client, manager, monkeypatch):
+    import threading
+
+    source = manager.config.allowed_roots[0]
+    manager.register(str(source))
+    manager.reconcile()
+    revision = manager.status()["revision"]
+    manager.config = replace(manager.config, scan_interval_seconds=3600)
+    # Isolate the watcher from the ingestion worker's own reconciliation.
+    monkeypatch.setattr(manager, "run_once", lambda: False)
+    original = manager.reconcile
+    scanned = threading.Event()
+
+    def reconcile():
+        result = original()
+        scanned.set()
+        return result
+
+    monkeypatch.setattr(manager, "reconcile", reconcile)
+    manager.start()
+    try:
+        assert scanned.wait(3)
+        scanned.clear()
+        (source / "a.txt").write_text("Status polling requests a background change check.")
+        response = client.get("/api/status", headers=auth())
+        assert response.status_code == 200
+        assert scanned.wait(3), "Status must wake the watcher before its hourly scan"
+        assert manager.status()["revision"] > revision
+    finally:
+        manager.stop()
+
+
 def test_bootstrap_cookie_csrf_logout_and_bearer(client):
     payload = {"token": "t" * 48}
     assert client.post("/api/session", json=payload).status_code == 403
