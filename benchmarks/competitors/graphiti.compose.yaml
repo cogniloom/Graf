@@ -1,0 +1,25 @@
+name: graf-compare-graphiti
+services:
+  neo4j:
+    image: neo4j:5.26.12-community@sha256:9f75e8df4325a24f00fdd7a8c0bcce650a58375049b1058e496e8b43d6c36b37
+    ports:
+      - "127.0.0.1:17687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/benchmark-local
+      NEO4J_server_memory_heap_initial__size: 256m
+      NEO4J_server_memory_heap_max__size: 1G
+      NEO4J_server_memory_pagecache_size: 256m
+    volumes:
+      - graphiti-data:/data
+    healthcheck:
+      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "benchmark-local", "RETURN 1"]
+      interval: 5s
+      timeout: 10s
+      retries: 30
+volumes:
+  graphiti-data:
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 10.231.94.0/24

@@ -46,6 +46,30 @@ Graph construction and retrieval do not call a generative model. PostgreSQL runs
 > [!IMPORTANT]
 > Codex reasoning uses your configured Codex provider and can transmit the evidence you request. See the [Codex guide](docs/CODEX.md) for the privacy boundary.
 
+## Graf vs. TrustGraph, LightRAG, Cognee and Graphiti
+
+**Measured configuration pilot · GPT-6-luna, high reasoning · 27 September 2026.** We ran all five native systems on the same **30 fictional operational documents and 16 questions**, with one answering pass and two exact-query context repeats on a shared CPU workstation.
+
+Graf had the shortest measured indexing interval and used **no generative calls for indexing**. Its first-pass CPU context retrieval was slower than the other tested configurations. Graphiti had the lowest median context-plus-answer time; Graf and LightRAG tied on strict automated passes. This small pilot does not establish a general product ranking.
+
+| System | Indexing interval ↓ | Index LLM tokens ↓ | Native context median ↓ | Context + answer median ↓ | Mean query tokens ↓ | Strict passes ↑ |
+|---|---:|---:|---:|---:|---:|---:|
+| **Graf** | 23.25 s | 0 | 49.43 s | 56.49 s | 14,331 | 7/16 |
+| **TrustGraph** | 927.50 s | 795,560 | 15.88 s | 23.24 s | 40,745 | 4/16 |
+| **LightRAG** | 1,439.17 s | 951,249 | 4.44 s | 12.58 s | 36,593 | 7/16 |
+| **Cognee** | 1,095.10 s | 859,680 | 0.25 s | 8.32 s | 14,900 | 6/16 |
+| **Graphiti** | 1,411.64 s | 2,203,364 | 0.06 s | 7.40 s | 14,242 | 6/16 |
+
+[![Graf versus TrustGraph, LightRAG, Cognee and Graphiti: indexing time, token usage, query latency and strict answer quality](benchmarks/results/2026-09-27-competitors/comparison.png)](benchmarks/results/2026-09-27-competitors/REPORT.md)
+
+Strict passes require correctness, completeness against the full authored reference, source support, valid verbatim citations and appropriate abstention. The judge can penalize omitted contextual details beyond a concise direct answer; this is not a human-adjudicated accuracy rate. The report separates those checks: for example, Graf had **15/16 judge-correct answers, 16/16 valid-citation responses and 7/16 strict passes**. It delivered all **29/29 designated reference quotations**; this measures the authored evidence set, not exhaustive retrieval recall. Human adjudication is pending.
+
+**How to read this comparison:** Graf uses its BGE embedding/reranking models; competitors use MiniLM embeddings. All generation requests use the same Luna/high model through an experimental Codex subscription transport, whose startup/instruction overhead and adapter-specific context formats affect time and tokens. These are not native provider API costs or large-corpus scalability results. TrustGraph's context stage includes native synthesis before the shared final answer; both are counted, although ordinary TrustGraph use need not generate two answers. Its indexing interval includes a 30-second readiness check.
+
+The full report includes first-pass and repeated-context median/p95, calls and input/cached/output tokens by stage, source coverage, context truncation, partial resource diagnostics and retained integration failures. Graf's exact-repeat context median was **0.020 s**; this is warm retrieval only, not a repeated full-answer measurement. Three failed Cognee setup attempts used **103 calls / 1,421,014 tokens**, separately from its successful configuration; the successful run includes native JSON-validation correction. LightRAG's indexing start overlapped two pending TrustGraph smoke calls (2.799 s of recorded queue wait).
+
+[**Full comparison and limitations**](benchmarks/results/2026-09-27-competitors/REPORT.md) · [**All 80 query measurements**](benchmarks/results/2026-09-27-competitors/per-query.csv) · [**Answers and judge rationales**](benchmarks/results/2026-09-27-competitors/answers.json) · [**Machine-readable summary**](benchmarks/results/2026-09-27-competitors/summary.json) · [**Methodology and reproduction**](benchmarks/competitors/README.md)
+
 ## Graf benchmarks
 
 [**Compare Graf with every native Codex model and reasoning level →**](#graf-versus-native-codex-every-model-and-reasoning-level)
