@@ -49,3 +49,50 @@ it("shows actual errors and requires explicit source removal confirmation", asyn
     ),
   );
 });
+
+it("selects a local folder and adds its actual path without an allowlist", async () => {
+  const fetch = vi.fn(
+    async (url: string) =>
+      new Response(
+        JSON.stringify(
+          url.startsWith("/api/filesystem")
+            ? {
+                path: "/home/test/Dossier Scheidung",
+                parent: "/home/test",
+                items: [],
+                total: 0,
+              }
+            : { items: [] },
+        ),
+      ),
+  );
+  vi.stubGlobal("fetch", fetch);
+  render(Management, {
+    view: "Sources",
+    tick: 0,
+    status: { counts: {}, state: "ready", phase: "idle" } as Status,
+    refresh: async () => {},
+    logout: async () => {},
+  });
+  await userEvent.click(screen.getByRole("button", { name: "Choose folder…" }));
+  await userEvent.click(
+    await screen.findByRole("button", { name: "Select this folder" }),
+  );
+  await waitFor(() =>
+    expect(
+      (screen.getByLabelText("File or directory path") as HTMLInputElement)
+        .value,
+    ).toBe("/home/test/Dossier Scheidung"),
+  );
+  expect(screen.queryByText("Allowed locations")).toBeNull();
+  await userEvent.click(screen.getByRole("button", { name: /Add source/ }));
+  await waitFor(() =>
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/sources",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ path: "/home/test/Dossier Scheidung" }),
+      }),
+    ),
+  );
+});

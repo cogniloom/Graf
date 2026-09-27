@@ -26,7 +26,7 @@ def auth():
 def test_public_health_and_protected_endpoints(client):
     assert client.get("/healthz").json() == {"alive": True}
     assert client.get("/readyz").status_code == 503
-    for route in ("status", "sources", "jobs", "graph", "documents", "settings", "worksets/old"):
+    for route in ("status", "sources", "filesystem", "jobs", "graph", "documents", "settings", "worksets/old"):
         assert client.get("/api/" + route).status_code == 401
     assert client.post("/api/search", json={"question": "x"}).status_code == 401
     assert client.get("/api/status", headers=auth()).json()["state"] == "empty"
@@ -73,7 +73,7 @@ def test_input_validation_and_body_limits(client, manager):
         client.post("/api/search", json={"question": "x", "limit": True}, headers=auth()).status_code == 422
     )
     assert client.post("/api/search", json={"question": "x" * 40000}, headers=auth()).status_code == 413
-    assert client.post("/api/sources", json={"path": "/etc/passwd"}, headers=auth()).status_code == 422
+    assert client.post("/api/sources", json={"path": "relative/path"}, headers=auth()).status_code == 422
     response = client.post(
         "/api/sources", json={"path": str(manager.config.allowed_roots[0])}, headers=auth()
     )
@@ -119,10 +119,24 @@ def test_static_spa_symlink_traversal_and_security_headers(client, manager):
 def test_config_rejects_nonloopback_insecure_token_and_overlap(manager):
     with pytest.raises(ValueError, match="127.0.0.1"):
         replace(manager.config, host="0.0.0.0")
-    with pytest.raises(ValueError, match="overlap"):
-        replace(manager.config, allowed_roots=(manager.config.home.parent,))
+    replace(manager.config, allowed_roots=(manager.config.home.parent,))
+    with pytest.raises(ValueError, match="workspace"):
+        manager.config.source(manager.config.home)
     manager.config.token_file.chmod(0o644)
     with pytest.raises(ValueError, match="private"):
         create_app(manager.config, manager=manager, start_background=False)
     with pytest.raises(ValueError, match="absolute"):
         AppConfig.load("relative.json")
+
+
+def test_filesystem_picker_lists_local_paths_and_handles_errors(client, manager, tmp_path):
+    folder = tmp_path / "Dossier with spaces"
+    folder.mkdir()
+    (folder / "evidence.txt").write_text("synthetic")
+    response = client.get("/api/filesystem", params={"path": str(folder)}, headers=auth())
+    assert response.status_code == 200
+    assert response.json()["items"] == [{"name": "evidence.txt", "path": str(folder / "evidence.txt"), "kind": "file"}]
+    assert client.get("/api/filesystem", params={"path": str(folder / "missing")}, headers=auth()).status_code == 422
+    assert client.get("/api/filesystem", params={"path": str(manager.config.home)}, headers=auth()).status_code == 422
+    assert client.get("/api/filesystem", params={"path": str(folder)}, headers=auth() | {"Origin": "https://example.com"}).status_code == 403
+    assert client.post("/api/sources", json={"path": str(folder)}, headers=auth()).status_code == 200

@@ -133,7 +133,7 @@ def extract(data, suffix, cfg, directory):
 
         with zipfile.ZipFile(io.BytesIO(data)) as z:
             infos = z.infolist()
-            if len(infos) > 20000 or sum(x.file_size for x in infos) > cfg["max_file_bytes"] * 8:
+            if len(infos) > 20000 or sum(x.file_size for x in infos) > min(cfg["max_file_bytes"], 100_000_000) * 8:
                 raise ValueError("Office archive expansion limit")
             # Preserve raw XML, including table/revision structure, as a separate artifact.
             for name in sorted(z.namelist()):

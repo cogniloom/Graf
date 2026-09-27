@@ -9,7 +9,7 @@ import stat
 from contextlib import contextmanager
 from pathlib import Path
 
-MAX_FILE_BYTES = 100_000_000
+from .config import absolute
 
 
 def restricted_hashes(config):
@@ -61,8 +61,6 @@ def read_file(fd, *, output=None, stopped=lambda: False):
     before = os.fstat(fd)
     if not stat.S_ISREG(before.st_mode):
         raise ValueError("Nonregular source entries are not allowed")
-    if before.st_size > MAX_FILE_BYTES:
-        raise ValueError("Source exceeds the 100 MB acquisition limit")
     digest, size = hashlib.sha256(), 0
     while True:
         if stopped():
@@ -71,8 +69,6 @@ def read_file(fd, *, output=None, stopped=lambda: False):
         if not chunk:
             break
         size += len(chunk)
-        if size > MAX_FILE_BYTES:
-            raise ValueError("Source exceeds the 100 MB acquisition limit")
         digest.update(chunk)
         if output is not None:
             output.write(chunk)
@@ -93,6 +89,8 @@ def inventory(config, source, stopped=lambda: False):
             if stopped():
                 raise InterruptedError("Source scan stopped")
             rel = prefix + name
+            if config.private_source(path / rel):
+                continue
             child = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=fd)
             try:
                 mode = os.fstat(child).st_mode
@@ -144,3 +142,33 @@ def stage(config, source, target, stopped=lambda: False):
             raise ValueError("Source hash changed during staging")
         count += 1
     return count
+
+
+def browse(config, value=None, offset=0, limit=200):
+    """List local choices without reading files or following symlinks."""
+    path = absolute(value) if value else absolute(Path.home())
+    if config.private_source(path):
+        raise ValueError("Graf workspace data cannot be selected")
+    try:
+        with opened(path, directory=True) as fd, os.scandir(fd) as entries:
+            choices = []
+            for entry in entries:
+                child = path / entry.name
+                if config.private_source(child):
+                    continue
+                if entry.is_dir(follow_symlinks=False):
+                    kind = "directory"
+                elif entry.is_file(follow_symlinks=False):
+                    kind = "file"
+                else:
+                    continue
+                choices.append({"name": entry.name, "path": str(child), "kind": kind})
+    except OSError as exc:
+        raise ValueError("Cannot open this folder. Check that it exists and you have permission to read it.") from exc
+    choices.sort(key=lambda item: (item["kind"] != "directory", item["name"].casefold(), item["name"]))
+    return {
+        "path": str(path),
+        "parent": str(path.parent) if path.parent != path else None,
+        "items": choices[offset:offset + limit],
+        "total": len(choices),
+    }

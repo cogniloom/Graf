@@ -12,7 +12,7 @@ Allow at least 15 GB free disk for dependencies and model weights, plus your doc
 Or select your document directory up front:
 
 ```sh
-./graf install --device cuda --allow-root /absolute/documents
+./graf install --device cuda
 ./graf sources add /absolute/documents/case
 ```
 
@@ -24,7 +24,7 @@ The API binds only `127.0.0.1`. Preferred ports are 8765 for the application and
 
 `--runtime /absolute/venv/bin/python` is an advanced verification option for a prepared environment, not the normal installation path. `uv sync --frozen` installs the application's locked dependencies by default.
 
-Run `./graf allow-root /another/directory` to authorize another source root. This local-owner command restarts a running application. The browser cannot grant itself access outside the allowlist. Source roots cannot overlap the private workspace; symlink sources are rejected.
+In Sources, use **Choose folder…** or **Choose file…**, or enter an absolute path. No location allowlist is required. Graf excludes its own private workspace data from imports; symlink sources are rejected. Existing `allowed_roots` configuration and `allow-root` commands are accepted for compatibility but no longer restrict access.
 
 Native Windows and macOS are not supported by this launcher. WSL2 may provide the required Linux environment but is not part of the verified platform matrix. Do not expose ports through a reverse proxy or bind to a public interface.
 

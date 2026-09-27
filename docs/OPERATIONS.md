@@ -42,7 +42,7 @@ Back up and verify first. Extract a new release at a stable application path, th
 - **CUDA unavailable or out of memory:** stop, choose `device: "cpu"` in private app.json, start and rebuild. CPU may be substantially slower.
 - **Blocked extraction:** inspect the job error and document warnings. Scanned images require a working Tesseract installation and suitable language data. Unsupported/oversized/locked documents remain coverage gaps.
 - **Graph unavailable:** check WebGL support and use the document list. Local graph worker/WASM files must be present in the built UI assets.
-- **Source denied:** authorize its parent with allow-root; symlinks and overlapping sources are deliberately rejected.
+- **Source denied:** check filesystem read permissions; symlinks, Graf private workspace data and overlapping registered sources are deliberately rejected.
 - **Application exits:** inspect the final log messages and run doctor. Never paste passwords, sign-in fragments or complete connection strings into an issue.
 
 To uninstall without losing evidence, stop with `--database`, remove the Codex plugin and archive the private workspace. Remove application files only after preserving backups. Docker volumes are not automatically deleted.

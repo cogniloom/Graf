@@ -215,7 +215,10 @@ def test_source_restrictions_apply_to_watcher_inventory(service, tmp_path):
     source.mkdir()
     (source / "invoice.txt").write_text(service.manager.text)
     (source / "other.txt").write_text("Unrelated retained source")
-    config = SimpleNamespace(home=service.home.parent, source=lambda value: source)
+    config = SimpleNamespace(
+        home=service.home.parent, source=lambda value: source,
+        private_source=lambda path: path.is_relative_to(service.home.parent),
+    )
     items = inventory(config, {"path": str(source), "kind": "directory"})
     assert list(items) == ["other.txt"]
 

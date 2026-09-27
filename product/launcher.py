@@ -185,8 +185,6 @@ def install(args, home):
     roots = [str(Path(p).expanduser().resolve(strict=True)) for p in args.allow_root]
     if any(not Path(p).is_dir() for p in roots):
         raise ValueError("--allow-root requires directories")
-    if any(home.is_relative_to(Path(root)) or Path(root).is_relative_to(home) for root in roots):
-        raise ValueError("Allowed source roots must not overlap the private workspace")
     source_home = home.with_name(home.name + "-sources")
     if args.demo:
         shutil.copytree(ROOT / "examples/demo", source_home / "demo", dirs_exist_ok=True)
@@ -385,18 +383,7 @@ def main():
         if args.action == "install":
             install(args, home)
         elif args.action == "allow-root":
-            root = args.path.expanduser().resolve(strict=True)
-            if not root.is_dir() or home.is_relative_to(root) or root.is_relative_to(home):
-                raise ValueError("Choose a directory outside the private workspace")
-            cfg = config(home)
-            if str(root) not in cfg["allowed_roots"]:
-                was_running = bool(alive(home))
-                stop(home)
-                cfg["allowed_roots"].append(str(root))
-                write_json(home / "app.json", cfg)
-                if was_running:
-                    start(home)
-            print("Allowed source root: " + str(root))
+            print("All local source locations are available. Select a file or folder in Sources.")
         elif args.action in ("backup", "verify-backup"):
             from backup import backup, verify
 

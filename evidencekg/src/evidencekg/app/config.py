@@ -12,6 +12,8 @@ def absolute(value):
     path = Path(value)
     if not path.is_absolute() or ".." in path.parts:
         raise ValueError("Expected an absolute path without parent traversal")
+    # POSIX treats // as / here; normalize before privacy comparisons.
+    path = Path("/" + str(path).lstrip("/"))
     # Check every component: resolving first would hide symlinks.
     for item in [path, *path.parents]:
         if item.is_symlink():
@@ -24,9 +26,10 @@ class AppConfig:
     home: Path
     database_config: Path
     models: Path
-    allowed_roots: tuple[Path, ...]
     token_file: Path
     ui_dist: Path
+    # Accepted for compatibility with existing app.json files; no longer an allowlist.
+    allowed_roots: tuple[Path, ...] = ()
     device: str = "cpu"
     host: str = "127.0.0.1"
     port: int = 8765
@@ -42,7 +45,7 @@ class AppConfig:
             raise ValueError("Workspace name must contain 1 to 200 characters")
         for name in ("home", "database_config", "models", "token_file", "ui_dist"):
             object.__setattr__(self, name, absolute(getattr(self, name)))
-        object.__setattr__(self, "allowed_roots", tuple(absolute(x) for x in self.allowed_roots))
+        object.__setattr__(self, "allowed_roots", tuple(Path(x) for x in self.allowed_roots))
         if any(p.is_relative_to(self.ui_dist) for p in (self.token_file, self.database_config)):
             raise ValueError("Private configuration and tokens must not be in the served UI directory")
         if self.host != "127.0.0.1" or type(self.port) is not int or not 1024 <= self.port <= 65535:
@@ -54,10 +57,6 @@ class AppConfig:
             or not 0.1 <= self.scan_interval_seconds <= 86400
         ):
             raise ValueError("Invalid polling interval")
-        if any(
-            self.home.is_relative_to(root) or root.is_relative_to(self.home) for root in self.allowed_roots
-        ):
-            raise ValueError("Source roots and private workspace must not overlap")
 
     @classmethod
     def load(cls, path):
@@ -73,10 +72,13 @@ class AppConfig:
             raise ValueError("Token must contain at least 32 non-whitespace characters")
         return value
 
+    def private_source(self, path):
+        return path.is_relative_to(self.home) or path in (self.token_file, self.database_config)
+
     def source(self, value, *, must_exist=True):
         path = absolute(value)
-        if not any(path.is_relative_to(root) for root in self.allowed_roots):
-            raise ValueError("Source is outside the selected allowed roots")
+        if self.private_source(path):
+            raise ValueError("Graf workspace data cannot be added as a source")
         if must_exist and not (path.is_file() or path.is_dir()):
             raise ValueError("Source must be an existing regular file or directory")
         return path

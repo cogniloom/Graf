@@ -75,6 +75,7 @@ def parse(data, suffix, cfg):
         (path / "config.json").write_text(json.dumps(cfg))
         env = {k: v for k, v in os.environ.items() if k in ("PATH", "LANG", "LC_ALL", "SYSTEMROOT")}
         env["PYTHONPATH"] = str(Path(__file__).resolve().parents[2])
+        shared_group = os.environ.get("GRAF_INGEST_PROCESS_GROUP") == str(os.getpgrp())
         try:
             p = subprocess.Popen(
                 [sys.executable, "-m", "evidencekg.parsers.worker", str(path), suffix],
@@ -82,12 +83,15 @@ def parse(data, suffix, cfg):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 cwd=tmp,
-                start_new_session=True,
+                start_new_session=not shared_group,
             )
             try:
                 stdout, stderr = p.communicate(timeout=cfg["parser_timeout"])
             except BaseException:
-                os.killpg(p.pid, signal.SIGKILL)
+                if shared_group:
+                    p.kill()  # The application supervisor owns the whole ingestion group.
+                else:
+                    os.killpg(p.pid, signal.SIGKILL)
                 p.wait()
                 raise
             if p.returncode:
