@@ -64,13 +64,13 @@ def checked(path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=ROOT / "dist")
-    parser.add_argument("--tag", help="Require vX.Y.Z or vX.Y.Z-rc.N matching the package version")
+    parser.add_argument("--tag", help="Require vX.Y.Z or vX.Y.Zrc matching the package version")
     args = parser.parse_args()
     version = tomllib.loads((ROOT / "evidencekg/pyproject.toml").read_text())["project"]["version"]
     if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
         raise ValueError("Release version must be X.Y.Z")
-    if args.tag is not None and not re.fullmatch(rf"v{re.escape(version)}(?:-rc\.[1-9][0-9]*)?", args.tag):
-        raise ValueError(f"Release tag must be v{version} or v{version}-rc.N, got {args.tag}")
+    if args.tag is not None and not re.fullmatch(rf"v{re.escape(version)}(?:rc)?", args.tag):
+        raise ValueError(f"Release tag must be v{version} or v{version}rc, got {args.tag}")
     archive_version = args.tag[1:] if args.tag else version
     for metadata in ("product/ui/package.json", "plugins/graf/.codex-plugin/plugin.json"):
         if json.loads((ROOT / metadata).read_text())["version"] != version:

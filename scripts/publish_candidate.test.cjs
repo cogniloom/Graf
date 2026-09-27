@@ -9,8 +9,8 @@ const publish = require('./publish_candidate.cjs');
 function fixture(t, options = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'candidate-test-'));
   t.after(() => fs.rmSync(dir, {recursive: true, force: true}));
-  const tag = 'v0.1.0-rc.42';
-  const name = 'graf-0.1.0-rc.42.tar.gz';
+  const tag = 'v0.1.42rc';
+  const name = 'graf-0.1.42rc.tar.gz';
   const data = Buffer.from('synthetic archive');
   fs.writeFileSync(path.join(dir, name), data);
   fs.writeFileSync(path.join(dir, `${name}.sha256`), `${crypto.createHash('sha256').update(data).digest('hex')}  ${name}\n`);
@@ -52,7 +52,7 @@ test('uploads to a draft then tags exact tested commit and publishes prerelease'
 });
 for (const prerelease of [true, false]) {
   test(`rerun preserves published release (prerelease=${prerelease})`, async t => {
-    const f = fixture(t, {ref: 'abc', releases: [{tag_name: 'v0.1.0-rc.42', draft: false, prerelease}]});
+    const f = fixture(t, {ref: 'abc', releases: [{tag_name: 'v0.1.42rc', draft: false, prerelease}]});
     await publish(f.args, f.env);
     assert.deepEqual(f.calls, []);
   });
@@ -63,8 +63,8 @@ test('upload failure never tags or publishes', async t => {
   assert.deepEqual(f.calls.map(c => c[0]), ['createRelease', 'uploadReleaseAsset']);
 });
 test('rerun resumes draft and replaces partial asset', async t => {
-  const f = fixture(t, {assets: [{id: 9, name: 'graf-0.1.0-rc.42.tar.gz'}]});
-  f.args.github.paginate = async method => method === 'releases' ? [f.draft] : [{id: 9, name: 'graf-0.1.0-rc.42.tar.gz'}];
+  const f = fixture(t, {assets: [{id: 9, name: 'graf-0.1.42rc.tar.gz'}]});
+  f.args.github.paginate = async method => method === 'releases' ? [f.draft] : [{id: 9, name: 'graf-0.1.42rc.tar.gz'}];
   await publish(f.args, f.env);
   assert.equal(f.calls[0][0], 'deleteReleaseAsset');
   assert.equal(f.calls.at(-1)[0], 'updateRelease');
@@ -81,7 +81,7 @@ test('API access error fails closed', async t => {
 });
 test('bad checksum fails before mutations', async t => {
   const f = fixture(t);
-  fs.appendFileSync(path.join(f.env.RELEASE_DIRECTORY, 'graf-0.1.0-rc.42.tar.gz'), 'corrupt');
+  fs.appendFileSync(path.join(f.env.RELEASE_DIRECTORY, 'graf-0.1.42rc.tar.gz'), 'corrupt');
   await assert.rejects(publish(f.args, f.env), /checksum mismatch/);
   assert.deepEqual(f.calls, []);
 });
@@ -91,3 +91,10 @@ test('manual runs cannot publish', async t => {
   await assert.rejects(publish(f.args, f.env), /push to main/);
   assert.deepEqual(f.calls, []);
 });
+for (const tag of ['v0.1.42', 'v0.1.43rc', 'v0.2.0']) {
+  test(`promotion during build blocks publication after ${tag}`, async t => {
+    const f = fixture(t, {releases: [{tag_name: tag, draft: false, prerelease: false}]});
+    await assert.rejects(publish(f.args, f.env), /already released/);
+    assert.deepEqual(f.calls, []);
+  });
+}
