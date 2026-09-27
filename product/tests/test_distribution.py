@@ -148,3 +148,18 @@ def test_set_release_version_synchronizes_all_metadata(tmp_path):
         setter.set_version(tmp_path, "0.3.0")
     for relative in files[:-1]:
         assert (tmp_path / relative).read_bytes() == before[relative]
+
+
+def test_backup_preserves_investigation_history_keys_and_restrictions(tmp_path):
+    backup = load("backup", "product/backup.py")
+    home = tmp_path / "home"
+    vault = home / "investigations" / "vault"
+    vault.mkdir(parents=True)
+    (vault / "signing.key").write_bytes(b"synthetic signing key fixture")
+    (home / "investigations" / "sessions.sqlite3").write_bytes(b"synthetic restriction fixture")
+    target = tmp_path / "archive"
+    backup.backup(home, target, lambda *a, **kw: kw["stdout"].write(b"dump"))
+    manifest = json.loads((target / "manifest.json").read_text())
+    for name in ("investigations/vault/signing.key", "investigations/sessions.sqlite3"):
+        assert (target / name).read_bytes() == (home / name).read_bytes()
+        assert manifest["files"][name] == backup.digest(target / name)

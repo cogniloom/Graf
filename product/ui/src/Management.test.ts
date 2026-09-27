@@ -1,11 +1,12 @@
-import { it, expect, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { it, expect, vi, afterEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/svelte";
 import userEvent from "@testing-library/user-event";
-import { Sources } from "./Management";
+import Management from "./Management.svelte";
+import type { Status } from "./api";
+afterEach(() => vi.unstubAllGlobals());
 it("shows actual errors and requires explicit source removal confirmation", async () => {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockResolvedValue(
+  const fetch = vi.fn(
+    async () =>
       new Response(
         JSON.stringify({
           items: [
@@ -22,19 +23,29 @@ it("shows actual errors and requires explicit source removal confirmation", asyn
           allowed_roots: ["/allowed"],
         }),
       ),
-    ),
   );
-  const mutate = vi.fn().mockResolvedValue(true);
-  render(<Sources tick={0} mutate={mutate} busy={false} />);
+  vi.stubGlobal("fetch", fetch);
+  render(Management, {
+    view: "Sources",
+    tick: 0,
+    status: { counts: {}, state: "ready", phase: "idle" } as Status,
+    refresh: async () => {},
+    logout: async () => {},
+  });
   expect(await screen.findByText("File disappeared")).toBeTruthy();
   await userEvent.click(screen.getByLabelText("Remove /allowed/test.txt"));
-  expect(mutate).not.toHaveBeenCalled();
+  expect(
+    fetch.mock.calls.some(
+      (c) => (c as unknown as [string, RequestInit])[1]?.method === "DELETE",
+    ),
+  ).toBe(false);
   await userEvent.click(screen.getByText("Cancel"));
-  expect(mutate).not.toHaveBeenCalled();
   await userEvent.click(screen.getByLabelText("Remove /allowed/test.txt"));
   await userEvent.click(screen.getByRole("button", { name: "Remove source" }));
   await waitFor(() =>
-    expect(mutate).toHaveBeenCalledWith("/sources/s1", { method: "DELETE" }),
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/sources/s1",
+      expect.objectContaining({ method: "DELETE" }),
+    ),
   );
-  vi.unstubAllGlobals();
 });

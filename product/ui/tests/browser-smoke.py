@@ -35,6 +35,7 @@ if not BASE:
     Thread(target=server.serve_forever, daemon=True).start()
     BASE = f"http://127.0.0.1:{server.server_port}"
 OUT = Path(__file__).resolve().parent.parent / "qa"
+OUT.mkdir(exist_ok=True)
 NAMES = [
     "Purchase request",
     "Vendor quote",
@@ -109,7 +110,7 @@ with sync_playwright() as p:
                 models_ready=True,
                 device="cpu",
             )
-        elif path == "/graph":
+        elif path in ("/graph", "/investigation-graph"):
             body = dict(
                 nodes=NODES,
                 edges=EDGES,
@@ -118,6 +119,8 @@ with sync_playwright() as p:
                 truncated=False,
                 snapshot_id="synthetic-qa",
             )
+        elif path == "/investigations":
+            body = dict(items=[])
         elif path == "/documents":
             body = dict(
                 items=[
@@ -192,17 +195,21 @@ with sync_playwright() as p:
 
     page.route("**/api/**", handle)
     page.goto(BASE + "/#token=synthetic-qa-token")
+    page.get_by_role("navigation", name="Main navigation").get_by_role("button", name="Graph", exact=True).click()
     expect(page.get_by_role("button", name="Fit graph")).to_be_enabled(timeout=30000)
-    expect(page.get_by_text("Approval email", exact=True)).to_be_visible(timeout=30000)
-    page.get_by_role("button", name="Pause motion").click()
+    expect(page.locator(".evidence-label").filter(has_text="Approval email")).to_be_visible(timeout=30000)
+    if page.get_by_role("button", name="Pause motion", exact=True).count():
+        page.get_by_role("button", name="Pause motion", exact=True).click()
+    page.locator(".evidence-label").filter(has_text="Approval email").click()
     page.get_by_role("button", name="Fit graph").click()
-    page.get_by_text("Approval email", exact=True).click()
-    expect(page.get_by_text("Synthetic browser verification passage. No real document data.")).to_be_visible()
-    expect(page.get_by_text("/synthetic/Approval email.txt", exact=True)).to_be_visible()
-    page.screenshot(path=str(OUT / "explore-desktop.png"))
+    expect(page.get_by_role("heading",name="Selected record")).to_be_visible()
     page.get_by_role("button", name="Labels", exact=True).click()
     expect(page.get_by_role("button", name="Labels", exact=True)).to_have_attribute("aria-pressed", "false")
-    page.get_by_role("button", name="Documents (8)", exact=True).click()
+    page.get_by_role("textbox", name="Search document names").fill("Approval")
+    page.get_by_role("button",name="Approval email.txt",exact=False).click()
+    expect(page.get_by_text("Synthetic browser verification passage. No real document data.")).to_be_visible()
+    expect(page.get_by_label("Source details").get_by_text("/synthetic/Approval email.txt", exact=True)).to_be_visible()
+    page.screenshot(path=str(OUT / "explore-desktop.png"))
     page.get_by_role("button", name="Close source details").click()
     page.get_by_role("textbox", name="Search document names").fill("absent")
     expect(page.get_by_text("No documents match your search.")).to_be_visible()
@@ -225,11 +232,10 @@ with sync_playwright() as p:
     expect(page.get_by_role("dialog")).not_to_be_visible()
     expect(page.get_by_role("row", name="/synthetic/new", exact=False)).not_to_be_visible()
     page.screenshot(path=str(OUT / "sources-desktop.png"))
-    page.get_by_role("button", name="Open in Codex").click()
+    page.get_by_role("navigation", name="Main navigation").get_by_role("button", name="Settings", exact=True).click()
     expect(page.get_by_text("Synthetic QA instructions. Do not execute.")).to_be_visible()
     page.set_viewport_size({"width": 390, "height": 844})
-    page.get_by_role("button", name="Explore", exact=True).click()
-    page.get_by_role("button", name="Documents (8)", exact=True).click()
+    page.get_by_role("textbox", name="Search document names").fill("Purchase")
     page.get_by_role("button", name="Purchase request.txt", exact=False).click()
     expect(page.get_by_text("Synthetic browser verification passage. No real document data.")).to_be_visible()
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
@@ -259,7 +265,7 @@ with sync_playwright() as p:
     assert ("POST", "/session") in calls
     assert page.evaluate("location.hash") == ""
     print(
-        "PASS: real Cosmograph rendered 64 synthetic nodes/64 links; graph label opens correct source; controls/list/search/source add/removal/Escape/mobile/no overflow/readiness invalidation/token removal; no external requests or page errors."
+        "PASS: real Cosmograph rendered 64 synthetic nodes/64 links; graph label selects the correct record; document list opens source; controls/list/search/source add/removal/Escape/mobile/no overflow/readiness invalidation/token removal; no external requests or page errors."
     )
     browser.close()
 

@@ -1,9 +1,7 @@
-import { it, expect, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
-import { App } from "./App";
-vi.mock("./Explore", () => ({
-  Explore: () => <div>Authenticated explore view</div>,
-}));
+import { it, expect, vi, afterEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/svelte";
+import App from "./App.svelte";
+afterEach(() => vi.unstubAllGlobals());
 it("consumes a new bootstrap fragment on an already mounted unauthorized page", async () => {
   let authenticated = false;
   history.replaceState(null, "", "/");
@@ -13,13 +11,14 @@ it("consumes a new bootstrap fragment on an already mounted unauthorized page", 
       authenticated = true;
       return new Response("{}");
     }
+    if (url === "/api/investigations") return new Response('{"items":[]}');
     return new Response(
       JSON.stringify(
         authenticated
           ? {
               workspace_name: "Test",
               state: "empty",
-              counts: { documents: 0, passages: 0, connections: 0 },
+              counts: {},
               revision: 1,
               published_revision: 0,
             }
@@ -29,14 +28,13 @@ it("consumes a new bootstrap fragment on an already mounted unauthorized page", 
     );
   });
   vi.stubGlobal("fetch", fetch);
-  render(<App />);
+  render(App);
   await screen.findByText("Open your workspace securely");
   location.hash = "token=synthetic-mounted-page-token";
   window.dispatchEvent(new HashChangeEvent("hashchange"));
-  await screen.findByText("Authenticated explore view");
+  await screen.findByLabelText("What would you like to investigate?");
   await waitFor(() => expect(location.hash).toBe(""));
   expect(
     fetch.mock.calls.filter(([url]) => url === "/api/session"),
   ).toHaveLength(1);
-  vi.unstubAllGlobals();
 });

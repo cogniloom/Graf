@@ -29,6 +29,8 @@ FILES = [
     "product/ui/index.html",
     "product/ui/tsconfig.json",
     "product/ui/vite.config.ts",
+    "product/ui/svelte.config.js",
+    "product/ui/.prettierrc.json",
     "deploy/postgres/entrypoint.sh",
     "deploy/postgres/init.sh",
 ]

@@ -455,3 +455,12 @@ def test_oversized_source_has_visible_block_and_never_stages(manager):
     assert manager.status()["counts"]["gaps"] == 1
     assert "100 MB" in manager.sources()["items"][0]["error"]
     assert not (manager.config.home / "generations").exists()
+
+
+def test_detailed_graph_includes_passages_before_any_investigation(manager):
+    ready(manager)
+    graph = manager.graph(detailed=True)
+    assert any(node["kind"] == "document" for node in graph["nodes"])
+    assert any(node["kind"] == "passage" for node in graph["nodes"])
+    assert any(edge["type"] == "contains" for edge in graph["edges"])
+    assert all(edge["source"] in {n["id"] for n in graph["nodes"]} for edge in graph["edges"])

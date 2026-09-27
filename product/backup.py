@@ -32,6 +32,7 @@ def backup(home, target, compose):
             "installed.json",
             "secrets",
             "generations",
+            "investigations",
         ):
             source = home / name
             if source.is_symlink():
