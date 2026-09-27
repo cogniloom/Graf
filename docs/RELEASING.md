@@ -8,29 +8,56 @@ tests and the dashboard build pass, it packages the allowlisted application and
 creates a Git tag and GitHub **pre-release** automatically. No manual tagging is
 required in Orca or a shell.
 
-Tags use the package version plus the workflow run number: for example,
-`v0.1.0-rc.42`. The archive is `graf-0.1.0-rc.42.tar.gz`, with a `.sha256`
-checksum. The tag points to the exact tested commit, even if another merge has
-since updated `main`. Candidate numbers can have gaps. A rerun reuses its number,
-resumes an unfinished draft, and leaves an already published candidate or promoted
-release unchanged. Upload failures leave a draft; publication happens only after
-both assets upload. Each main push runs independently; newer merges do not cancel
-older candidates.
+Tags use `v<major>.<minor>.<build-number>rc`. For example, workflow run 5
+in series `0.1` creates `v0.1.5rc` and `graf-0.1.5rc.tar.gz` with a `.sha256`
+checksum. Run 6 creates `v0.1.6rc`, and run 7 creates `v0.1.7rc`, whether or not
+you promoted an earlier build. There is no separate RC counter. Build numbers are
+GitHub workflow run numbers: failed/manual runs can leave gaps, reruns reuse their
+number, and changing the major/minor series does not reset the workflow counter.
+The tag points to the exact tested commit. Each main push runs independently.
 
 ### Promote a candidate using GitHub's web UI
 
-1. Open the repository's **Releases** page and choose the tested candidate.
-2. Click the pencil/edit control for that release.
-3. Clear **Set as a pre-release**. Select **Set as the latest release** if desired.
-4. Click **Update release**.
+1. Open the repository's **Releases** page and edit the tested candidate.
+2. Change its tag from, for example, `v0.1.5rc` to `v0.1.5`, creating the stable
+   tag at the **same candidate commit**. Do not target a newer `main` commit.
+3. Update the display title, clear **Set as a pre-release**, and optionally select
+   **Set as the latest release**. Save the release.
 
-Promotion keeps the same tag, commit, and downloadable assets; it does not rebuild
-or remove the `-rc.N` suffix. You can change the display title when promoting it.
-For the next version series, update the matching base version in
-`evidencekg/pyproject.toml`, `product/ui/package.json` and its lockfile, and
-`plugins/graf/.codex-plugin/plugin.json`; refresh `evidencekg/uv.lock`. You do
-not need a version bump for each merge. The builder rejects mismatched component
-versions and tags.
+Changing only the display title does not rename the Git tag. Promotion does not
+rebuild or rename downloadable assets: they retain their `rc` filenames and
+checksums. The next builds are `v0.1.6rc`, then `v0.1.7rc`; you can promote either.
+You may also keep the original tag and only clear the prerelease flag.
+
+### Control major and minor versions
+
+The default series comes from the major/minor portion of the source package
+version. To choose another series, open **Settings → Secrets and variables →
+Actions → Variables** and set **`RELEASE_SERIES`** to, for example, `0.2` or `1.0`.
+The next build number 8 then produces `v0.2.8rc` or `v1.0.8rc`. Delete the variable
+to return to the source series. Use `X.Y` only; the patch component always comes
+from the workflow run number. Do not change `RELEASE_SERIES` when rerunning an old build if you want
+to preserve its original tag.
+
+For a source-controlled series change, run
+`python3 scripts/set_release_version.py 0.2.0`, review the five changed metadata
+files, and include them in your normal PR. The source patch component is replaced
+by the build number in the disposable CI checkout. Python, dashboard, plugin and
+both lockfiles receive the same numeric version before tests; the workflow never
+commits these changes. The `rc` suffix is used for Git tags and archive names;
+package metadata stays numeric. Manual runs build artifacts without publishing.
+
+Published candidates (including candidates marked stable with the same tag) are
+left unchanged on reruns. Unfinished drafts resume their asset uploads. If a
+candidate was renamed to its stable tag, rerunning its publication is blocked
+rather than recreating that candidate. A new workflow run uses its new build
+number. The publisher rejects versions at or below a published stable version,
+including legacy `-rc.N`/`-rcN` tags that were promoted to stable. Release API
+errors stop publication rather than guessing.
+
+The publisher rechecks release status after building. GitHub does not provide an
+atomic lock between manual promotion and publication, so avoid promoting during
+the brief publication step; an overlapping build may need a new run.
 
 Both jobs select only the exact `self-hosted` runner label. The build runner must
 provide Linux with Docker job-container support and network access to the image
@@ -50,12 +77,12 @@ Tag pushes do not trigger this workflow.
 
 The archive includes the built dashboard and Codex plugin; Python dependencies and
 models are downloaded during installation. Download both assets from GitHub Releases,
-then verify and extract (substitute your candidate number):
+then verify and extract (substitute your build number):
 
 ```sh
-sha256sum --check graf-0.1.0-rc.42.tar.gz.sha256
-tar -xzf graf-0.1.0-rc.42.tar.gz
-cd graf-0.1.0-rc.42
+sha256sum --check graf-0.1.42rc.tar.gz.sha256
+tar -xzf graf-0.1.42rc.tar.gz
+cd graf-0.1.42rc
 ./graf install --demo
 ```
 

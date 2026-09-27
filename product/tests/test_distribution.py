@@ -85,7 +85,7 @@ def test_backup_rejects_top_level_symlink(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "tag", ["v0.1.0-rc.0", "v0.1.0-rc.01", "v0.1.0-rc.-1", "v0.2.0-rc.42", "v0.1.0-rc.42/escape"]
+    "tag", ["v0.1.0-rc.0", "v0.1.0-rc.01", "v0.1.0-rc.-1", "v0.2.0rc", "v0.1.0rc/escape"]
 )
 def test_release_rejects_invalid_candidate_tag(tmp_path, monkeypatch, tag):
     test_release_rejects_wrong_tag_before_staging(tmp_path, monkeypatch, tag)
@@ -114,11 +114,37 @@ def test_candidate_archive_name_and_checksum(tmp_path, monkeypatch):
     monkeypatch.setattr(release, "FILES", ["product/ui/dist/index.html"])
     monkeypatch.setattr(release, "TREES", [])
     output = tmp_path / "output"
-    monkeypatch.setattr("sys.argv", ["build_release.py", "--output", str(output), "--tag", "v0.1.0-rc.42"])
+    monkeypatch.setattr("sys.argv", ["build_release.py", "--output", str(output), "--tag", "v0.1.0rc"])
     release.main()
-    archive = output / "graf-0.1.0-rc.42.tar.gz"
+    archive = output / "graf-0.1.0rc.tar.gz"
     assert (output / (archive.name + ".sha256")).read_text() == hashlib.sha256(
         archive.read_bytes()
     ).hexdigest() + "  " + archive.name + "\n"
     with tarfile.open(archive) as bundle:
-        assert "graf-0.1.0-rc.42/product/ui/dist/index.html" in bundle.getnames()
+        assert "graf-0.1.0rc/product/ui/dist/index.html" in bundle.getnames()
+
+
+def test_set_release_version_synchronizes_all_metadata(tmp_path):
+    import shutil
+    import tomllib
+
+    setter = load("set_release_version", "scripts/set_release_version.py")
+    files = ["evidencekg/pyproject.toml", "evidencekg/uv.lock", "product/ui/package.json",
+             "product/ui/package-lock.json", "plugins/graf/.codex-plugin/plugin.json"]
+    for relative in files:
+        dest = tmp_path / relative
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / relative, dest)
+    setter.set_version(tmp_path, "0.2.0")
+    assert tomllib.loads((tmp_path / files[0]).read_text())["project"]["version"] == "0.2.0"
+    lock = tomllib.loads((tmp_path / files[1]).read_text())
+    assert next(p for p in lock["package"] if p["name"] == "evidencekg")["version"] == "0.2.0"
+    for relative in files[2:]:
+        assert json.loads((tmp_path / relative).read_text())["version"] == "0.2.0"
+    assert json.loads((tmp_path / files[3]).read_text())["packages"][""]["version"] == "0.2.0"
+    before = {f: (tmp_path / f).read_bytes() for f in files}
+    (tmp_path / files[4]).write_text('{"version":"9.0.0"}')
+    with pytest.raises(ValueError, match="Version mismatch"):
+        setter.set_version(tmp_path, "0.3.0")
+    for relative in files[:-1]:
+        assert (tmp_path / relative).read_bytes() == before[relative]

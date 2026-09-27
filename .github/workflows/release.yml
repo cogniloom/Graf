@@ -47,6 +47,25 @@ jobs:
         with:
           version: '0.12.17'
           python-version: '3.12'
+      - name: Select release version
+        id: version
+        uses: actions/github-script@v7
+        env:
+          RELEASE_SERIES: ${{ vars.RELEASE_SERIES }}
+          BUILD_NUMBER: ${{ github.run_number }}
+        with:
+          script: |
+            const {selectVersion} = require('./scripts/release_version.cjs');
+            const base = require('./product/ui/package.json').version;
+            const selected = selectVersion({base, series: process.env.RELEASE_SERIES,
+              number: process.env.BUILD_NUMBER});
+            core.setOutput('version', selected.version);
+            core.setOutput('tag', selected.tag);
+            core.info(`Selected ${selected.tag}`);
+      - name: Synchronize build version
+        env:
+          BUILD_VERSION: ${{ steps.version.outputs.version }}
+        run: uv run --no-project python scripts/set_release_version.py "$BUILD_VERSION"
       - name: Install Python dependencies
         run: uv sync --project evidencekg --frozen --extra app
       - name: Check parser prerequisites
@@ -63,15 +82,14 @@ jobs:
           npm test
           npm run build
       - name: Test release publication
-        run: node --test scripts/publish_candidate.test.cjs
+        run: node --test scripts/*.test.cjs
       - name: Build release archive
         id: archive
         env:
-          CANDIDATE_NUMBER: ${{ github.run_number }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
         run: |
           output=$(mktemp -d "$RUNNER_TEMP/docworm-release.XXXXXX")
-          version=$(uv run --project evidencekg --frozen --extra app python -c 'import tomllib; print(tomllib.load(open("evidencekg/pyproject.toml", "rb"))["project"]["version"])')
-          tag="v${version}-rc.${CANDIDATE_NUMBER}"
+          tag="$RELEASE_TAG"
           uv run --project evidencekg --frozen --extra app python scripts/build_release.py --output "$output" --tag "$tag"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           cd "$output"

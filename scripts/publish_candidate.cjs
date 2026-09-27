@@ -2,13 +2,14 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const {assertOpen} = require('./release_version.cjs');
 
 module.exports = async function publish({github, context, core}, env = process.env) {
   if (context.eventName !== 'push' || context.ref !== 'refs/heads/main') {
     throw new Error('Candidates may only be published by a push to main');
   }
   const tag = env.RELEASE_TAG;
-  if (!/^v\d+\.\d+\.\d+-rc\.[1-9]\d*$/.test(tag || '')) {
+  if (!/^v(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.[1-9]\d*rc$/.test(tag || '')) {
     throw new Error('Invalid candidate tag');
   }
   const repo = context.repo;
@@ -30,6 +31,8 @@ module.exports = async function publish({github, context, core}, env = process.e
     core.info(`Keeping published release ${tag} unchanged (including manual promotion).`);
     return;
   }
+  // Promotion can happen while the build is running. Never publish an obsolete series.
+  assertOpen(tag.slice(1, -2), releases);
   if (release && release.target_commitish !== context.sha) {
     throw new Error('Candidate draft targets a different commit');
   }
