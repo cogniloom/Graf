@@ -33,6 +33,13 @@ The proposed benefit is fewer model-driven searches and reads before answering. 
 
 ## Reproduce
 
+For manual ChatGPT web runs using Google Drive or GitHub, see the
+[web benchmark guide](web-guide.md). Generate source-only upload archives,
+individual prompts, private reference answers and a results log with
+`python3 -m benchmarks.prepare_web .evidencekg-benchmarks/chatgpt-web`.
+This is a separate native web/connector comparison; no uploads or model calls
+are made during preparation.
+
 Use the repository's Python environment and locked dependencies:
 
 ```sh

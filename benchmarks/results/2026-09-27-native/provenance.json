@@ -1,0 +1,50 @@
+{
+  "source_run_sha256": "f8acf99e59b46c8c4b7ba791dd09ffa9bc831c5865025f4838e3a36fe627ae52",
+  "source_head": "de5064b252cfbbaeb8e4882ff963c84c3d7b4c98",
+  "collection_amendment_sha256": "5585cff2b6d3dd659ee7ecd0893931194b9ec8babc571aca43e47b45158bae01",
+  "parallel_cohort": {
+    "concurrency": 6,
+    "started_unix": 1790458534.7145965,
+    "prior_trials": [
+      "trial-0000",
+      "trial-0001",
+      "trial-0002",
+      "trial-0003",
+      "trial-0004",
+      "trial-0005",
+      "trial-0006",
+      "trial-0007",
+      "trial-0008",
+      "trial-0009",
+      "trial-0010",
+      "trial-0011",
+      "trial-0012",
+      "trial-0013",
+      "trial-0014",
+      "trial-0015",
+      "trial-0016",
+      "trial-0017",
+      "trial-0018",
+      "trial-0019",
+      "trial-0020",
+      "trial-0021",
+      "trial-0022",
+      "trial-0023",
+      "trial-0024",
+      "trial-0025",
+      "trial-0026",
+      "trial-0027",
+      "trial-0028"
+    ],
+    "scheduler_sha": "86cedea04f15fb4641a7428c64fc68306ea1d41c4fb519369805764efee38593",
+    "timing_note": "Per-case wall time includes parallel host/provider contention; cohorts are labeled."
+  },
+  "files": {
+    "summary.json": "2e4417041b0f3471b4243358d87aded51e630858daddf34da495c3183924502a",
+    "summary.csv": "6576e23c59ab70df39471395850962179c9bc15be7c55b140fdfb032113a52cd",
+    "per-case-execution.csv": "d226cac16a23cb0943eb83398ccb12a60ea12a835d36ed3489834155684311d5",
+    "grading-usage.json": "631acab7f88e26b9008df45d3207701d4425e2d0c9370753c27a1159085a2794",
+    "pipeline-status.json": "aa3865393bbc84438ce3a5bfb4e913995e8e8514351debcff44b8a7383b78cd3"
+  },
+  "raw_evidence": "Retained locally in ignored .evidencekg-benchmarks/native-persisted; raw sessions are not distributed in this summary export."
+}

@@ -1,0 +1,13 @@
+{
+  "phase": "complete_with_halted_configurations",
+  "scheduled": 910,
+  "answered": 835,
+  "failed": 3,
+  "halted_configurations": 3,
+  "graded": 835,
+  "configured_concurrency": 6,
+  "active": 0,
+  "queued_configurations": 0,
+  "blocked": [],
+  "updated_unix": 1790466141.648595
+}

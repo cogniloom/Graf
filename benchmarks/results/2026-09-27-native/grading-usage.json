@@ -1,0 +1,15 @@
+{
+  "calls": 835,
+  "seconds": 6187.377420091478,
+  "unknown_usage_calls": 0,
+  "usage": {
+    "input_tokens": 13136842,
+    "cached_input_tokens": 6641664,
+    "output_tokens": 89436
+  },
+  "known_usage_lower_bound": {
+    "input_tokens": 13136842,
+    "cached_input_tokens": 6641664,
+    "output_tokens": 89436
+  }
+}
