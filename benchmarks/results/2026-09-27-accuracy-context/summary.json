@@ -1,0 +1,286 @@
+{
+  "exploratory": {
+    "baseline": {
+      "scheduled": 20,
+      "graded": 20,
+      "failed": 0,
+      "answers": {
+        "scheduled": 20,
+        "attempted": 20,
+        "unknown_usage_calls": 0,
+        "usage": {
+          "input_tokens": 611365,
+          "cached_input_tokens": 331008,
+          "output_tokens": 11529
+        },
+        "known_usage_lower_bound": {
+          "input_tokens": 611365,
+          "cached_input_tokens": 331008,
+          "output_tokens": 11529
+        },
+        "seconds": 306.77982353098923
+      },
+      "judges": {
+        "scheduled": 20,
+        "attempted": 20,
+        "unknown_usage_calls": 0,
+        "usage": {
+          "input_tokens": 423364,
+          "cached_input_tokens": 141312,
+          "output_tokens": 2578
+        },
+        "known_usage_lower_bound": {
+          "input_tokens": 423364,
+          "cached_input_tokens": 141312,
+          "output_tokens": 2578
+        },
+        "seconds": 170.52212373903603
+      },
+      "citation": {
+        "passes": 16,
+        "evaluated": 20,
+        "rate": 0.8
+      },
+      "abstention": {
+        "passes": 20,
+        "evaluated": 20,
+        "rate": 1.0
+      },
+      "semantic": {
+        "passes": 10,
+        "evaluated": 20,
+        "rate": 0.5
+      },
+      "strict": {
+        "passes": 9,
+        "evaluated": 20,
+        "rate": 0.45
+      },
+      "judge_components": {
+        "correct": 16,
+        "complete": 15,
+        "supported": 11
+      },
+      "measured": {
+        "mean_total_tokens": 31144.7,
+        "median_answer_seconds": 13.911615848497604,
+        "median_estimated_end_to_end_seconds": 32.72924490150763,
+        "mean_context_bytes": 43189.7,
+        "total_tool_calls": 8,
+        "answers_using_tools": 3
+      }
+    },
+    "treatment": {
+      "scheduled": 20,
+      "graded": 20,
+      "failed": 0,
+      "answers": {
+        "scheduled": 20,
+        "attempted": 20,
+        "unknown_usage_calls": 0,
+        "usage": {
+          "input_tokens": 1473370,
+          "cached_input_tokens": 904192,
+          "output_tokens": 15036
+        },
+        "known_usage_lower_bound": {
+          "input_tokens": 1473370,
+          "cached_input_tokens": 904192,
+          "output_tokens": 15036
+        },
+        "seconds": 391.42710456310306
+      },
+      "judges": {
+        "scheduled": 20,
+        "attempted": 20,
+        "unknown_usage_calls": 0,
+        "usage": {
+          "input_tokens": 491093,
+          "cached_input_tokens": 123648,
+          "output_tokens": 2944
+        },
+        "known_usage_lower_bound": {
+          "input_tokens": 491093,
+          "cached_input_tokens": 123648,
+          "output_tokens": 2944
+        },
+        "seconds": 187.50474600997404
+      },
+      "citation": {
+        "passes": 19,
+        "evaluated": 20,
+        "rate": 0.95
+      },
+      "abstention": {
+        "passes": 20,
+        "evaluated": 20,
+        "rate": 1.0
+      },
+      "semantic": {
+        "passes": 12,
+        "evaluated": 20,
+        "rate": 0.6
+      },
+      "strict": {
+        "passes": 12,
+        "evaluated": 20,
+        "rate": 0.6
+      },
+      "judge_components": {
+        "correct": 16,
+        "complete": 19,
+        "supported": 12
+      },
+      "measured": {
+        "mean_total_tokens": 74420.3,
+        "median_answer_seconds": 18.9689621800062,
+        "median_estimated_end_to_end_seconds": 40.79896091899718,
+        "mean_context_bytes": 98043.7,
+        "total_tool_calls": 21,
+        "answers_using_tools": 13
+      }
+    }
+  },
+  "final": {
+    "baseline": {
+      "scheduled": 20,
+      "graded": 20,
+      "failed": 0,
+      "answers": {
+        "scheduled": 20,
+        "attempted": 20,
+        "unknown_usage_calls": 0,
+        "usage": {
+          "input_tokens": 407734,
+          "cached_input_tokens": 184320,
+          "output_tokens": 9849
+        },
+        "known_usage_lower_bound": {
+          "input_tokens": 407734,
+          "cached_input_tokens": 184320,
+          "output_tokens": 9849
+        },
+        "seconds": 259.25011377900955
+      },
+      "judges": {
+        "scheduled": 20,
+        "attempted": 20,
+        "unknown_usage_calls": 0,
+        "usage": {
+          "input_tokens": 418430,
+          "cached_input_tokens": 123648,
+          "output_tokens": 2601
+        },
+        "known_usage_lower_bound": {
+          "input_tokens": 418430,
+          "cached_input_tokens": 123648,
+          "output_tokens": 2601
+        },
+        "seconds": 171.1232956610329
+      },
+      "citation": {
+        "passes": 16,
+        "evaluated": 20,
+        "rate": 0.8
+      },
+      "abstention": {
+        "passes": 18,
+        "evaluated": 20,
+        "rate": 0.9
+      },
+      "semantic": {
+        "passes": 9,
+        "evaluated": 20,
+        "rate": 0.45
+      },
+      "strict": {
+        "passes": 7,
+        "evaluated": 20,
+        "rate": 0.35
+      },
+      "judge_components": {
+        "correct": 12,
+        "complete": 11,
+        "supported": 9
+      },
+      "measured": {
+        "mean_total_tokens": 20879.15,
+        "median_answer_seconds": 13.110772372499923,
+        "median_estimated_end_to_end_seconds": 32.207754463976016,
+        "mean_context_bytes": 43189.7,
+        "total_tool_calls": 0,
+        "answers_using_tools": 0
+      }
+    },
+    "treatment": {
+      "scheduled": 20,
+      "graded": 20,
+      "failed": 0,
+      "answers": {
+        "scheduled": 20,
+        "attempted": 20,
+        "unknown_usage_calls": 0,
+        "usage": {
+          "input_tokens": 1817191,
+          "cached_input_tokens": 1192960,
+          "output_tokens": 13724
+        },
+        "known_usage_lower_bound": {
+          "input_tokens": 1817191,
+          "cached_input_tokens": 1192960,
+          "output_tokens": 13724
+        },
+        "seconds": 371.44054166806745
+      },
+      "judges": {
+        "scheduled": 20,
+        "attempted": 20,
+        "unknown_usage_calls": 0,
+        "usage": {
+          "input_tokens": 496184,
+          "cached_input_tokens": 158976,
+          "output_tokens": 2766
+        },
+        "known_usage_lower_bound": {
+          "input_tokens": 496184,
+          "cached_input_tokens": 158976,
+          "output_tokens": 2766
+        },
+        "seconds": 171.65113727998687
+      },
+      "citation": {
+        "passes": 16,
+        "evaluated": 20,
+        "rate": 0.8
+      },
+      "abstention": {
+        "passes": 20,
+        "evaluated": 20,
+        "rate": 1.0
+      },
+      "semantic": {
+        "passes": 13,
+        "evaluated": 20,
+        "rate": 0.65
+      },
+      "strict": {
+        "passes": 11,
+        "evaluated": 20,
+        "rate": 0.55
+      },
+      "judge_components": {
+        "correct": 17,
+        "complete": 18,
+        "supported": 13
+      },
+      "measured": {
+        "mean_total_tokens": 91545.75,
+        "median_answer_seconds": 18.06677227850014,
+        "median_estimated_end_to_end_seconds": 41.22809823600983,
+        "mean_context_bytes": 98472.1,
+        "total_tool_calls": 29,
+        "answers_using_tools": 14
+      }
+    }
+  }
+}

@@ -224,15 +224,19 @@ class Runtime:
             },
         )
 
-    def retrieve(self, question, limit=12, snapshot=None):
+    def retrieve(self, question, limit=12, snapshot=None, *, code_context=False):
         if not isinstance(question, str) or not question.strip() or len(question) > 4096:
             raise ValueError("Expected nonempty question, at most4096 characters")
         if type(limit) is not int or not 1 <= limit <= 12:
             raise ValueError("Expected limit1..12")
+        if type(code_context) is not bool:
+            raise ValueError("Expected boolean code_context")
         if snapshot is not None and snapshot != self.config["snapshot_id"]:
             raise ValueError("Snapshot not prepared for hybrid retrieval")
         begin = time.monotonic()
         identity = {"config": self.config, "question": question, "limit": limit}
+        if code_context:
+            identity["code_context"] = True
         with self._database() as ledger, ledger.query_lock(identity):
             self._verify_models()
             result = self.ledger.get_result(identity)
@@ -240,6 +244,12 @@ class Runtime:
             if not cached:
                 self._load()
                 result = self.ranker.retrieve(question, limit=limit)
+                if code_context:
+                    from .code_relationships import build_relationship_context
+
+                    result["code_context"] = build_relationship_context(
+                        self.ranker.segments, question, result, reranker=self.ranker.reranker
+                    )
                 self.ledger.put_result(identity, result)
             else:
                 # Validate the retained inventory before advertising continuation.

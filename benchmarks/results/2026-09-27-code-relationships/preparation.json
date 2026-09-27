@@ -1,0 +1,24 @@
+{
+  "setup": {
+    "config": "/tmp/graf-relationships-final-state/hybrid.json",
+    "snapshot_id": "N7d280910c01404c898cc8d09a4d468a5b77d75417dfa97e630436b2014c750be",
+    "segments": 360,
+    "index_seconds": 18.890925364015857,
+    "generative_calls": 0
+  },
+  "implementation": {
+    "__init__.py": "b80537673585ddcb726070c67be65553b97c436064807b3edee541c5b99bc69f",
+    "accuracy_context.py": "76ae7e2e50e81ed7ca45ff3f8a410f144e38af67774fa1fb787defc0fd4fd99b",
+    "code_context.py": "1bb68d529669fe13987c02b9f1b555436f466bb1e6ed41ba1e0c582529478e9d",
+    "code_relationships.py": "4b3d090fdbf98586c4bfabc26569ee87d4506060f5db951520e6f3811eb13ac5",
+    "download_models.py": "9491983bd1e599464cc9d531935322813133555b3371b7c1b54c738443e74cb3",
+    "index.py": "bb37ee47a38c150f11ca7bb1f4d310c177152b1e449d998a82e354e1411c299b",
+    "lexical.py": "12305d784a5996657cceba8d845ffc764778258a091659171809b2620ae07c4d",
+    "postgres.py": "9eda397e2c82b1e36ac270ebcdb41f8fd92c552509893a153b1665177a90124a",
+    "retrieval.py": "630ee5a50e4a5b73c08a6034516702cc244a2cb9bad2942974cce799e7e74f48",
+    "runtime.py": "cd15e64a631b7c99e9a0786d2d024a9569cb1faac4bd44127974f604d784a085",
+    "semantic.py": "945e1aa1c647264e1439b2cb1e0184f3fc21255855900c71e6306b1b8546fe0e",
+    "sources.py": "c41d0eb6cbfbced13216564e94008022b9e665d45da1083eb410c6819ac7e85f"
+  },
+  "cache_verified": true
+}

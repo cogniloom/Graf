@@ -1,0 +1,94 @@
+[
+  {
+    "arm": "original",
+    "repeat": 1,
+    "original_summary": {
+      "model": "gpt-6-luna",
+      "effort": "low",
+      "workload": "code",
+      "scheduled": 10,
+      "attempted": 10,
+      "status": "complete",
+      "halted_at": null,
+      "answered": 10,
+      "graded": 10,
+      "strict_passes": 4,
+      "accuracy": 0.4,
+      "elapsed_seconds": 172.83492933402886,
+      "median_seconds": 14.713060344496625,
+      "usage_known": 10,
+      "input_tokens": 346079,
+      "cached_input_tokens": 206080,
+      "output_tokens": 6582
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 2,
+    "original_summary": {
+      "model": "gpt-6-luna",
+      "effort": "low",
+      "workload": "code",
+      "scheduled": 10,
+      "attempted": 10,
+      "status": "complete",
+      "halted_at": null,
+      "answered": 10,
+      "graded": 10,
+      "strict_passes": 6,
+      "accuracy": 0.6,
+      "elapsed_seconds": 142.21825374197215,
+      "median_seconds": 13.034777490989654,
+      "usage_known": 10,
+      "input_tokens": 332374,
+      "cached_input_tokens": 195840,
+      "output_tokens": 5239
+    }
+  },
+  {
+    "arm": "relationships",
+    "repeat": 1,
+    "original_summary": {
+      "model": "gpt-6-luna",
+      "effort": "low",
+      "workload": "code",
+      "scheduled": 10,
+      "attempted": 10,
+      "status": "complete",
+      "halted_at": null,
+      "answered": 10,
+      "graded": 10,
+      "strict_passes": 3,
+      "accuracy": 0.3,
+      "elapsed_seconds": 147.41651492891833,
+      "median_seconds": 14.113489834504435,
+      "usage_known": 10,
+      "input_tokens": 470126,
+      "cached_input_tokens": 249856,
+      "output_tokens": 5274
+    }
+  },
+  {
+    "arm": "relationships",
+    "repeat": 2,
+    "original_summary": {
+      "model": "gpt-6-luna",
+      "effort": "low",
+      "workload": "code",
+      "scheduled": 10,
+      "attempted": 10,
+      "status": "complete",
+      "halted_at": null,
+      "answered": 10,
+      "graded": 10,
+      "strict_passes": 4,
+      "accuracy": 0.4,
+      "elapsed_seconds": 150.89150177806732,
+      "median_seconds": 15.485484684002586,
+      "usage_known": 10,
+      "input_tokens": 504787,
+      "cached_input_tokens": 284416,
+      "output_tokens": 5597
+    }
+  }
+]

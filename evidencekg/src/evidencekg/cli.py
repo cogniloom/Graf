@@ -38,6 +38,8 @@ def parser():
     discover.add_argument("question")
     discover.add_argument("--backend", choices=["hybrid", "mechanical"], default="hybrid")
     discover.add_argument("--hybrid-config", type=Path)
+    discover.add_argument("--code-context", action="store_true",
+                          help="Experimental Python symbol/dependency evidence view (hybrid only)")
     discover.add_argument("--snapshot")
     discover.add_argument("--limit", type=int, default=12)
     discover.add_argument("--discovery-index", type=Path, help="Optional previously built attributed index")
@@ -186,10 +188,15 @@ def main(argv=None):
             try:
                 result = (runtime.page(args.workset_id, args.cursor, args.limit)
                           if args.command == "discovery-workset" else
-                          runtime.retrieve(args.question, limit=args.limit, snapshot=args.snapshot))
+                          runtime.retrieve(args.question, limit=args.limit, snapshot=args.snapshot,
+                                           **({"code_context": True} if args.code_context else {})))
+                if args.command == "discover" and args.code_context:
+                    result = result["code_context"]
             finally:
                 runtime.close()
         else:
+            if getattr(args, "code_context", False):
+                raise ValueError("--code-context requires --backend hybrid")
             store = Store(args.state)
             api, queue = API(store), Queue(store)
             if args.command == "configure":
