@@ -1,0 +1,7 @@
+{
+  "verified_spans": 391,
+  "contexts": 10,
+  "max_bytes": 44974,
+  "byte_limit": 45000,
+  "scope": "exact frozen snapshot span reconstruction, not semantic completeness"
+}

@@ -1,0 +1,1505 @@
+[
+  {
+    "arm": "original",
+    "repeat": 1,
+    "case_id": "code-03",
+    "trial": "trial-0048",
+    "answer": {
+      "answer": "The parser launches the worker in a new session, so it has its own process group. On any exception during `communicate`\u2014including a timeout\u2014the parent sends `SIGKILL` to that process group and waits for the child. A timeout is then caught as `subprocess.TimeoutExpired` and returned as a failed parse with empty sections, attachments, and artifacts and a warning containing the exception text.\n\nIn ingestion, a failed parse raises an error from the extraction call; the per-document handler records the document as `failed`, stores the error, and leaves its units empty. Thus that document contributes no extracted text units, while ingestion continues to later filesystem entries. The evidence establishes this behavior for the `evidencekg` parser. The supplied `corpus.py.txt` passages concern a separate pipeline and do not document this parser timeout path.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/parsers/__init__.py.txt",
+          "quote": "                env=env,\n                stdout=subprocess.PIPE,\n                stderr=subprocess.PIPE,\n                cwd=tmp,\n                start_new_session=True,\n            )\n            try:\n                stdout, stderr = p.communicate(timeout=cfg[\"parser_timeout\"])\n            except BaseException:\n                os.killpg(p.pid, signal.SIGKILL)\n                p.wait()\n                raise"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/parsers/__init__.py.txt",
+          "quote": "        except (OSError, ValueError, subprocess.TimeoutExpired) as exc:\n            return dict(sections=[], warnings=[str(exc)], attachments=[], artifacts=[], status=\"failed\")"
+        },
+        {
+          "path": "corpus.py.txt",
+          "quote": "        except Exception as exc:\n            rec.update(status=\"failed\", error=f\"{type(exc).__name__}: {exc}\", units=[])"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": false,
+        "complete": false,
+        "supported": false,
+        "rationale": "The process-group kill, child wait, and empty failed parser result are accurate and cited. However, the ingestion explanation incorrectly imports corpus.py\u2019s exception handler into evidencekg despite acknowledging they are separate pipelines. evidencekg consumes the returned status and warnings directly, persists them, and creates an empty segment via the (0, 0) fallback; the timeout does not raise into a per-document extraction handler. The answer omits this actual ingestion behavior and provides no applicable ingestion citation."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 1,
+    "case_id": "code-06",
+    "trial": "trial-0068",
+    "answer": {
+      "answer": "Citation IDs are deterministic identifiers bound to an immutable span: the code removes `citation_id` from each span, adds its `segment_id` and `extraction_id`, validates the reference, then checks the ID equals `ident(\"Q\", segment[\"id\"], ref[\"start\"], ref[\"end\"])`. Duplicate IDs in the catalog are rejected by the same condition.\n\n> `if cid != ident(\"Q\", segment[\"id\"], ref[\"start\"], ref[\"end\"]) or cid in result:`\n>\n> `raise ValueError(\"Invalid or duplicate citation choice\")`\n>\n> \u2014 `evidencekg/src/evidencekg/citation_choices.py.txt`\n\nThe selection schema offers only catalog IDs. Resolution accepts an object containing exactly `citation_id`, requires that ID to exist in the catalog, and replaces it with a copy of the catalog\u2019s original span reference. Forged, unknown, or augmented choices raise an error.\n\n> `if set(node) != {\"citation_id\"} or node[\"citation_id\"] not in catalog:`\n>\n> `raise ValueError(\"Unknown or malformed citation choice\")`\n>\n> `return dict(catalog[node[\"citation_id\"]])`\n>\n> \u2014 `evidencekg/src/evidencekg/citation_choices.py.txt`\n\nThe assurance documentation describes the choices as verbatim text with segment-relative offsets, partitioned into spans of at most 400 characters, and says the adapter resolves selections to immutable quotes and offsets. It also states that raw selections and resolved results are stored and hash-linked. The cited tests show that a citation selected for one task payload is rejected when resolved against another payload, and that a forged changed raw selection is rejected as a duplicate citation-selection during submission. This distinguishes implementation details from the broader documentation claim that receipts are reproduced by integrity checks.\n\n> `Enhanced packets also include deterministic citation choices: verbatim text`\n>\n> `with segment-relative offsets, partitioned into spans of at most 400 characters.`\n>\n> `The subscription adapter now asks the model to select citation IDs and deterministically resolves them to immutable quotes and offsets.`\n>\n> \u2014 `evidencekg/ASSURANCE.md`\n\n> `with pytest.raises(ValueError):`\n>\n> `    resolve(raw, other[\"payload\"])`\n>\n> `with pytest.raises(ValueError, match=\"duplicate citation-selection\"): `\n>\n> `    submit(queue, task, forged)`\n>\n> \u2014 `evidencekg/tests/test_citation_choices.py.txt`",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/citation_choices.py.txt",
+          "quote": "if cid != ident(\"Q\", segment[\"id\"], ref[\"start\"], ref[\"end\"]) or cid in result:\n                raise ValueError(\"Invalid or duplicate citation choice\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/citation_choices.py.txt",
+          "quote": "if set(node) != {\"citation_id\"} or node[\"citation_id\"] not in catalog:\n                    raise ValueError(\"Unknown or malformed citation choice\")\n                return dict(catalog[node[\"citation_id\"]])"
+        },
+        {
+          "path": "evidencekg/ASSURANCE.md",
+          "quote": "Enhanced packets also include deterministic citation choices: verbatim text\nwith segment-relative offsets, partitioned into spans of at most 400 characters."
+        },
+        {
+          "path": "evidencekg/ASSURANCE.md",
+          "quote": "The subscription adapter\nnow asks the model to select citation IDs and deterministically resolves them to\nimmutable quotes and offsets."
+        },
+        {
+          "path": "evidencekg/tests/test_citation_choices.py.txt",
+          "quote": "other = queue.next_review_task(rid, \"test\", kinds=[\"source\"])\n    with pytest.raises(ValueError):\n        resolve(raw, other[\"payload\"])"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "The answer correctly gives the exact ID formula, reference validation, and ValueError rejection of duplicate catalog IDs. Its additional claims about schema restrictions, exact span resolution, receipts, and rejection tests are supported by the cited full sources. It covers all material parts of the reference without contradictions."
+      },
+      "passed": true
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 1,
+    "case_id": "code-09",
+    "trial": "trial-0099",
+    "answer": {
+      "answer": "For one paginated retrieval row, if its serialized size alone exceeds the 750,000-byte page budget, retrieval raises `ValueError` with `One result exceeds response budget; use bounded source/feature reads`. It does not return that row or a continuation cursor. If the row fits by itself but would exceed the budget only after earlier rows have been included, the page stops before it and can continue from the last returned row. The reference ranking implementation likewise preserves the single-row failure for lexical reads; for mechanical-neighbour rows it defers the failure until an oversized row is actually reached by the query. Evidence: `evidencekg/src/evidencekg/retrieval.py.txt`: `if used + size > 750000:` / `if not items:` / `raise ValueError(\"One result exceeds response budget; use bounded source/feature reads\")` / `break`; `evidencekg/src/evidencekg/reference_ranking.py.txt`: `# Native neighbours fails if any one row cannot fit its response page.` and `if detail is None:` / `raise ValueError(\"One result exceeds response budget; use bounded source/feature reads\")`.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/retrieval.py.txt",
+          "quote": "        for row in selected[:limit]:\n            size = len(dump(row).encode())\n            if used + size > 750000:\n                if not items:\n                    raise ValueError(\"One result exceeds response budget; use bounded source/feature reads\")\n                break"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/reference_ranking.py.txt",
+          "quote": "    def _encode(item):\n        canonical = dump(item)\n        # Native neighbours fails if any one row cannot fit its response page.\n        # Store the failure as a sentinel: an unreachable oversized row must not\n        # make an unrelated query fail, unlike occurrence integrity verification.\n        return canonical if len(canonical.encode()) <= 750000 else None\n\n    @staticmethod\n    def _mechanical(detail, seed):\n        if detail is None:\n            raise ValueError(\"One result exceeds response budget; use bounded source/feature reads\")"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": false,
+        "complete": false,
+        "supported": false,
+        "rationale": "The candidate gives the correct budget and error message but incorrectly makes an individually oversized row an unconditional failure. The code raises only when the page has no items; after earlier items, even an individually oversized row ends the page and returns a continuation cursor. The candidate omits that material case and contradicts its cited source. Its reference-ranking details are supported but do not fix the error."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 1,
+    "case_id": "code-02",
+    "trial": "trial-0148",
+    "answer": {
+      "answer": "A retrieval cursor is bound to both the snapshot and the query scope. Reusing it with a different snapshot or scope causes cursor validation to fail with `ValueError(\"Invalid cursor\")`; it does not continue from the old position. The native API checks the cursor\u2019s `snapshot` and scope signature, and wraps the mismatch as `Invalid cursor`. In the cache implementation, the scope signature is likewise checked, and cached requests are keyed by snapshot, node, and relation types. A test confirms that reusing a neighbour cursor on a newer snapshot raises this error.\n\nEvidence:\n\n- `evidencekg/src/evidencekg/retrieval.py.txt`: `if value[\"snapshot\"] != snapshot or value[\"scope\"] != signature:`\n- `evidencekg/src/evidencekg/retrieval.py.txt`: `raise ValueError(\"Invalid cursor\") from exc`\n- `evidencekg/tests/test_reference_cache.py.txt`: `with pytest.raises(ValueError, match=\"Invalid cursor\"):`\n- `evidencekg/tests/test_reference_cache.py.txt`: `cached.neighbours(two, doc, cursor=first[\"next_cursor\"])`",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/retrieval.py.txt",
+          "quote": "if value[\"snapshot\"] != snapshot or value[\"scope\"] != signature:\n                    raise ValueError(\"Cursor scope/snapshot mismatch\")\n                after = value[\"after\"]\n            except Exception as exc:\n                raise ValueError(\"Invalid cursor\") from exc"
+        },
+        {
+          "path": "evidencekg/tests/test_reference_cache.py.txt",
+          "quote": "with pytest.raises(ValueError, match=\"Invalid cursor\"):\n        cached.neighbours(two, doc, cursor=first[\"next_cursor\"])"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": false,
+        "rationale": "The core answer correctly and completely states that snapshot or scope mismatch raises ValueError(\"Invalid cursor\"), matching the source and reference. The cited test supports rejection on a newer snapshot. However, the additional claims about the cache\u2019s internal scope validation and cache keys are not established by the supplied sources or citations."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 1,
+    "case_id": "code-01",
+    "trial": "trial-0251",
+    "answer": {
+      "answer": "Ingestion first materializes snapshot membership, then freezes lexical rows from that membership into a snapshot-specific FTS5 table. The table name is derived from the validated snapshot ID, and its rows come only from segments whose extraction IDs occur in that snapshot\u2019s `snapshot_documents` entries. That lets later lexical queries use a fixed snapshot corpus instead of the mutable global segment index.\n\nThe implementation excerpt establishes the table creation and population rule:\n\n> `def fts_name(snapshot_id):`\n> `    if not re.fullmatch(r\"N[0-9a-f]{64}\", snapshot_id):`\n> `        raise ValueError(\"Invalid snapshot identifier\")`\n> `    return \"fts_\" + snapshot_id[1:]`\n>\n> `def freeze_fts(store, snapshot_id):`\n> `    name = fts_name(snapshot_id)`\n> `    exists = store.db.execute(\"SELECT 1 FROM sqlite_master WHERE type='table' AND name=?\", (name,)).fetchone()`\n> `    if not exists:`\n> `        # Identifier is generated by this module from validated content-addressed IDs.`\n> `        store.db.execute(`\n> `            f\"CREATE VIRTUAL TABLE {name} USING fts5(segment_id UNINDEXED,text,tokenize='unicode61 remove_diacritics 2')\"`\n> `        )`\n> `        store.db.execute(`\n> `            f\"\"\"INSERT INTO {name} SELECT s.id,s.text FROM segments s JOIN snapshot_documents sd ON sd.extraction_id=s.extraction_id WHERE sd.snapshot_id=? ORDER BY s.id\"\"\",`\n> `            (snapshot_id,),`\n> `        )`\n\nThe separate in-memory lexical index also builds its FTS5 corpus from a supplied `segments` mapping, rather than reading the global index during each search:\n\n> `class LexicalIndex:`\n> `    def __init__(self, segments):`\n> `        self.db = sqlite3.connect(\":memory:\", check_same_thread=False)`\n> `        self.db.row_factory = sqlite3.Row`\n> `        self.db.execute(`\n> `            \"CREATE VIRTUAL TABLE passages USING fts5(segment_id UNINDEXED,text,tokenize='unicode61 remove_diacritics 2')\"`\n> `        )`\n> `        self.db.executemany(`\n> `            \"INSERT INTO passages VALUES(?,?)\", [(sid, segments[sid][\"text\"]) for sid in sorted(segments)]`\n> `        )`\n\nThe supplied excerpts do not include the ingestion call site or the lexical query implementation for the snapshot-specific table, so they show how the frozen corpus is constructed but do not establish the full wiring from ingestion through later queries.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/snapshots.py.txt",
+          "quote": "def fts_name(snapshot_id):\n    if not re.fullmatch(r\"N[0-9a-f]{64}\", snapshot_id):\n        raise ValueError(\"Invalid snapshot identifier\")\n    return \"fts_\" + snapshot_id[1:]\n\n\ndef freeze_fts(store, snapshot_id):\n    name = fts_name(snapshot_id)\n    exists = store.db.execute(\"SELECT 1 FROM sqlite_master WHERE type='table' AND name=?\", (name,)).fetchone()\n    if not exists:\n        # Identifier is generated by this module from validated content-addressed IDs.\n        store.db.execute(\n            f\"CREATE VIRTUAL TABLE {name} USING fts5(segment_id UNINDEXED,text,tokenize='unicode61 remove_diacritics 2')\"\n        )\n        store.db.execute(\n            f\"\"\"INSERT INTO {name} SELECT s.id,s.text FROM segments s JOIN snapshot_documents sd ON sd.extraction_id=s.extraction_id WHERE sd.snapshot_id=? ORDER BY s.id\"\"\",\n            (snapshot_id,),\n        )"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/hybrid/lexical.py.txt",
+          "quote": "class LexicalIndex:\n    def __init__(self, segments):\n        self.db = sqlite3.connect(\":memory:\", check_same_thread=False)\n        self.db.row_factory = sqlite3.Row\n        self.db.execute(\n            \"CREATE VIRTUAL TABLE passages USING fts5(segment_id UNINDEXED,text,tokenize='unicode61 remove_diacritics 2')\"\n        )\n        self.db.executemany(\n            \"INSERT INTO passages VALUES(?,?)\", [(sid, segments[sid][\"text\"]) for sid in sorted(segments)]\n        )"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": false,
+        "complete": false,
+        "supported": false,
+        "rationale": "The frozen-table construction is accurately described and cited. However, the claim that supplied evidence lacks ingestion and query wiring contradicts the sources: ingest.py calls freeze_fts after populating snapshot_documents, and retrieval.py uses fts_name(snapshot_id) for MATCH and BM25 queries. The answer omits that explicit retrieval connection and lacks citations for its ingestion chronology and later-query claims. The separate in-memory index does not establish this wiring."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 1,
+    "case_id": "code-10",
+    "trial": "trial-0460",
+    "answer": {
+      "answer": "No. The implementation raises a RuntimeError if it cannot initialize, configure, or apply the Linux network policy, so extraction cannot continue past that failure. The README states the same behavior. Evidence:\n\n- `evidencekg/src/evidencekg/parsers/isolation.py.txt`: `if not context:\\n        raise RuntimeError(\"Cannot initialize parser network policy\")` and `if library.seccomp_load(context):\\n            raise RuntimeError(\"Cannot apply parser network policy\")`\n- `evidencekg/README.md`: `Failure to establish that policy fails extraction.`",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/parsers/isolation.py.txt",
+          "quote": "if not context:\n        raise RuntimeError(\"Cannot initialize parser network policy\")\n    try:\n        for name in (b\"socket\", b\"socketpair\", b\"connect\", b\"sendto\", b\"sendmsg\", b\"sendmmsg\"):\n            syscall = library.seccomp_syscall_resolve_name(name)\n            if syscall >= 0 and library.seccomp_rule_add(context, 0x00050000 | errno.EPERM, syscall, 0):\n                raise RuntimeError(\"Cannot configure parser network policy\")\n        if library.seccomp_load(context):\n            raise RuntimeError(\"Cannot apply parser network policy\")"
+        },
+        {
+          "path": "evidencekg/README.md",
+          "quote": "Binary parser\nsubprocesses have memory/CPU/file/time limits and a Linux seccomp network denial\ninherited by OCR children. Failure to establish that policy fails extraction."
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "The answer correctly states that seccomp load failure raises RuntimeError and fails extraction, supported by accurate code and README citations. Initialization and rule-configuration failures are also supported. It omits the reference\u2019s finally-block cleanup detail, but that detail is not material to whether parsing can continue."
+      },
+      "passed": true
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 1,
+    "case_id": "code-08",
+    "trial": "trial-0525",
+    "answer": {
+      "answer": "The retrieved passages do not establish how the default snapshot read follows the acquisition head or where that head is updated. The snapshot source shown only defines FTS freezing; the other implementation excerpt concerns local semantic adapters. The README describes snapshots as immutable but does not identify the read or update code paths.",
+      "abstain": true,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/snapshots.py.txt",
+          "quote": "\"\"\"Frozen lexical statistics and an acquisition head independent of content identity.\"\"\"\n\nimport re\n\n\ndef fts_name(snapshot_id):"
+        },
+        {
+          "path": "evidencekg/README.md",
+          "quote": "Each\nimmutable snapshot has its own FTS index so future documents cannot change\nold BM25 ordering or invalidate cursors."
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": false,
+      "abstention_gate": false,
+      "grade": {
+        "correct": false,
+        "complete": false,
+        "supported": false,
+        "rationale": "Abstention is unjustified: db.py explicitly shows Store.snapshot(None) reading current_snapshot first, falling back only when no head exists to snapshots ordered by created_at DESC, id DESC. ingest.py upserts that head after freeze_fts within the write transaction. The candidate omits both requested mechanisms; its citations support peripheral descriptions but not its claim that the supplied evidence cannot answer the question. The reference answer matches the sources."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 1,
+    "case_id": "code-05",
+    "trial": "trial-0607",
+    "answer": {
+      "answer": "No. Citation-choice resolution maps a valid citation ID to the catalog\u2019s stored quote and offsets; it does not take a model-supplied quote to repair. An altered quote included alongside an ID is rejected as malformed, and an unknown ID is rejected.\n\nEvidence:\n\n- `evidencekg/src/evidencekg/citation_choices.py.txt`: `return dict(catalog[node[\"citation_id\"]])`\n- `evidencekg/src/evidencekg/citation_choices.py.txt`: `if set(node) != {\"citation_id\"} or node[\"citation_id\"] not in catalog:` followed by `raise ValueError(\"Unknown or malformed citation choice\")`\n- `evidencekg/tests/test_citation_choices.py.txt`: `with pytest.raises(ValueError):` followed by `resolve({\"sources\": [{\"citation_id\": cid, \"quote\": \"invented\"}]}, payload)` and a separate check that `resolve({\"sources\": [{\"citation_id\": \"Q-forged\"}]}, payload)` raises `ValueError`.\n\nThe assurance documentation says the adapter resolves selections to immutable quotes and offsets and that unknown IDs and malformed results are rejected (`evidencekg/ASSURANCE.md`: `The subscription adapter now asks the model to select citation IDs and deterministically resolves them to immutable quotes and offsets.`). That is documentation; the implementation and tests above establish the specific rejection behavior. These sources address altered text submitted with a citation ID; they do not establish detection of a model misrepresenting a source in its separate claim text.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/citation_choices.py.txt",
+          "quote": "if set(node) != {\"citation_id\"} or node[\"citation_id\"] not in catalog:\n                    raise ValueError(\"Unknown or malformed citation choice\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/citation_choices.py.txt",
+          "quote": "return dict(catalog[node[\"citation_id\"]])"
+        },
+        {
+          "path": "evidencekg/tests/test_citation_choices.py.txt",
+          "quote": "with pytest.raises(ValueError):\n        resolve({\"sources\": [{\"citation_id\": cid, \"quote\": \"invented\"}]}, payload)\n    other = queue.next_review_task(rid, \"test\", kinds=[\"source\"])\n    with pytest.raises(ValueError):\n        resolve(raw, other[\"payload\"])"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": false,
+        "supported": false,
+        "rationale": "The core answer is accurate: valid IDs expand to stored references, while unknown IDs and extra fields are rejected. However, it omits the material safeguard that choices() calls validate_refs(), rejecting catalog quotations that differ from the exact source substring. Its ASSURANCE.md quotation cannot be verified from the supplied evidence; the implementation and test citations otherwise support the stated resolution behavior."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 1,
+    "case_id": "code-04",
+    "trial": "trial-0660",
+    "answer": {
+      "answer": "Failed PDF extraction can hide embedded attachments or other descendants, leaving the inventory\u2019s source denominator unknown. In `ingest.py.txt`, a failed extraction of a `.pdf` sets `unknown_descendants` to true; the code then marks the inventory incomplete and records the reason. The README says that when the denominator is unknown, `inventory.total` is null and `known_matches` reports only records actually known. Thus inventory cannot report a complete total, even though it can still list known records.\n\nEvidence:\n\n- `evidencekg/src/evidencekg/ingest.py.txt`: `if status == \"failed\" and (\\n                Path(path).suffix.lower() in (\".eml\", \".pdf\", \".docx\") or mime == \"message/rfc822\"\\n            ):\\n                unknown_descendants = True`\n- `evidencekg/src/evidencekg/ingest.py.txt`: `if unknown_descendants:\\n                manifest[\"inventory_complete\"] = False\\n                manifest[\"inventory_errors\"].append(\\n                    {\\n                        \"path\": path,\\n                        \"error\": \"Container descendants could not be fully enumerated; source denominator is unknown\",\\n                    }\\n                )`\n- `evidencekg/README.md`: `A symlink, inaccessible\\ndirectory or unenumerated container depth makes the overall denominator unknown.\\nKnown records are still enumerated; `inventory.total` is then null and\\n`known_matches` reports the records actually known.`\n- `evidencekg/src/evidencekg/parsers/worker.py.txt`: `for name, values in reader.attachments.items():\\n                for i, value in enumerate(values):\\n                    child(name, value, f\"pdf:{name}:{i}\", \"application/octet-stream\")\\n        except Exception as exc:\\n            result[\"warnings\"].append(\"PDF attachment enumeration failed: \" + str(exc))`",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "if status == \"failed\" and (\n                Path(path).suffix.lower() in (\".eml\", \".pdf\", \".docx\") or mime == \"message/rfc822\"\n            ):\n                unknown_descendants = True"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "if unknown_descendants:\n                manifest[\"inventory_complete\"] = False\n                manifest[\"inventory_errors\"].append(\n                    {\n                        \"path\": path,\n                        \"error\": \"Container descendants could not be fully enumerated; source denominator is unknown\",\n                    }\n                )"
+        },
+        {
+          "path": "evidencekg/README.md",
+          "quote": "A symlink, inaccessible\ndirectory or unenumerated container depth makes the overall denominator unknown.\nKnown records are still enumerated; `inventory.total` is then null and\n`known_matches` reports the records actually known."
+        },
+        {
+          "path": "evidencekg/src/evidencekg/parsers/worker.py.txt",
+          "quote": "for name, values in reader.attachments.items():\n                for i, value in enumerate(values):\n                    child(name, value, f\"pdf:{name}:{i}\", \"application/octet-stream\")\n        except Exception as exc:\n            result[\"warnings\"].append(\"PDF attachment enumeration failed: \" + str(exc))"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "The answer accurately explains the full causal chain: failed PDF extraction may conceal descendants, ingestion marks inventory incomplete, and inventory returns a null total while retaining known_matches and known records. Its citations match the supplied sources and support every material claim; retrieval.py independently confirms the stated behavior. No material discrepancy with the reference."
+      },
+      "passed": true
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 1,
+    "case_id": "code-07",
+    "trial": "trial-0796",
+    "answer": {
+      "answer": "No\u2014not always. In `evidencekg/src/evidencekg/ingest.py`, a pending ingest looks up the latest extraction for the same document version, parser version, and config. If that extraction has status `failed`, it creates a new retry extraction ID and reparses; if an existing extraction is reusable, it uses that extraction instead. Thus a failed prior extraction is not simply reused on a later pending ingest. The `reextract` option also forces a new extraction when an existing one is found.\n\nA separate implementation appears in `corpus.py.txt`: when the extraction cache exists and `reextract` is false, it reads the cached parsed result. The shown code does not establish how that implementation handles a prior extraction failure, so the answer for that implementation is not established by these passages.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "            if status == \"pending\":\n                existing = store.db.execute(\n                    \"SELECT * FROM extractions WHERE document_version_id=? AND parser_version=? AND config_hash=? ORDER BY rowid DESC LIMIT 1\",\n                    (version, parser_hash, config_hash),\n                ).fetchone()\n                if existing and (existing[\"status\"] == \"failed\" or reextract):\n                    extraction = ident(\"X\", extraction, \"retry\", uuid.uuid4().hex)\n                    existing = None\n                elif existing:\n                    extraction = existing[\"id\"]"
+        },
+        {
+          "path": "corpus.py.txt",
+          "quote": "            if cache.exists() and not reextract:\n                parsed = json.loads(cache.read_text(\"utf-8\"))\n                children = []\n                for a in parsed.get(\"attachments\", []):\n                    b = (state / \"blobs\" / a[\"sha256\"]).read_bytes()\n                    if digest(b) != a[\"sha256\"]:\n                        raise CorpusError(\"Attachment cache checksum mismatch; rerun ingest --reextract.\")\n                    children.append((a[\"name\"], b))"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": false,
+        "complete": false,
+        "supported": false,
+        "rationale": "The EvidenceKG explanation correctly covers pending ingests, retry IDs, reparsing, and reextract; its citation includes the fresh UUID and existing=None. However, the claimed uncertainty about corpus.py overlooks the full source: extraction exceptions before cache creation are retried, while an existing cache is reused unless reextract is set, even after some later failures. That added abstention is unjustified and leaves the comparison incomplete. The reference also needs the candidate\u2019s pending-status qualification."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 2,
+    "case_id": "code-03",
+    "trial": "trial-0048",
+    "answer": {
+      "answer": "The parser starts the worker in a new session, then waits for it with the configured `parser_timeout`. If that wait raises an exception (including a timeout), it sends `SIGKILL` to the worker\u2019s process group and waits for the worker process. The timeout is caught afterward and returned as a failed parse result: no sections, attachments, or artifacts, and a warning containing the exception text. The ingestion caller treats that as a parse exception and marks the document `failed` with an error and no units. The supplied passages do not establish whether descendants are always terminated or provide evidence of a timeout occurring in a particular ingestion.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/parsers/__init__.py.txt",
+          "quote": "                env=env,\n                stdout=subprocess.PIPE,\n                stderr=subprocess.PIPE,\n                cwd=tmp,\n                start_new_session=True,\n            )"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/parsers/__init__.py.txt",
+          "quote": "            try:\n                stdout, stderr = p.communicate(timeout=cfg[\"parser_timeout\"])\n            except BaseException:\n                os.killpg(p.pid, signal.SIGKILL)\n                p.wait()\n                raise"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/parsers/__init__.py.txt",
+          "quote": "        except (OSError, ValueError, subprocess.TimeoutExpired) as exc:\n            return dict(sections=[], warnings=[str(exc)], attachments=[], artifacts=[], status=\"failed\")"
+        },
+        {
+          "path": "corpus.py.txt",
+          "quote": "        except Exception as exc:\n            rec.update(status=\"failed\", error=f\"{type(exc).__name__}: {exc}\", units=[])"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": false,
+        "complete": false,
+        "supported": false,
+        "rationale": "The process-group SIGKILL, child wait, and empty failed result with exception-text warning are correctly cited. However, the answer conflates corpus.py with EvidenceKG ingestion: the actual caller consumes the returned status and warnings rather than catching a propagated parse exception, and creates an empty failed segment rather than recording an error with no units. It omits that actual ingestion behavior, and its corpus.py citation cannot support it."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 2,
+    "case_id": "code-06",
+    "trial": "trial-0068",
+    "answer": {
+      "answer": "Citation IDs are derived from the segment ID and the span\u2019s start and end offsets: the implementation requires `cid == ident(\"Q\", segment[\"id\"], ref[\"start\"], ref[\"end\"])`. It builds the catalog from each segment\u2019s `citation_spans` and `citation_extra_spans`, adds that segment\u2019s ID and extraction ID to each reference, and validates the reference before accepting the ID. A repeated ID in the catalog is rejected by the same condition as an ID that does not match its span: `if cid != ident(...) or cid in result` raises `ValueError(\"Invalid or duplicate citation choice\")`. Thus the ID selects a span tied to a specific segment and offsets; resolution returns the catalog\u2019s original reference rather than accepting a model-supplied quote. The documentation describes these as verbatim text with segment-relative offsets and says the adapter resolves selected IDs to immutable quotes and offsets. The implementation also rejects unknown IDs and objects containing fields besides `citation_id`. Sources: `evidencekg/src/evidencekg/citation_choices.py.txt`: `for span in segment.get(\"citation_spans\", []) + segment.get(\"citation_extra_spans\", []):` / `ref = {**span, \"segment_id\": segment[\"id\"], \"extraction_id\": segment[\"extraction_id\"]}` / `if cid != ident(\"Q\", segment[\"id\"], ref[\"start\"], ref[\"end\"]) or cid in result:` / `raise ValueError(\"Invalid or duplicate citation choice\")` / `if set(node) != {\"citation_id\"} or node[\"citation_id\"] not in catalog:` / `return dict(catalog[node[\"citation_id\"]])`; `evidencekg/ASSURANCE.md`: `verbatim text` / `with segment-relative offsets` / `The subscription adapter now asks the model to select citation IDs and deterministically resolves them to immutable quotes and offsets.`",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/citation_choices.py.txt",
+          "quote": "for span in segment.get(\"citation_spans\", []) + segment.get(\"citation_extra_spans\", []):\n            ref = {**span, \"segment_id\": segment[\"id\"], \"extraction_id\": segment[\"extraction_id\"]}\n            cid = ref.pop(\"citation_id\")\n            validate_refs([ref], segments)\n            if cid != ident(\"Q\", segment[\"id\"], ref[\"start\"], ref[\"end\"]) or cid in result:\n                raise ValueError(\"Invalid or duplicate citation choice\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/citation_choices.py.txt",
+          "quote": "if \"citation_id\" in node:\n                if set(node) != {\"citation_id\"} or node[\"citation_id\"] not in catalog:\n                    raise ValueError(\"Unknown or malformed citation choice\")\n                return dict(catalog[node[\"citation_id\"]])"
+        },
+        {
+          "path": "evidencekg/ASSURANCE.md",
+          "quote": "Enhanced packets also include deterministic citation choices: verbatim text\nwith segment-relative offsets, partitioned into spans of at most 400 characters.\nThese choices cover all text and select no relevance. Supplemental choices cover\nmandatory wording markers crossing a partition boundary. The subscription adapter\nnow asks the model to select citation IDs and deterministically resolves them to\nimmutable quotes and offsets."
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "The answer accurately explains deterministic IDs tied to segment IDs and span offsets, reference validation, and duplicate catalog IDs raising ValueError. Its additional details about catalog construction, immutable reference resolution, and rejection of unknown or malformed selections are directly supported by the cited full sources. It covers every material part of the question and agrees with the reference."
+      },
+      "passed": true
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 2,
+    "case_id": "code-09",
+    "trial": "trial-0099",
+    "answer": {
+      "answer": "In the paginated API, if the first result in the page alone exceeds the 750,000-byte budget, retrieval raises `ValueError(\"One result exceeds response budget; use bounded source/feature reads\")`. If earlier rows fit but adding a later row would exceed the budget, it stops the page and returns the rows already accumulated, with a continuation cursor when results remain. `read_segments` has similar behavior under its configurable output budget: it raises if the first requested segment cannot fit; otherwise it returns the accumulated segments and lists the unreturned IDs. The reference ranking adapter also raises this error for an oversized single result.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/retrieval.py.txt",
+          "quote": "            if used + size > 750000:\n                if not items:\n                    raise ValueError(\"One result exceeds response budget; use bounded source/feature reads\")\n                break"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/retrieval.py.txt",
+          "quote": "        nxt = (\n            base64.urlsafe_b64encode(\n                dump({\"snapshot\": snapshot, \"scope\": signature, \"after\": key(items[-1])}).encode()\n            ).decode()\n            if len(selected) > len(items)\n            else None"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/retrieval.py.txt",
+          "quote": "                if not result[\"items\"]:\n                    raise ValueError(\"Single segment exceeds output budget; increase max_output_bytes\")\n                result[\"remaining_segment_ids\"] = segment_ids[i:]\n                break"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/reference_ranking.py.txt",
+          "quote": "            if len(dump(row).encode()) > 750000:\n                raise ValueError(\"One result exceeds response budget; use bounded source/feature reads\")"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "Correctly states the 750,000-byte threshold, first-item ValueError and bounded-read guidance, and page termination with a continuation cursor after accumulated items. Citations support these behaviors and the additional read_segments and ranking-adapter claims. The source clarifies that pagination counts encoded JSON row bytes; the candidate\u2019s shorter wording does not contradict this."
+      },
+      "passed": true
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 2,
+    "case_id": "code-02",
+    "trial": "trial-0148",
+    "answer": {
+      "answer": "A cursor is bound to both its snapshot and its query scope. Reusing it with a different snapshot or scope is rejected with `ValueError(\"Invalid cursor\")`; the underlying cause is a snapshot/scope mismatch. The cursor is not applied to the new retrieval. Both the native paginator and the reference cache check these bindings. The tests specifically verify that a cursor from one snapshot is rejected when used with another snapshot for the same neighbour request.\n\nEvidence:\n\n- `evidencekg/src/evidencekg/retrieval.py.txt`: `if value[\"snapshot\"] != snapshot or value[\"scope\"] != signature:`\n- `evidencekg/src/evidencekg/retrieval.py.txt`: `raise ValueError(\"Cursor scope/snapshot mismatch\")`\n- `evidencekg/src/evidencekg/retrieval.py.txt`: `raise ValueError(\"Invalid cursor\")`\n- `evidencekg/src/evidencekg/reference_cache.py.txt`: `if value[\"snapshot\"] != c[\"snapshot\"] or value[\"scope\"] != c[\"signature\"]:`\n- `evidencekg/src/evidencekg/reference_cache.py.txt`: `raise ValueError(\"Invalid cursor\")`\n- `evidencekg/tests/test_reference_cache.py.txt`: `with pytest.raises(ValueError, match=\"Invalid cursor\"):`\n- `evidencekg/tests/test_reference_cache.py.txt`: `cached.neighbours(two, doc, cursor=first[\"next_cursor\"])`",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/retrieval.py.txt",
+          "quote": "if value[\"snapshot\"] != snapshot or value[\"scope\"] != signature:\n                    raise ValueError(\"Cursor scope/snapshot mismatch\")\n                after = value[\"after\"]\n            except Exception as exc:\n                raise ValueError(\"Invalid cursor\") from exc"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/reference_cache.py.txt",
+          "quote": "if value[\"snapshot\"] != c[\"snapshot\"] or value[\"scope\"] != c[\"signature\"]:\n                    raise ValueError(\"Cursor scope/snapshot mismatch\")\n                start = bisect_right(c[\"keys\"], value[\"after\"])\n            except Exception as exc:\n                raise ValueError(\"Invalid cursor\") from exc"
+        },
+        {
+          "path": "evidencekg/tests/test_reference_cache.py.txt",
+          "quote": "with pytest.raises(ValueError, match=\"Invalid cursor\"):\n        cached.neighbours(two, doc, cursor=first[\"next_cursor\"])"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "The answer accurately states that either snapshot or scope-hash mismatch rejects the cursor with ValueError(\"Invalid cursor\"), chaining the mismatch error before applying pagination. Valid citations support both implementations and the cross-snapshot neighbour test. It covers all material aspects and agrees with the reference and full sources."
+      },
+      "passed": true
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 2,
+    "case_id": "code-01",
+    "trial": "trial-0251",
+    "answer": {
+      "answer": "Ingestion computes a content-addressed snapshot ID, then freezes lexical search into an FTS5 table named from that validated ID. `freeze_fts` creates the table only if absent and populates it from segments joined to that snapshot\u2019s documents. Retrieval can therefore search the snapshot\u2019s frozen table instead of consulting a mutable global index. The supplied implementation excerpt supports the table creation and population; it does not include the retrieval call site, so the exact query path is not established here.\n\nEvidence:\n\n- `evidencekg/src/evidencekg/snapshots.py.txt`: `def fts_name(snapshot_id):\\n    if not re.fullmatch(r\"N[0-9a-f]{64}\", snapshot_id):\\n        raise ValueError(\"Invalid snapshot identifier\")\\n    return \"fts_\" + snapshot_id[1:]`\n- `evidencekg/src/evidencekg/snapshots.py.txt`: `def freeze_fts(store, snapshot_id):\\n    name = fts_name(snapshot_id)\\n    exists = store.db.execute(\"SELECT 1 FROM sqlite_master WHERE type='table' AND name=?\", (name,)).fetchone()\\n    if not exists:`\n- `evidencekg/src/evidencekg/snapshots.py.txt`: `f\"\"\"INSERT INTO {name} SELECT s.id,s.text FROM segments s JOIN snapshot_documents sd ON sd.extraction_id=s.extraction_id WHERE sd.snapshot_id=? ORDER BY s.id\"\"\",\\n            (snapshot_id,),`\n- `evidencekg/src/evidencekg/hybrid/lexical.py.txt` shows a separate in-memory lexical index is populated from the `segments` mapping passed to its constructor: `[(sid, segments[sid][\"text\"]) for sid in sorted(segments)]`. The excerpt does not establish how that mapping is scoped or invoked.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/snapshots.py.txt",
+          "quote": "def fts_name(snapshot_id):\n    if not re.fullmatch(r\"N[0-9a-f]{64}\", snapshot_id):\n        raise ValueError(\"Invalid snapshot identifier\")\n    return \"fts_\" + snapshot_id[1:]"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/snapshots.py.txt",
+          "quote": "def freeze_fts(store, snapshot_id):\n    name = fts_name(snapshot_id)\n    exists = store.db.execute(\"SELECT 1 FROM sqlite_master WHERE type='table' AND name=?\", (name,)).fetchone()\n    if not exists:"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/snapshots.py.txt",
+          "quote": "f\"\"\"INSERT INTO {name} SELECT s.id,s.text FROM segments s JOIN snapshot_documents sd ON sd.extraction_id=s.extraction_id WHERE sd.snapshot_id=? ORDER BY s.id\"\"\",\n            (snapshot_id,),"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/hybrid/lexical.py.txt",
+          "quote": "self.db.executemany(\n            \"INSERT INTO passages VALUES(?,?)\", [(sid, segments[sid][\"text\"]) for sid in sorted(segments)]\n        )"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": false,
+        "complete": false,
+        "supported": false,
+        "rationale": "The freezing mechanism is accurately described, but the claim that the supplied evidence lacks the retrieval call site is false: retrieval.py explicitly uses fts_name(snapshot_id) and queries that table with MATCH and BM25. This leaves a material part of the answer unresolved despite available evidence. Citations also omit ingest.py\u2019s freeze_fts call and snapshot-ID computation, and retrieval.py\u2019s query path."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 2,
+    "case_id": "code-10",
+    "trial": "trial-0460",
+    "answer": {
+      "answer": "No. The parser cannot continue when its Linux network-denial policy fails to load: the implementation raises an error if `seccomp_load` fails. The README states that failure to establish the policy fails extraction.\n\nEvidence:\n\n- `evidencekg/src/evidencekg/parsers/isolation.py.txt`: `if library.seccomp_load(context):\\n            raise RuntimeError(\"Cannot apply parser network policy\")`\n- `evidencekg/README.md`: `Failure to establish that policy fails extraction.`",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/parsers/isolation.py.txt",
+          "quote": "if library.seccomp_load(context):\n            raise RuntimeError(\"Cannot apply parser network policy\")"
+        },
+        {
+          "path": "evidencekg/README.md",
+          "quote": "Failure to establish that policy fails extraction."
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "The answer correctly states that seccomp load failure raises an error and fails extraction, with valid citations to both supplied sources. It omits the reference\u2019s finally-block context release, but that cleanup detail is not material to whether parsing can continue."
+      },
+      "passed": true
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 2,
+    "case_id": "code-08",
+    "trial": "trial-0525",
+    "answer": {
+      "answer": "When a read omits `snapshot_id`, `Store.snapshot()` first follows the singleton row in `current_snapshot` and loads that snapshot. If no head row exists, it falls back to the latest snapshot by `created_at`, then `id`. Reads that resolve through this method, such as `inventory()`, therefore follow the acquisition head by default. The head is updated during ingestion, after snapshot records and indexes are prepared: an upsert sets `current_snapshot` to the newly created snapshot. The ingest path also reads that head to choose the prior manifest. These are implementation details; the snapshots module\u2019s docstring describes the head as independent of content identity.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/db.py.txt",
+          "quote": "    def snapshot(self, snapshot_id=None):\n        if snapshot_id is None:\n            head = self.db.execute(\"SELECT snapshot_id FROM current_snapshot WHERE singleton=1\").fetchone()\n            if head:\n                return self.one(\"SELECT * FROM snapshots WHERE id=?\", (head[0],))\n            return self.one(\"SELECT * FROM snapshots ORDER BY created_at DESC,id DESC LIMIT 1\")\n        return self.one(\"SELECT * FROM snapshots WHERE id=?\", (snapshot_id,))"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "        latest = store.db.execute(\"SELECT snapshot_id FROM current_snapshot WHERE singleton=1\").fetchone()\n        previous_manifest = store.manifest(latest[0]) if latest else {\"documents\": [], \"history\": []}"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "        store.db.execute(\n            \"INSERT INTO current_snapshot VALUES(1,?) ON CONFLICT(singleton) DO UPDATE SET snapshot_id=excluded.snapshot_id\",\n            (snapshot,),\n        )"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/retrieval.py.txt",
+          "quote": "    def inventory(self, snapshot_id=None, cursor=None, limit=100):\n        snapshot = self.store.snapshot(snapshot_id)[\"id\"]"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": false,
+        "rationale": "The answer accurately covers head-first lookup, fallback ordering, and ingestion\u2019s head upsert after index preparation (specifically freeze_fts). It also correctly describes inventory and prior-manifest selection. However, the snapshots-module docstring claim has no citation or supplied source. The upsert citation alone also omits the preceding FTS-freezing step, although the full ingestion source confirms that chronology."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 2,
+    "case_id": "code-05",
+    "trial": "trial-0607",
+    "answer": {
+      "answer": "No. In the citation-choice path, the resolver accepts only an object containing a known `citation_id`, then replaces that selection with the catalog entry\u2019s original quote and offsets. Altered quote fields and unknown IDs are rejected; the implementation does not repair an altered quote supplied by the model. This conclusion is specific to citation-choice resolution; the supplied sources do not establish behavior for every other submission path.\n\nEvidence:\n\n- `evidencekg/src/evidencekg/citation_choices.py.txt`: `if set(node) != {\"citation_id\"} or node[\"citation_id\"] not in catalog:` followed by `raise ValueError(\"Unknown or malformed citation choice\")`. A known selection resolves as `return dict(catalog[node[\"citation_id\"]])`.\n- `evidencekg/tests/test_citation_choices.py.txt`: `with pytest.raises(ValueError):` followed by `resolve({\"sources\": [{\"citation_id\": cid, \"quote\": \"invented\"}]}, payload)`, and a separate assertion that `resolve({\"sources\": [{\"citation_id\": \"Q-forged\"}]}, payload)` raises `ValueError`.\n- `evidencekg/ASSURANCE.md` documents: `The subscription adapter now asks the model to select citation IDs and deterministically resolves them to immutable quotes and offsets.` It also says `Unknown IDs, wrong source scope, changed raw duplicate submissions and malformed results are rejected durably.` The code and tests above support the specific resolver behavior.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/citation_choices.py.txt",
+          "quote": "if set(node) != {\"citation_id\"} or node[\"citation_id\"] not in catalog:\n                    raise ValueError(\"Unknown or malformed citation choice\")\n                return dict(catalog[node[\"citation_id\"]])"
+        },
+        {
+          "path": "evidencekg/tests/test_citation_choices.py.txt",
+          "quote": "    with pytest.raises(ValueError):\n        resolve({\"sources\": [{\"citation_id\": \"Q-forged\"}]}, payload)\n    with pytest.raises(ValueError):\n        resolve({\"sources\": [{\"citation_id\": cid, \"quote\": \"invented\"}]}, payload)"
+        },
+        {
+          "path": "evidencekg/ASSURANCE.md",
+          "quote": "The subscription adapter now asks the model to select citation IDs and deterministically resolves them to immutable quotes and offsets. Both raw selections and resolved results are stored,\nhash-linked, exported in `citation_receipts.json`, and reproduced by integrity\nchecks. Unknown IDs, wrong source scope, changed raw duplicate submissions and\nmalformed results are rejected durably."
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": false,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "The answer addresses both questions accurately. Cited code and tests show that unknown IDs and citation objects with extra quote fields are rejected, while valid IDs expand to catalog entries. The full sources additionally confirm exact-substring validation during catalog construction. Omitting that implementation detail does not undermine the answer\u2019s completeness; its scope qualification does not contradict the documented strict behavior of ordinary submissions."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 2,
+    "case_id": "code-04",
+    "trial": "trial-0660",
+    "answer": {
+      "answer": "PDF extraction can fail in ways that leave descendants or source content unknown. The implementation attempts native text extraction, then OCR for pages with no extracted text; if that path fails, it records an unread/OCR gap. It also marks a failed PDF extraction as making inventory incomplete, because the system treats a failed PDF as a possible container whose descendants could not be fully enumerated. Incomplete inventory means the total is reported as unknown (null), while known entries remain countable.\n\nThe README states: \u201cA symlink, inaccessible directory or unenumerated container depth makes the overall denominator unknown. Known records are still enumerated; `inventory.total` is then null and `known_matches` reports the records actually known.\u201d It also says \u201cMissing tools/data produce explicit extraction gaps.\u201d\n\nThe implementation condition is broader than just a page OCR gap: a PDF document with overall `status == \"failed\"` sets `unknown_descendants` and adds an error saying \u201cContainer descendants could not be fully enumerated; source denominator is unknown\u201d. A warning-level page extraction/OCR gap instead makes the parser result partial, so that condition alone does not trigger this failed-PDF branch. Thus, failed PDF extraction can block a complete inventory total because the system cannot establish the denominator; a page-level gap by itself does not necessarily do so.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/parsers/worker.py.txt",
+          "quote": "                        f\"Page {i}: unread/OCR gap: {exc}\""
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "            if status == \"failed\" and (\n                Path(path).suffix.lower() in (\".eml\", \".pdf\", \".docx\") or mime == \"message/rfc822\"\n            ):\n                unknown_descendants = True"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "                    \"error\": \"Container descendants could not be fully enumerated; source denominator is unknown\","
+        },
+        {
+          "path": "evidencekg/README.md",
+          "quote": "A symlink, inaccessible\ndirectory or unenumerated container depth makes the overall denominator unknown.\nKnown records are still enumerated; `inventory.total` is then null and\n`known_matches` reports the records actually known."
+        },
+        {
+          "path": "evidencekg/README.md",
+          "quote": "Missing tools/data produce explicit extraction gaps."
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": false,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "The answer accurately explains the full chain: failed PDF status implies potentially unknown descendants, marks inventory incomplete, and yields a null total while preserving known_matches. Its cited sources support these claims. The additional distinction between page-level OCR warnings (partial extraction) and overall failed PDF status is supported by the full worker and ingestion code and usefully qualifies the reference answer."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "original",
+    "repeat": 2,
+    "case_id": "code-07",
+    "trial": "trial-0796",
+    "answer": {
+      "answer": "The source shows different behavior in the two ingest implementations, so there is no single unconditional answer.\n\nIn `evidencekg/src/evidencekg/ingest.py`, a later ingest does not reuse a prior failed extraction when it is found for the same document version, parser version, and config hash: it creates a retry extraction ID and proceeds to parse again. The code says:\n\n`if existing and (existing[\"status\"] == \"failed\" or reextract):`\n`    extraction = ident(\"X\", extraction, \"retry\", uuid.uuid4().hex)`\n`    existing = None`\n\nThe later `if existing:` branch is therefore skipped for that failed result, and parsing is run when the status is pending:\n\n`if status == \"pending\":`\n`    result = parsers.parse(data, Path(path).suffix.lower(), cfg)`\n\nThere is a qualification: an extraction with a non-failed status is reused when found and `reextract` is false. Its stored artifact is loaded here:\n\n`if existing:`\n`    artifact = json.loads(store.get(existing[\"artifact_sha\"]))`\n`    status, warnings = existing[\"status\"], json.loads(existing[\"warnings_json\"])`\n`    children = artifact[\"children\"]`\n\nThe separate implementation in `corpus.py.txt` caches successful extraction results by content, suffix, and parser signature and reuses them when present, unless `reextract` is set. Its shown logic is:\n\n`if cache.exists() and not reextract:`\n`    parsed = json.loads(cache.read_text(\"utf-8\"))`\n`else:`\n`    parsed = extract(data, suffix, cfg)`\n\nThat passage alone does not establish how a prior *failed* extraction is recorded or reused by this implementation; the shown cache write is reached only after `extract` returns. So for `corpus.py.txt`, whether a failed prior extraction is reused cannot be established from the supplied source passages.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "if existing and (existing[\"status\"] == \"failed\" or reextract):\n                    extraction = ident(\"X\", extraction, \"retry\", uuid.uuid4().hex)\n                    existing = None"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "if status == \"pending\":\n                    result = parsers.parse(data, Path(path).suffix.lower(), cfg)\n                    status = result[\"status\"]"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "if existing:\n                artifact = json.loads(store.get(existing[\"artifact_sha\"]))\n                status, warnings = existing[\"status\"], json.loads(existing[\"warnings_json\"])\n                children = artifact[\"children\"]"
+        },
+        {
+          "path": "corpus.py.txt",
+          "quote": "if cache.exists() and not reextract:\n                parsed = json.loads(cache.read_text(\"utf-8\"))"
+        },
+        {
+          "path": "corpus.py.txt",
+          "quote": "else:\n                parsed = extract(data, suffix, cfg)"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": false,
+        "complete": false,
+        "supported": false,
+        "rationale": "The candidate correctly quotes the UUID retry mechanism, but omits its enclosing condition: the current acquisition must be pending. Already-failed acquisitions can reuse an existing extraction, so the reference is also overbroad. Its corpus.py uncertainty is unjustified by the full source: extract exceptions occur before cache writing, whereas failures after cache creation can leave reusable cached results. The citations are genuine but do not support these broader conclusions or cover these material distinctions."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 1,
+    "case_id": "code-03",
+    "trial": "trial-0048",
+    "answer": {
+      "answer": "For the `evidencekg` parser implementation, a timeout from `communicate` enters the exception handler: the parser was launched in a new session, and the code sends `SIGKILL` to its process group (`p.pid` as the group ID), waits for the parser process, then re-raises the timeout. The outer handler catches `subprocess.TimeoutExpired` and returns a failed parse result with empty sections, attachments, and artifacts, and the exception text in `warnings`.\n\nIn ingestion, that result\u2019s `status` and warning are retained on the extraction/document record. So the document is recorded as failed, with no extracted text from that parse. For failed `.eml`, `.pdf`, or `.docx` inputs, ingestion also marks inventory incomplete because container descendants may be unknown. The code does not establish that unrelated process groups are affected.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/parsers/__init__.py.txt",
+          "quote": "                start_new_session=True,\n            )\n            try:\n                stdout, stderr = p.communicate(timeout=cfg[\"parser_timeout\"])\n            except BaseException:\n                os.killpg(p.pid, signal.SIGKILL)\n                p.wait()\n                raise"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/parsers/__init__.py.txt",
+          "quote": "        except (OSError, ValueError, subprocess.TimeoutExpired) as exc:\n            return dict(sections=[], warnings=[str(exc)], attachments=[], artifacts=[], status=\"failed\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "                if status == \"pending\":\n                    result = parsers.parse(data, Path(path).suffix.lower(), cfg)\n                    status = result[\"status\"]\n                    warnings += result[\"warnings\"]"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "            manifest[\"documents\"].append(\n                dict(\n                    path=path,\n                    source_entry_id=entry,\n                    source_kind=\"attachment\" if parent else \"filesystem\",\n                    document_version_id=version,\n                    extraction_id=extraction,\n                    blob=blob,\n                    status=status,\n                    warnings=warnings,\n                    parent=parent,\n                    mime_part=part,\n                    empty=artifact[\"empty\"],"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "            if status == \"failed\" and (\n                Path(path).suffix.lower() in (\".eml\", \".pdf\", \".docx\") or mime == \"message/rfc822\"\n            ):\n                unknown_descendants = True"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "Accurately describes the timeout sequence: SIGKILL to the parser\u2019s process group, wait, re-raise, then conversion to an empty failed result with the exception warning. It covers ingestion retaining the failure and warning. Citations and full sources also support the added container inventory consequences; these valid details extend the reference without contradicting it."
+      },
+      "passed": true
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 1,
+    "case_id": "code-06",
+    "trial": "trial-0068",
+    "answer": {
+      "answer": "Citation choices are built from each segment\u2019s `citation_spans` and `citation_extra_spans`. For each span, the code adds the segment and extraction IDs, removes its supplied citation ID, validates the reference, then requires the ID to equal `ident(\"Q\", segment_id, start, end)` and not already exist in the catalog. `ident` is the prefix plus a hash of the serialized parts, so the ID is tied to the segment and offsets. A failed check raises `ValueError(\"Invalid or duplicate citation choice\")`.\n\nValidation checks that the segment is in the task, the extraction matches, the offsets form a valid nonempty range, and the quote exactly equals the segment text at those offsets. The resolver accepts a choice object only when its sole key is `citation_id` and that ID exists in the current payload\u2019s catalog; it replaces the choice with a copy of the catalog reference. Thus callers cannot alter the quote or offsets through the choice object.\n\nThe retrieved implementation rejects duplicate IDs while constructing the catalog. It does not show a check rejecting repeated uses of the same valid ID in separate selections. Separately, the CLI worker\u2019s strict JSON parser rejects duplicate object keys; that is different from rejecting repeated citation selections.\n\nEvidence:\n- `evidencekg/src/evidencekg/citation_choices.py.txt`: \u201cref = {**span, \"segment_id\": segment[\"id\"], \"extraction_id\": segment[\"extraction_id\"]}\u201d \u2026 \u201cif cid != ident(\"Q\", segment[\"id\"], ref[\"start\"], ref[\"end\"]) or cid in result:\u201d \u2026 \u201craise ValueError(\"Invalid or duplicate citation choice\")\u201d\n- `evidencekg/src/evidencekg/db.py.txt`: \u201cdef ident(prefix, *parts):\\n    return prefix + sha(dump(parts))\u201d\n- `evidencekg/src/evidencekg/validation.py.txt`: \u201cif not seg or ref[\"extraction_id\"] != seg[\"extraction_id\"]:\\n            raise ValueError(\"Evidence is not in this task\")\u201d \u2026 \u201cif type(lo) is not int or type(hi) is not int or not 0 <= lo < hi <= len(seg[\"text\"]):\\n            raise ValueError(\"Invalid citation span\")\u201d \u2026 \u201cif seg[\"text\"][lo:hi] != ref[\"quote\"]:\\n            raise ValueError(\"Fabricated or altered quotation\")\u201d\n- `evidencekg/src/evidencekg/citation_choices.py.txt`: \u201cif set(node) != {\"citation_id\"} or node[\"citation_id\"] not in catalog:\\n                    raise ValueError(\"Unknown or malformed citation choice\")\u201d \u2026 \u201creturn dict(catalog[node[\"citation_id\"]])\u201d\n- `evidencekg/src/evidencekg/worker_adapters/cli.py.txt`: \u201cif key in result:\\n            raise ValueError(\"Duplicate JSON key: \" + key)\u201d",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/citation_choices.py.txt",
+          "quote": "            ref = {**span, \"segment_id\": segment[\"id\"], \"extraction_id\": segment[\"extraction_id\"]}\n            cid = ref.pop(\"citation_id\")\n            validate_refs([ref], segments)\n            if cid != ident(\"Q\", segment[\"id\"], ref[\"start\"], ref[\"end\"]) or cid in result:\n                raise ValueError(\"Invalid or duplicate citation choice\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/db.py.txt",
+          "quote": "def ident(prefix, *parts):\n    return prefix + sha(dump(parts))"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/validation.py.txt",
+          "quote": "def validate_refs(refs, segments):\n    for ref in refs:\n        REF_VALIDATOR.validate(ref)\n        seg = segments.get(ref[\"segment_id\"])\n        if not seg or ref[\"extraction_id\"] != seg[\"extraction_id\"]:\n            raise ValueError(\"Evidence is not in this task\")\n        lo, hi = ref[\"start\"], ref[\"end\"]\n        if type(lo) is not int or type(hi) is not int or not 0 <= lo < hi <= len(seg[\"text\"]):\n            raise ValueError(\"Invalid citation span\")\n        if seg[\"text\"][lo:hi] != ref[\"quote\"]:\n            raise ValueError(\"Fabricated or altered quotation\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/citation_choices.py.txt",
+          "quote": "    def visit(node):\n        if isinstance(node, dict):\n            if \"citation_id\" in node:\n                if set(node) != {\"citation_id\"} or node[\"citation_id\"] not in catalog:\n                    raise ValueError(\"Unknown or malformed citation choice\")\n                return dict(catalog[node[\"citation_id\"]])\n            return {key: visit(value) for key, value in node.items()}\n        if isinstance(node, list):\n            return [visit(value) for value in node]\n        return node"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/worker_adapters/cli.py.txt",
+          "quote": "def _strict_object(pairs):\n    result = {}\n    for key, value in pairs:\n        if key in result:\n            raise ValueError(\"Duplicate JSON key: \" + key)\n        result[key] = value\n    return result"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "Accurately explains deterministic IDs bound to segment and offsets, reference validation, and ValueError rejection of duplicate catalog IDs. Citations and full sources support the resolver\u2019s immutable-reference behavior and the distinction between duplicate catalog entries, repeated selections, and duplicate JSON keys. Covers every material part of the reference answer without contradiction."
+      },
+      "passed": true
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 1,
+    "case_id": "code-09",
+    "trial": "trial-0099",
+    "answer": {
+      "answer": "In the native paginated API, if the next single result is larger than the 750,000-byte budget and no result has yet fit on that page, the call raises `ValueError` with \u201cOne result exceeds response budget; use bounded source/feature reads\u201d. If earlier results fit, the page returns those and stops before the oversized result; it remains among the remaining results for a later cursor request. [evidencekg/src/evidencekg/retrieval.py.txt]",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/retrieval.py.txt",
+          "quote": "            if used + size > 750000:\n                if not items:\n                    raise ValueError(\"One result exceeds response budget; use bounded source/feature reads\")\n                break"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/retrieval.py.txt",
+          "quote": "            if len(selected) > len(items)\n            else None\n        )\n        manifest = self.store.manifest(snapshot)\n        return dict(\n            snapshot_id=snapshot,\n            items=items,\n            next_cursor=nxt,"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "Accurately describes both branches: an oversized first item raises the quoted ValueError; otherwise the page ends with previously accepted items. The cited source also supports retaining the oversized item for the next cursor request, where it would raise again. All material behavior is covered, though the answer could clarify that size is measured in encoded JSON bytes."
+      },
+      "passed": true
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 1,
+    "case_id": "code-02",
+    "trial": "trial-0148",
+    "answer": {
+      "answer": "In the retrieval `API.page` implementation, a cursor carries both the snapshot ID and a hash of the query scope. Reusing it with a different snapshot or scope raises `ValueError(\"Invalid cursor\")`; the page is not returned. The mismatch raises an inner `ValueError`, which the cursor handler wraps as `Invalid cursor`.\n\n`evidencekg/src/evidencekg/retrieval.py.txt`:\n> `if value[\"snapshot\"] != snapshot or value[\"scope\"] != signature:`\n> `    raise ValueError(\"Cursor scope/snapshot mismatch\")`\n> `except Exception as exc:`\n> `    raise ValueError(\"Invalid cursor\") from exc`\n\nFor cached neighbour pages, the cursor is also checked against the cached snapshot and scope signature and similarly rejected as `Invalid cursor` on mismatch (`evidencekg/src/evidencekg/reference_cache.py.txt`). The test confirms that a cursor from one snapshot fails when used with another (`evidencekg/tests/test_reference_cache.py.txt`).",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/retrieval.py.txt",
+          "quote": "                if value[\"snapshot\"] != snapshot or value[\"scope\"] != signature:\n                    raise ValueError(\"Cursor scope/snapshot mismatch\")\n                after = value[\"after\"]\n            except Exception as exc:\n                raise ValueError(\"Invalid cursor\") from exc"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/reference_cache.py.txt",
+          "quote": "                if value[\"snapshot\"] != c[\"snapshot\"] or value[\"scope\"] != c[\"signature\"]:\n                    raise ValueError(\"Cursor scope/snapshot mismatch\")\n                start = bisect_right(c[\"keys\"], value[\"after\"])\n            except Exception as exc:\n                raise ValueError(\"Invalid cursor\") from exc"
+        },
+        {
+          "path": "evidencekg/tests/test_reference_cache.py.txt",
+          "quote": "    with pytest.raises(ValueError, match=\"Invalid cursor\"):\n        cached.neighbours(two, doc, cursor=first[\"next_cursor\"])"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "The answer accurately explains that either a snapshot or scope-hash mismatch raises an inner ValueError, wrapped as ValueError(\"Invalid cursor\"), preventing a page return. It covers all material requirements. The cited retrieval code, cache implementation, and cross-snapshot test support its claims and agree with the full sources and reference rubric."
+      },
+      "passed": true
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 1,
+    "case_id": "code-01",
+    "trial": "trial-0251",
+    "answer": {
+      "answer": "Ingestion builds a separate FTS5 table for each snapshot. `freeze_fts` derives the table name from a validated snapshot ID and populates it from segments joined to that snapshot\u2019s `snapshot_documents` rows:\n\n- `evidencekg/src/evidencekg/snapshots.py.txt`: `if not re.fullmatch(r\"N[0-9a-f]{64}\", snapshot_id):\\n        raise ValueError(\"Invalid snapshot identifier\")\\n    return \"fts_\" + snapshot_id[1:]`\n- `evidencekg/src/evidencekg/snapshots.py.txt`: `f\"\"\"INSERT INTO {name} SELECT s.id,s.text FROM segments s JOIN snapshot_documents sd ON sd.extraction_id=s.extraction_id WHERE sd.snapshot_id=? ORDER BY s.id\"\"\",\\n            (snapshot_id,),`\n\nIngestion calls `freeze_fts(store, snapshot)` before updating `current_snapshot`. The global `segment_fts` table is also populated during segment extraction, but lexical search uses the per-snapshot table instead. `API.search` validates the requested snapshot, selects its FTS table by name, and joins search hits through `snapshot_documents` scoped to that same snapshot:\n\n- `evidencekg/src/evidencekg/ingest.py.txt`: `freeze_fts(store, snapshot)`\n- `evidencekg/src/evidencekg/retrieval.py.txt`: `self.store.snapshot(snapshot_id)\\n            name = fts_name(snapshot_id)`\n- `evidencekg/src/evidencekg/retrieval.py.txt`: `FROM {name} JOIN segments s ON s.id={name}.segment_id JOIN extractions e ON e.id=s.extraction_id\\n                JOIN snapshot_documents sd ON sd.extraction_id=e.id WHERE sd.snapshot_id=? AND {name} MATCH ?`\n\nThus later ingestion can advance the mutable current head and add segments to the global index without changing the FTS table already frozen for an earlier snapshot. The search is bound to the supplied snapshot ID rather than resolving the mutable current head during lexical lookup.",
+      "abstain": false,
+      "citations": []
+    },
+    "original_score": {
+      "citation_gate": false,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "The answer accurately explains snapshot-specific FTS creation, population through snapshot_documents, and lexical lookup through fts_name. Its chronology and distinction from segment_fts match the full sources. Inline file citations and quotations provide valid support despite the empty citations array. The existing-table guard also supports the conclusion that later ingestion preserves earlier frozen indexes."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 1,
+    "case_id": "code-10",
+    "trial": "trial-0460",
+    "answer": {
+      "answer": "For PDF, DOCX, email, and image parser subprocesses, no: the parser worker calls `deny_network()` before extraction, and a policy setup failure raises and causes parsing to fail. The parent converts that subprocess failure into an extraction with status `failed`; it does not continue parsing. The README also says policy failure fails extraction. Plain TXT/MD are handled directly by `extract()` in the parent process, so this worker policy path does not apply to them.\n\nEvidence:\n- `evidencekg/src/evidencekg/parsers/worker.py.txt`: `def main():\\n    from .isolation import deny_network\\n\\n    deny_network()`\n- `evidencekg/src/evidencekg/parsers/isolation.py.txt`: `if not context:\\n        raise RuntimeError(\"Cannot initialize parser network policy\")`\n- `evidencekg/src/evidencekg/parsers/isolation.py.txt`: `raise RuntimeError(\"Cannot configure parser network policy\")`\n- `evidencekg/src/evidencekg/parsers/isolation.py.txt`: `if library.seccomp_load(context):\\n            raise RuntimeError(\"Cannot apply parser network policy\")`\n- `evidencekg/src/evidencekg/parsers/__init__.py.txt`: `if p.returncode:\\n                raise ValueError(\"Parser failed: \" + stderr.decode(errors=\"replace\")[-1500:])` and `except (OSError, ValueError, subprocess.TimeoutExpired) as exc:\\n            return dict(sections=[], warnings=[str(exc)], attachments=[], artifacts=[], status=\"failed\")`\n- `evidencekg/src/evidencekg/parsers/__init__.py.txt`: `if suffix in (\".txt\", \".md\"):\\n        from .worker import extract\\n\\n        return extract(data, suffix, cfg, None)`\n- `evidencekg/README.md`: `Failure to establish that policy fails extraction.`",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/parsers/worker.py.txt",
+          "quote": "def main():\n    from .isolation import deny_network\n\n    deny_network()"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/parsers/isolation.py.txt",
+          "quote": "if not context:\n        raise RuntimeError(\"Cannot initialize parser network policy\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/parsers/isolation.py.txt",
+          "quote": "                raise RuntimeError(\"Cannot configure parser network policy\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/parsers/isolation.py.txt",
+          "quote": "        if library.seccomp_load(context):\n            raise RuntimeError(\"Cannot apply parser network policy\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/parsers/__init__.py.txt",
+          "quote": "            if p.returncode:\n                raise ValueError(\"Parser failed: \" + stderr.decode(errors=\"replace\")[-1500:])"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/parsers/__init__.py.txt",
+          "quote": "        except (OSError, ValueError, subprocess.TimeoutExpired) as exc:\n            return dict(sections=[], warnings=[str(exc)], attachments=[], artifacts=[], status=\"failed\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/parsers/__init__.py.txt",
+          "quote": "    if suffix in (\".txt\", \".md\"):\n        from .worker import extract\n\n        return extract(data, suffix, cfg, None)"
+        },
+        {
+          "path": "evidencekg/README.md",
+          "quote": "Failure to establish that policy fails extraction."
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "The cited code confirms that seccomp load failure raises RuntimeError before extraction, and the parent reports status=\"failed\". The TXT/MD exception is accurately qualified and supported. All material claims have valid citations consistent with the full sources. Although the reference also mentions context release in finally, that cleanup detail is not material to whether parsing continues."
+      },
+      "passed": true
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 1,
+    "case_id": "code-08",
+    "trial": "trial-0525",
+    "answer": {
+      "answer": "In the EvidenceKG implementation, a read that omits `snapshot_id` resolves through `Store.snapshot(None)`: it first uses the row in `current_snapshot` with `singleton=1`; if that row is absent, it falls back to the newest snapshot by `created_at DESC, id DESC`. The inventory API calls this default resolver when it has no snapshot ID, and passes the resolved ID into paging and manifest reads. The head is updated during ingestion after the snapshot records, relationships, and frozen FTS index are created, by an upsert into `current_snapshot`. The provided sources show that fallback behavior explicitly; they do not establish whether or when the head row can be absent in normal operation.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/db.py.txt",
+          "quote": "    def snapshot(self, snapshot_id=None):\n        if snapshot_id is None:\n            head = self.db.execute(\"SELECT snapshot_id FROM current_snapshot WHERE singleton=1\").fetchone()\n            if head:\n                return self.one(\"SELECT * FROM snapshots WHERE id=?\", (head[0],))\n            return self.one(\"SELECT * FROM snapshots ORDER BY created_at DESC,id DESC LIMIT 1\")\n        return self.one(\"SELECT * FROM snapshots WHERE id=?\", (snapshot_id,))"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/retrieval.py.txt",
+          "quote": "    def inventory(self, snapshot_id=None, cursor=None, limit=100):\n        snapshot = self.store.snapshot(snapshot_id)[\"id\"]"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "        store.db.execute(\n            \"INSERT INTO current_snapshot VALUES(1,?) ON CONFLICT(singleton) DO UPDATE SET snapshot_id=excluded.snapshot_id\",\n            (snapshot,),\n        )"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": false,
+        "complete": true,
+        "supported": false,
+        "rationale": "The core answer correctly covers head-first resolution, fallback ordering, inventory propagation, and the ingestion upsert after freeze_fts. However, its final caveat is too strong: Store initialization creates current_snapshot without populating it, so a fresh store has no head until ingestion inserts one. The full sources therefore establish a normal absence case."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 1,
+    "case_id": "code-05",
+    "trial": "trial-0607",
+    "answer": {
+      "answer": "For the `evidencekg` citation-choice path, no: resolution replaces a selected citation ID with the corresponding catalog entry, whose quote was checked against the source span while the catalog was built. It rejects unknown IDs and citation-choice objects containing extra fields, so an altered quote supplied alongside an ID is not silently repaired. The separate `lawcase_report` implementation is not shown using this resolver, so this conclusion applies to the `evidencekg` path.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/citation_choices.py.txt",
+          "quote": "            validate_refs([ref], segments)\n            if cid != ident(\"Q\", segment[\"id\"], ref[\"start\"], ref[\"end\"]) or cid in result:\n                raise ValueError(\"Invalid or duplicate citation choice\")\n            result[cid] = ref"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/citation_choices.py.txt",
+          "quote": "            if \"citation_id\" in node:\n                if set(node) != {\"citation_id\"} or node[\"citation_id\"] not in catalog:\n                    raise ValueError(\"Unknown or malformed citation choice\")\n                return dict(catalog[node[\"citation_id\"]])"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/validation.py.txt",
+          "quote": "        if seg[\"text\"][lo:hi] != ref[\"quote\"]:\n            raise ValueError(\"Fabricated or altered quotation\")"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "The cited code confirms exact source-substring validation during catalog construction, replacement with validated catalog entries, and rejection of unknown IDs or extra fields. Both questions are fully answered. The lawcase_report caveat merely limits scope; it makes no claim about that implementation\u2019s behavior."
+      },
+      "passed": true
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 1,
+    "case_id": "code-04",
+    "trial": "trial-0660",
+    "answer": {
+      "answer": "A PDF may contain attachments or other container descendants that inventory discovers during extraction. If extraction fails for the PDF, the implementation marks the inventory incomplete because it cannot know whether all those descendants were enumerated; therefore a complete source denominator\u2014and thus a complete total\u2014cannot be reported. A page-level text failure alone does not necessarily do this: it records an unread/OCR gap and still attempts OCR and annotations. The incomplete-total rule is triggered when the extraction status is `failed` for a `.pdf` (or when attachment enumeration fails), not merely because a page has a text-extraction warning.\n\nThe ingestion code sets `inventory_complete` false and adds an error saying the source denominator is unknown when that condition applies. The README explains the reporting consequence: when the denominator is unknown, `inventory.total` is null while `known_matches` counts records actually known.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "            if status == \"failed\" and (\n                Path(path).suffix.lower() in (\".eml\", \".pdf\", \".docx\") or mime == \"message/rfc822\"\n            ):\n                unknown_descendants = True\n            if unknown_descendants:\n                manifest[\"inventory_complete\"] = False\n                manifest[\"inventory_errors\"].append(\n                    {\n                        \"path\": path,\n                        \"error\": \"Container descendants could not be fully enumerated; source denominator is unknown\",\n                    }\n                )"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/parsers/worker.py.txt",
+          "quote": "                    result[\"warnings\"].append(\n                        f\"Page {i}: native text failed; OCR/annotations still attempted: {exc}\"\n                    )"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/parsers/worker.py.txt",
+          "quote": "        except Exception as exc:\n            result[\"warnings\"].append(\"PDF attachment enumeration failed: \" + str(exc))"
+        },
+        {
+          "path": "evidencekg/README.md",
+          "quote": "A symlink, inaccessible\ndirectory or unenumerated container depth makes the overall denominator unknown.\nKnown records are still enumerated; `inventory.total` is then null and\n`known_matches` reports the records actually known."
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": false,
+        "complete": true,
+        "supported": false,
+        "rationale": "The core explanation is complete and supported: failed PDF extraction can hide descendants, making inventory incomplete and total null while preserving known_matches. However, the added claim that a page-level text failure records an unread/OCR gap overstates the code: native-text failure records a warning and attempts OCR; an unread/OCR gap is recorded only if that fallback fails. The cited warning does not support that unconditional claim."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 1,
+    "case_id": "code-07",
+    "trial": "trial-0796",
+    "answer": {
+      "answer": "There are two separate implementations in the supplied sources. In `corpus.py.txt`, a later ingest reuses a cached extraction whenever the cache exists and `reextract` is false; the shown code does not check whether that cached extraction previously failed. In `evidencekg/src/evidencekg/ingest.py.txt`, a prior failed extraction is retried when the later ingest finds it: it generates a new extraction ID instead of reusing the failed record. So the answer depends on which implementation you mean.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "corpus.py.txt",
+          "quote": "            if cache.exists() and not reextract:\n                parsed = json.loads(cache.read_text(\"utf-8\"))\n                children = []"
+        },
+        {
+          "path": "corpus.py.txt",
+          "quote": "            else:\n                parsed = extract(data, suffix, cfg)\n                children = parsed.pop(\"attachments\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "                if existing and (existing[\"status\"] == \"failed\" or reextract):\n                    extraction = ident(\"X\", extraction, \"retry\", uuid.uuid4().hex)\n                    existing = None\n                elif existing:\n                    extraction = existing[\"id\"]"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": false,
+        "complete": false,
+        "supported": false,
+        "rationale": "The implementation distinction is real, but cache reuse alone does not establish reuse of failed extractions: in corpus.py, an extract() exception occurs before cache creation, so a later ingest can extract again. The candidate omits this material distinction. In ingest.py, it also omits the pending-status condition, fresh UUID, and clearing existing to force parsing. Its quotations are valid but do not fully support the implied failure-handling contrast. The reference likewise overgeneralizes: its retry rule applies within the pending branch, and no supplied evidence establishes version precedence."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 2,
+    "case_id": "code-03",
+    "trial": "trial-0048",
+    "answer": {
+      "answer": "In the `evidencekg` implementation, the parser subprocess starts a new session, so its process is the leader of a new process group. If `communicate` raises\u2014including on timeout\u2014the handler sends `SIGKILL` to that process group with `os.killpg(p.pid, ...)`, waits for the parser process, then re-raises. On a timeout, the outer handler catches `subprocess.TimeoutExpired` and returns a failed parse result with empty sections, attachments, and artifacts, and the exception text in warnings. The ingestion caller copies that `failed` status and warning into the extraction record; for `.eml`, `.pdf`, and `.docx` inputs (or `message/rfc822` MIME), it also marks inventory incomplete because container descendants may be unknown. Other file types do not trigger that specific descendant-inventory rule. These claims describe the implementation; no separate documentation claim is needed.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/parsers/__init__.py.txt",
+          "quote": "                cwd=tmp,\n                start_new_session=True,\n            )\n            try:\n                stdout, stderr = p.communicate(timeout=cfg[\"parser_timeout\"])\n            except BaseException:\n                os.killpg(p.pid, signal.SIGKILL)\n                p.wait()\n                raise"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/parsers/__init__.py.txt",
+          "quote": "        except (OSError, ValueError, subprocess.TimeoutExpired) as exc:\n            return dict(sections=[], warnings=[str(exc)], attachments=[], artifacts=[], status=\"failed\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "                if status == \"pending\":\n                    result = parsers.parse(data, Path(path).suffix.lower(), cfg)\n                    status = result[\"status\"]\n                    warnings += result[\"warnings\"]"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "            if status == \"failed\" and (\n                Path(path).suffix.lower() in (\".eml\", \".pdf\", \".docx\") or mime == \"message/rfc822\"\n            ):\n                unknown_descendants = True\n            if unknown_descendants:\n                manifest[\"inventory_complete\"] = False"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "The answer accurately covers process-group SIGKILL, waiting and re-raising, conversion of TimeoutExpired into an empty failed result with exception warnings, and ingestion\u2019s recording of that status and warnings. Its additional conditional inventory-incomplete behavior is supported by the cited ingestion code and full source. It covers all material reference points without contradictions."
+      },
+      "passed": true
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 2,
+    "case_id": "code-06",
+    "trial": "trial-0068",
+    "answer": {
+      "answer": "The implementation generates each citation ID from the segment ID and the span\u2019s start and end offsets: `ident(\"Q\", segment[\"id\"], span[\"start\"], span[\"end\"])`. It builds the selectable catalog from primary and extra spans, then validates each reference against the task\u2019s segment and extraction, checks the offsets are in range, and requires the quoted text to equal that exact slice. During catalog construction, an ID that does not match the computed ID\u2014or repeats an existing catalog ID\u2014raises an error.\n\nThe model\u2019s schema restricts `citation_id` to catalog IDs. Resolution accepts an object containing only that key, looks it up in the task\u2019s catalog, and replaces it with a copy of the stored span reference. Unknown IDs and extra fields are rejected, so the submitted choice cannot alter the quote or offsets. The worker adapter returns both this resolved result and the raw selection; submission checks they still resolve to the same output and records the raw and resolved hashes.\n\nFor repeated submissions, the queue accepts an identical validated submission as idempotent only when its task, lease, input identity, result hash, and (for citation selections) raw-output receipt match. Changed citation-selection lineage is rejected as a conflicting duplicate. This is distinct from duplicate JSON object keys, which the CLI worker also rejects while parsing.\n\nEvidence:\n\n- `evidencekg/src/evidencekg/review_queue.py.txt`: `for span in segment[\"citation_spans\"] + segment[\"citation_extra_spans\"]:`\n- `evidencekg/src/evidencekg/review_queue.py.txt`: `span[\"citation_id\"] = ident(\"Q\", segment[\"id\"], span[\"start\"], span[\"end\"])`\n- `evidencekg/src/evidencekg/citation_choices.py.txt`: `if cid != ident(\"Q\", segment[\"id\"], ref[\"start\"], ref[\"end\"]) or cid in result:`\n- `evidencekg/src/evidencekg/citation_choices.py.txt`: `if set(node) != {\"citation_id\"} or node[\"citation_id\"] not in catalog:`\n- `evidencekg/src/evidencekg/citation_choices.py.txt`: `return dict(catalog[node[\"citation_id\"]])`\n- `evidencekg/src/evidencekg/validation.py.txt`: `if seg[\"text\"][lo:hi] != ref[\"quote\"]:`\n- `evidencekg/src/evidencekg/review_queue.py.txt`: `if dump(resolve(json.loads(raw), payload)) != output:`\n- `evidencekg/src/evidencekg/review_queue.py.txt`: `raise ValueError(\"Conflicting duplicate citation-selection lineage\")`\n- `evidencekg/src/evidencekg/review_queue.py.txt`: `raise ValueError(\"Conflicting duplicate submission\")`\n- `evidencekg/src/evidencekg/worker_adapters/cli.py.txt`: `raise ValueError(\"Duplicate JSON key: \" + key)`",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/review_queue.py.txt",
+          "quote": "                    span[\"citation_id\"] = ident(\"Q\", segment[\"id\"], span[\"start\"], span[\"end\"])"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/citation_choices.py.txt",
+          "quote": "            if cid != ident(\"Q\", segment[\"id\"], ref[\"start\"], ref[\"end\"]) or cid in result:\n                raise ValueError(\"Invalid or duplicate citation choice\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/validation.py.txt",
+          "quote": "        if not seg or ref[\"extraction_id\"] != seg[\"extraction_id\"]:\n            raise ValueError(\"Evidence is not in this task\")\n        lo, hi = ref[\"start\"], ref[\"end\"]\n        if type(lo) is not int or type(hi) is not int or not 0 <= lo < hi <= len(seg[\"text\"]):\n            raise ValueError(\"Invalid citation span\")\n        if seg[\"text\"][lo:hi] != ref[\"quote\"]:\n            raise ValueError(\"Fabricated or altered quotation\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/citation_choices.py.txt",
+          "quote": "            if \"citation_id\" in node:\n                if set(node) != {\"citation_id\"} or node[\"citation_id\"] not in catalog:\n                    raise ValueError(\"Unknown or malformed citation choice\")\n                return dict(catalog[node[\"citation_id\"]])"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/review_queue.py.txt",
+          "quote": "                    if dump(resolve(json.loads(raw), payload)) != output:\n                        raise ValueError(\"Citation choice resolution differs from raw response\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/review_queue.py.txt",
+          "quote": "                        raise ValueError(\"Conflicting duplicate citation-selection lineage\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/review_queue.py.txt",
+          "quote": "                raise ValueError(\"Conflicting duplicate submission\")"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": false,
+        "rationale": "The core explanation matches the sources and covers the reference: IDs derive from segment/start/end, references are validated, and invalid or duplicate catalog IDs raise ValueError. Resolution and submission-lineage details also agree with the supplied code. However, the worker-adapter return behavior and CLI duplicate-key rejection lack verifiable source support: the CLI source is absent, and no adapter-return citation is provided."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 2,
+    "case_id": "code-09",
+    "trial": "trial-0099",
+    "answer": {
+      "answer": "In the main paginated API, if the next single result would exceed the 750,000-byte response budget and the page has no items yet, retrieval raises `ValueError(\"One result exceeds response budget; use bounded source/feature reads\")`. If the page already contains items, it stops before that result and returns the partial page with remaining results available through pagination. A specialized reference-ranking lexical reader also raises for an oversized result. This describes the implementation shown in the source passages.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/retrieval.py.txt",
+          "quote": "            if used + size > 750000:\n                if not items:\n                    raise ValueError(\"One result exceeds response budget; use bounded source/feature reads\")\n                break"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/retrieval.py.txt",
+          "quote": "            if len(selected) > len(items)\n            else None"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/reference_ranking.py.txt",
+          "quote": "        for row in ordered:\n            if len(dump(row).encode()) > 750000:\n                raise ValueError(\"One result exceeds response budget; use bounded source/feature reads\")"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": false,
+        "supported": true,
+        "rationale": "The cited sources support both conditional outcomes, the exact ValueError, and the specialized lexical reader\u2019s behavior. The answer omits that the budget measures encoded JSON bytes. Its pagination wording needs qualification: a continuation cursor is returned, but an individually oversized result will raise when encountered first on the next page."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 2,
+    "case_id": "code-02",
+    "trial": "trial-0148",
+    "answer": {
+      "answer": "For the native retrieval API, a cursor is bound to both the snapshot and the query scope. Reusing it with a different snapshot or scope triggers a `ValueError` (reported as `Invalid cursor`); it does not continue paging under the new request. The check compares the cursor\u2019s snapshot and scope signature with the current values. [evidencekg/src/evidencekg/retrieval.py.txt] `if value[\"snapshot\"] != snapshot or value[\"scope\"] != signature:` \u2026 `raise ValueError(\"Cursor scope/snapshot mismatch\")` \u2026 `raise ValueError(\"Invalid cursor\") from exc`\n\nThe reference cache applies the same binding to cached pages: its cursor check compares against the cached snapshot and scope signature, and wraps a mismatch as `Invalid cursor`. Its test also exercises reusing a cursor from one snapshot against another and expects that error. [evidencekg/src/evidencekg/reference_cache.py.txt] `if value[\"snapshot\"] != c[\"snapshot\"] or value[\"scope\"] != c[\"signature\"]:` \u2026 `raise ValueError(\"Invalid cursor\") from exc` [evidencekg/tests/test_reference_cache.py.txt] `with pytest.raises(ValueError, match=\"Invalid cursor\"):`",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/retrieval.py.txt",
+          "quote": "                if value[\"snapshot\"] != snapshot or value[\"scope\"] != signature:\n                    raise ValueError(\"Cursor scope/snapshot mismatch\")\n                after = value[\"after\"]\n            except Exception as exc:\n                raise ValueError(\"Invalid cursor\") from exc"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/reference_cache.py.txt",
+          "quote": "                if value[\"snapshot\"] != c[\"snapshot\"] or value[\"scope\"] != c[\"signature\"]:\n                    raise ValueError(\"Cursor scope/snapshot mismatch\")\n                start = bisect_right(c[\"keys\"], value[\"after\"])\n            except Exception as exc:\n                raise ValueError(\"Invalid cursor\") from exc"
+        },
+        {
+          "path": "evidencekg/tests/test_reference_cache.py.txt",
+          "quote": "    with pytest.raises(ValueError, match=\"Invalid cursor\"):\n        cached.neighbours(two, doc, cursor=first[\"next_cursor\"])"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "The answer correctly states that either a snapshot or scope-signature mismatch rejects the cursor with ValueError('Invalid cursor'), preventing continued pagination. It covers all material parts of the question. Citations match the supplied implementations, and the cited test confirms cross-snapshot rejection in the reference cache. No discrepancy with the reference rubric."
+      },
+      "passed": true
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 2,
+    "case_id": "code-01",
+    "trial": "trial-0251",
+    "answer": {
+      "answer": "The implementation builds a separate in-memory lexical index for a chosen snapshot. `RankedDiscovery` first resolves the supplied snapshot ID and loads segment rows by joining `snapshot_documents` to extractions and segments, filtered by that snapshot. It passes the resulting segment map to `_LexicalRows`; the available excerpts do not show that class's implementation, so they do not establish its exact query mechanics. The separate `hybrid.LexicalIndex` implementation explicitly inserts the supplied segment map's texts into an in-memory FTS5 table, then searches that table; its `search` method does not use its `snapshot` argument. The excerpts do not establish that this hybrid class is the one used by ingestion or `RankedDiscovery`, so these implementations should not be conflated.\n\nIngestion also creates a snapshot-named FTS5 table only if it does not already exist, populating it from segments whose extractions belong to that snapshot's documents. It then updates `current_snapshot`. This provides snapshot-scoped indexed contents, while the mutable global `segment_fts` is visibly maintained during ingestion; the excerpts do not show which search caller uses the snapshot-named table, so they cannot establish a complete ingestion-to-query call path.\n\nEvidence:\n\n- `evidencekg/src/evidencekg/ranking.py.txt`: `self.snapshot_id = store.snapshot(snapshot_id)[\"id\"]` and `self._lexical = _LexicalRows(store)`\n- `evidencekg/src/evidencekg/ranking.py.txt`: `FROM snapshot_documents sd JOIN extractions e ON e.id=sd.extraction_id` / `JOIN segments s ON s.extraction_id=e.id WHERE sd.snapshot_id=?`\n- `evidencekg/src/evidencekg/hybrid/lexical.py.txt`: `self.db = sqlite3.connect(\":memory:\", check_same_thread=False)` / `\"INSERT INTO passages VALUES(?,?)\", [(sid, segments[sid][\"text\"]) for sid in sorted(segments)]`\n- `evidencekg/src/evidencekg/hybrid/lexical.py.txt`: `return {\"items\": [{\"id\": sid} for sid in self._search(query)]}`\n- `evidencekg/src/evidencekg/snapshots.py.txt`: `if not exists:` / `INSERT INTO {name} SELECT s.id,s.text FROM segments s JOIN snapshot_documents sd ON sd.extraction_id=s.extraction_id WHERE sd.snapshot_id=? ORDER BY s.id`\n- `evidencekg/src/evidencekg/ingest.py.txt`: `INSERT INTO segment_fts VALUES(?,?)` and later `UPDATE SET snapshot_id=excluded.snapshot_id`",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/ranking.py.txt",
+          "quote": "self.snapshot_id = store.snapshot(snapshot_id)[\"id\"]\n        self.api = API(store)\n        self._lexical = _LexicalRows(store)"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ranking.py.txt",
+          "quote": "FROM snapshot_documents sd JOIN extractions e ON e.id=sd.extraction_id\n            JOIN segments s ON s.extraction_id=e.id WHERE sd.snapshot_id=?"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/hybrid/lexical.py.txt",
+          "quote": "self.db = sqlite3.connect(\":memory:\", check_same_thread=False)\n        self.db.row_factory = sqlite3.Row\n        self.db.execute(\n            \"CREATE VIRTUAL TABLE passages USING fts5(segment_id UNINDEXED,text,tokenize='unicode61 remove_diacritics 2')\"\n        )\n        self.db.executemany(\n            \"INSERT INTO passages VALUES(?,?)\", [(sid, segments[sid][\"text\"]) for sid in sorted(segments)]\n        )"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/hybrid/lexical.py.txt",
+          "quote": "    def search(self, snapshot, query):\n        return {\"items\": [{\"id\": sid} for sid in self._search(query)]}"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/snapshots.py.txt",
+          "quote": "    if not exists:\n        # Identifier is generated by this module from validated content-addressed IDs.\n        store.db.execute(\n            f\"CREATE VIRTUAL TABLE {name} USING fts5(segment_id UNINDEXED,text,tokenize='unicode61 remove_diacritics 2')\"\n        )\n        store.db.execute(\n            f\"\"\"INSERT INTO {name} SELECT s.id,s.text FROM segments s JOIN snapshot_documents sd ON sd.extraction_id=s.extraction_id WHERE sd.snapshot_id=? ORDER BY s.id\"\"\",\n            (snapshot_id,),\n        )"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "                    store.db.execute(\"INSERT INTO segment_fts VALUES(?,?)\", (segment, body))"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "            \"INSERT INTO current_snapshot VALUES(1,?) ON CONFLICT(singleton) DO UPDATE SET snapshot_id=excluded.snapshot_id\","
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": false,
+        "complete": false,
+        "supported": false,
+        "rationale": "The candidate correctly describes conditional creation and population of snapshot-specific FTS tables, but incorrectly claims the query path is unavailable: retrieval.py explicitly uses fts_name(snapshot_id) and queries that table with MATCH and BM25. It omits ingestion\u2019s explicit freeze_fts call and this essential retrieval connection. Its claim that RankedDiscovery passes a segment map to _LexicalRows contradicts _LexicalRows(store); the opening in-memory-index characterization is unsupported for the ingestion path. The reference answer agrees with the supplied sources."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 2,
+    "case_id": "code-10",
+    "trial": "trial-0460",
+    "answer": {
+      "answer": "No. For PDF, DOCX, email, and image parsing, the worker calls `deny_network()` before extraction; if that policy setup fails, the worker exits with an error. The parser wrapper converts that subprocess failure into a `failed` extraction result with no sections. The README also says policy failure fails extraction. TXT/MD take a separate in-process path that does not call this worker setup, so this policy-load failure behavior is not established for those formats by these sources.\n\nEvidence:\n\n- `evidencekg/src/evidencekg/parsers/worker.py.txt`: `def main():\\n    from .isolation import deny_network\\n\\n    deny_network()` and then `result = extract(`, placing policy setup before extraction.\n- `evidencekg/src/evidencekg/parsers/__init__.py.txt`: `if suffix in (\".txt\", \".md\"):\\n        from .worker import extract\\n\\n        return extract(data, suffix, cfg)` shows the separate text path. For other supported formats, the subprocess failure handler is `except (OSError, ValueError, subprocess.TimeoutExpired) as exc:\\n            return dict(sections=[], warnings=[str(exc)], attachments=[], artifacts=[], status=\"failed\")`.\n- `evidencekg/src/evidencekg/parsers/isolation.py.txt`: policy setup raises on initialization, configuration, or application failures, including `raise RuntimeError(\"Cannot apply parser network policy\")`.\n- `evidencekg/README.md`: `Failure to establish that policy fails extraction.`",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/parsers/worker.py.txt",
+          "quote": "def main():\n    from .isolation import deny_network\n\n    deny_network()\n    resource.setrlimit(resource.RLIMIT_AS, (2_000_000_000, 2_000_000_000))\n    resource.setrlimit(resource.RLIMIT_CPU, (150, 150))\n    resource.setrlimit(resource.RLIMIT_FSIZE, (500_000_000, 500_000_000))\n    directory = Path(sys.argv[1])\n    result = extract("
+        },
+        {
+          "path": "evidencekg/src/evidencekg/parsers/__init__.py.txt",
+          "quote": "    if suffix in (\".txt\", \".md\"):\n        from .worker import extract\n\n        return extract(data, suffix, cfg)"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/parsers/__init__.py.txt",
+          "quote": "        except (OSError, ValueError, subprocess.TimeoutExpired) as exc:\n            return dict(sections=[], warnings=[str(exc)], attachments=[], artifacts=[], status=\"failed\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/parsers/isolation.py.txt",
+          "quote": "        raise RuntimeError(\"Cannot apply parser network policy\")\n"
+        },
+        {
+          "path": "evidencekg/README.md",
+          "quote": "Failure to establish that policy fails extraction."
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": false,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": false,
+        "rationale": "The substantive answer correctly explains fail-closed behavior, the failed extraction result, and the TXT/MD exception. Omitting context cleanup does not materially affect this question. However, the TXT/MD citation inaccurately quotes `extract(data, suffix, cfg)`; the supplied source says `extract(data, suffix, cfg, None)`, so the citations are not fully valid."
+      },
+      "passed": false
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 2,
+    "case_id": "code-08",
+    "trial": "trial-0525",
+    "answer": {
+      "answer": "In the EvidenceKG implementation, a snapshot read with no ID first looks up the singleton row in `current_snapshot` and returns the snapshot named there. If that row is absent, it falls back to the latest snapshot by `created_at`, then `id`. The inventory API uses this default when `snapshot_id` is omitted. The head is updated during `ingest`, after snapshot records and the frozen FTS index are created, by an upsert into `current_snapshot`.\n\nCitations:\n- `evidencekg/src/evidencekg/db.py.txt`: `def snapshot(self, snapshot_id=None):\\n        if snapshot_id is None:\\n            head = self.db.execute(\"SELECT snapshot_id FROM current_snapshot WHERE singleton=1\").fetchone()\\n            if head:\\n                return self.one(\"SELECT * FROM snapshots WHERE id=?\", (head[0],))\\n            return self.one(\"SELECT * FROM snapshots ORDER BY created_at DESC,id DESC LIMIT 1\")`\n- `evidencekg/src/evidencekg/retrieval.py.txt`: `    def inventory(self, snapshot_id=None, cursor=None, limit=100):\\n        snapshot = self.store.snapshot(snapshot_id)[\"id\"]`\n- `evidencekg/src/evidencekg/ingest.py.txt`: `        store.db.execute(\\n            \"INSERT INTO current_snapshot VALUES(1,?) ON CONFLICT(singleton) DO UPDATE SET snapshot_id=excluded.snapshot_id\",\\n            (snapshot,),\\n        )`",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/db.py.txt",
+          "quote": "def snapshot(self, snapshot_id=None):\n        if snapshot_id is None:\n            head = self.db.execute(\"SELECT snapshot_id FROM current_snapshot WHERE singleton=1\").fetchone()\n            if head:\n                return self.one(\"SELECT * FROM snapshots WHERE id=?\", (head[0],))\n            return self.one(\"SELECT * FROM snapshots ORDER BY created_at DESC,id DESC LIMIT 1\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/retrieval.py.txt",
+          "quote": "    def inventory(self, snapshot_id=None, cursor=None, limit=100):\n        snapshot = self.store.snapshot(snapshot_id)[\"id\"]"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "        store.db.execute(\n            \"INSERT INTO current_snapshot VALUES(1,?) ON CONFLICT(singleton) DO UPDATE SET snapshot_id=excluded.snapshot_id\",\n            (snapshot,),\n        )"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "The answer accurately describes singleton-head precedence, fallback ordering by created_at DESC then id DESC, and the ingestion upsert after freeze_fts. It covers both requested parts. All citations match the supplied sources; the full ingest source confirms the chronology, and retrieval.py supports the additional inventory API claim."
+      },
+      "passed": true
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 2,
+    "case_id": "code-05",
+    "trial": "trial-0607",
+    "answer": {
+      "answer": "No. In the `evidencekg` citation-choice implementation, `resolve` replaces a valid `citation_id` selection with a copy of the catalog entry, which was validated against the segment text when the catalog was built. A supplied altered quote or other extra key in a citation-choice object fails the exact-key check; an ID not in the catalog also raises `ValueError`.\n\nEvidence: `evidencekg/src/evidencekg/citation_choices.py.txt`:\n```python\ndef resolve(raw, payload):\n    catalog = choices(payload)\n\n    def visit(node):\n        if isinstance(node, dict):\n            if \"citation_id\" in node:\n                if set(node) != {\"citation_id\"} or node[\"citation_id\"] not in catalog:\n                    raise ValueError(\"Unknown or malformed citation choice\")\n                return dict(catalog[node[\"citation_id\"]])\n```\n\n`choices` validates each catalog reference and checks its ID against the segment ID and span offsets in the same source file:\n```python\n            validate_refs([ref], segments)\n            if cid != ident(\"Q\", segment[\"id\"], ref[\"start\"], ref[\"end\"]) or cid in result:\n                raise ValueError(\"Invalid or duplicate citation choice\")\n```\nThe underlying span validation rejects quote text that differs from the source segment: `evidencekg/src/evidencekg/validation.py.txt`:\n```python\n        if seg[\"text\"][lo:hi] != ref[\"quote\"]:\n            raise ValueError(\"Fabricated or altered quotation\")\n```\n\nThe adapter uses this resolution path when immutable citation choices are enabled and turns resolution errors into `WorkerOutputError`: `evidencekg/src/evidencekg/worker_adapters/cli.py.txt`:\n```python\n                return SelectedCitationResult(resolve(raw, payload), raw)\n            except (ValueError, KeyError, TypeError) as exc:\n                raise WorkerOutputError(str(exc), dump(raw)) from exc\n```\nThe docs also state the behavior, but the implementation above is the direct evidence: `evidencekg/ASSURANCE.md` says \u201cno rejected quotation is silently repaired.\u201d",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/citation_choices.py.txt",
+          "quote": "def resolve(raw, payload):\n    catalog = choices(payload)\n\n    def visit(node):\n        if isinstance(node, dict):\n            if \"citation_id\" in node:\n                if set(node) != {\"citation_id\"} or node[\"citation_id\"] not in catalog:\n                    raise ValueError(\"Unknown or malformed citation choice\")\n                return dict(catalog[node[\"citation_id\"]])"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/citation_choices.py.txt",
+          "quote": "            validate_refs([ref], segments)\n            if cid != ident(\"Q\", segment[\"id\"], ref[\"start\"], ref[\"end\"]) or cid in result:\n                raise ValueError(\"Invalid or duplicate citation choice\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/validation.py.txt",
+          "quote": "        if seg[\"text\"][lo:hi] != ref[\"quote\"]:\n            raise ValueError(\"Fabricated or altered quotation\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/worker_adapters/cli.py.txt",
+          "quote": "                return SelectedCitationResult(resolve(raw, payload), raw)\n            except (ValueError, KeyError, TypeError) as exc:\n                raise WorkerOutputError(str(exc), dump(raw)) from exc"
+        },
+        {
+          "path": "evidencekg/ASSURANCE.md",
+          "quote": "no rejected quotation is silently repaired."
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "The answer accurately distinguishes valid ID resolution from quote repair: catalog references undergo exact-span validation, while selections with extra fields or unknown IDs are rejected. It covers both requested behaviors, and all citations match the supplied sources, including the adapter\u2019s error handling. No material discrepancy with the reference rubric."
+      },
+      "passed": true
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 2,
+    "case_id": "code-04",
+    "trial": "trial-0660",
+    "answer": {
+      "answer": "A PDF page extraction or OCR failure is recorded as a warning and leaves an unread/OCR gap. If parsing returns partial status, that alone does not make the inventory incomplete: the implementation marks it incomplete when a PDF extraction is wholly `failed`, because it treats a failed PDF as a container whose descendants may not have been enumerated. For page-level gaps, the inventory can still be marked complete even though the extracted content is incomplete. The inventory API therefore may report a total of known records for a partial PDF, but reports `total: null` when `inventory_complete` is false; it gives the known record count separately as `known_matches`.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/parsers/worker.py.txt",
+          "quote": "                if not text.strip():\n                    try:\n                        target = directory / f\"page-{i}\"\n                        p = subprocess.run(\n                            [\n                                \"pdftoppm\",\n                                \"-f\",\n                                str(i),\n                                \"-l\",\n                                str(i),\n                                \"-scale-to\",\n                                \"3000\",\n                                \"-singlefile\",\n                                \"-png\",\n                                str(directory / \"input\"),\n                                str(target),\n                            ],\n                            capture_output=True,\n                            timeout=60,\n                        )\n                        if p.returncode:\n                            raise ValueError(\"PDF rendering failed\")\n                        image = target.with_suffix(\".png\")\n                        artifact(f\"page-{i}.png\", image.read_bytes())\n                        text = ocr(image)\n                        method = \"ocr\"\n                    except Exception as exc:\n                        result[\"warnings\"].append(f\"Page {i}: unread/OCR gap: {exc}\")"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/parsers/worker.py.txt",
+          "quote": "    if result[\"warnings\"]:\n        result[\"status\"] = \"partial\"\n    return result"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "            if status == \"failed\" and (\n                Path(path).suffix.lower() in (\".eml\", \".pdf\", \".docx\") or mime == \"message/rfc822\"\n            ):\n                unknown_descendants = True\n            if unknown_descendants:\n                manifest[\"inventory_complete\"] = False\n                manifest[\"inventory_errors\"].append(\n                    {\n                        \"path\": path,\n                        \"error\": \"Container descendants could not be fully enumerated; source denominator is unknown\",\n                    }\n                )"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/retrieval.py.txt",
+          "quote": "            total=None if scope[\"kind\"] == \"inventory\" and not manifest[\"inventory_complete\"] else total,\n            known_matches=total,\n            remaining=max(0, len(selected) - len(items)),\n            extraction_warnings={\n                \"count\": sum(bool(d[\"warnings\"]) for d in manifest[\"documents\"]),\n                \"details\": \"inventory tool enumerates all document warnings without truncation\",\n            },\n            scope=scope,\n            inventory_complete=manifest[\"inventory_complete\"],"
+        },
+        {
+          "path": "evidencekg/README.md",
+          "quote": "Known records are still enumerated; `inventory.total` is then null and\n`known_matches` reports the records actually known."
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": true,
+        "complete": true,
+        "supported": true,
+        "rationale": "Explains the full causal chain: failed PDFs may conceal descendants, ingestion marks inventory incomplete, and inventory returns total=null while preserving known_matches. Citations support the distinction between page/OCR gaps and inventory completeness. The added partial-status qualification is consistent with the full sources: partial status alone does not invalidate inventory, although attachment-enumeration warnings can independently do so."
+      },
+      "passed": true
+    }
+  },
+  {
+    "arm": "anchored",
+    "repeat": 2,
+    "case_id": "code-07",
+    "trial": "trial-0796",
+    "answer": {
+      "answer": "It depends on which implementation you mean. In `evidencekg`, a later ingest does not reuse a prior failed extraction: when the existing extraction status is `failed`, it creates a retry extraction ID, clears the existing result, and proceeds to parse again. The source code says:\n\n`evidencekg/src/evidencekg/ingest.py.txt`:\n> if existing and (existing[\"status\"] == \"failed\" or reextract):\n>     extraction = ident(\"X\", extraction, \"retry\", uuid.uuid4().hex)\n>     existing = None\n\nThen, without an existing result, pending status invokes the parser:\n\n`evidencekg/src/evidencekg/ingest.py.txt`:\n> if status == \"pending\":\n>     result = parsers.parse(data, Path(path).suffix.lower(), cfg)\n\nIn `corpus.py`, a prior extraction cache is reused whenever it exists and `reextract` is false; the shown implementation does not inspect a cached failure status before reuse. However, its cache write occurs only after `extract(...)` returns successfully, while extraction exceptions are caught outside that branch and mark the record failed. So the source supports reuse of an existing cache, but does not establish that failed extraction results are cached there. The relevant code is:\n\n`corpus.py.txt`:\n> if cache.exists() and not reextract:\n>     parsed = json.loads(cache.read_text(\"utf-8\"))\n\nand:\n\n`corpus.py.txt`:\n> parsed = extract(data, suffix, cfg)\n> children = parsed.pop(\"attachments\")\n> parsed[\"attachments\"] = []\n> for name, payload in children:\n>     ash = digest(payload)\n>     (state / \"blobs\" / ash).write_bytes(payload)\n>     parsed[\"attachments\"].append({\"name\": name, \"sha256\": ash})\n> write_json(cache, parsed)\n\nThus the direct answer is **no for `evidencekg`**; for `corpus.py`, an existing extraction cache is reused by default, but these sources do not show failed extractions being written into that cache.",
+      "abstain": false,
+      "citations": [
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "                if existing and (existing[\"status\"] == \"failed\" or reextract):\n                    extraction = ident(\"X\", extraction, \"retry\", uuid.uuid4().hex)\n                    existing = None"
+        },
+        {
+          "path": "evidencekg/src/evidencekg/ingest.py.txt",
+          "quote": "                if status == \"pending\":\n                    result = parsers.parse(data, Path(path).suffix.lower(), cfg)"
+        },
+        {
+          "path": "corpus.py.txt",
+          "quote": "            if cache.exists() and not reextract:\n                parsed = json.loads(cache.read_text(\"utf-8\"))"
+        },
+        {
+          "path": "corpus.py.txt",
+          "quote": "                parsed = extract(data, suffix, cfg)\n                children = parsed.pop(\"attachments\")\n                parsed[\"attachments\"] = []\n                for name, payload in children:\n                    ash = digest(payload)\n                    (state / \"blobs\" / ash).write_bytes(payload)\n                    parsed[\"attachments\"].append({\"name\": name, \"sha256\": ash})\n                write_json(cache, parsed)"
+        }
+      ]
+    },
+    "original_score": {
+      "citation_gate": true,
+      "abstention_gate": true,
+      "grade": {
+        "correct": false,
+        "complete": false,
+        "supported": false,
+        "rationale": "The core retry mechanism and corpus.py cache distinction are accurately cited. However, the categorical \u201cno for evidencekg\u201d omits a material condition: retry logic runs only when the new acquisition status is pending. A repeated non-pending failure can reuse an existing extraction. The reference answer also omits this condition; the full source therefore supports a narrower conclusion than either answer states."
+      },
+      "passed": false
+    }
+  }
+]

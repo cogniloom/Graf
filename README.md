@@ -31,6 +31,8 @@ Add documents, explore their relationships in Cosmograph, and ask Codex to inves
 
 Candidate worksets stay available for continued review. Extraction gaps stay visible. A short search result is never presented as proof that you have seen everything.
 
+**Python-only code enrichment (experimental).** Graf's optional source-code relationship enrichment is currently optimized for Python. Other languages retain their retrieved source passages without this function/caller/callee enrichment. Support for additional languages is planned. Accuracy gains have been measured on one Python development benchmark; they are not yet validated across repositories. See the [code enrichment guide](benchmarks/CODE_CONTEXT.md).
+
 | Bring your sources | Explore the connections | Investigate with context |
 | :--- | :--- | :--- |
 | Add files or directories. Rescan, pause or resume processing while originals remain untouched. | Navigate the interactive graph, inspect documents, or use the accessible document list. | Ask Codex to search connected evidence, continue candidate worksets and read source passages through local MCP tools. |

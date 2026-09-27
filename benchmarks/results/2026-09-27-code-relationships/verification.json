@@ -1,0 +1,8 @@
+{
+  "questions": 10,
+  "exact_source_quotes": 502,
+  "default_segments_unchanged": true,
+  "frozen_builder_matches": true,
+  "cli_matches_runtime": true,
+  "generative_retrieval_calls": 0
+}

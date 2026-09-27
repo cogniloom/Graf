@@ -1,0 +1,16 @@
+{
+  "REPORT.md": "58c073fd8a93ae2279daf6422349ba6f26f2b645e3b249e3bfe88dea62d848e9",
+  "REVIEW.md": "87b6d399da08072b32c5ef344710998ef98dab7fc69314a01384b03b60757290",
+  "answers.json": "1efa27222a692e6f2b654bbf6cd04ece138f90fe21d6850f1e79f96040491c1e",
+  "enrichment-provenance.json": "6ffdf986cef9862e2fa23346e04fecd1852061238063603e916b140d054864f0",
+  "example-after.json": "6cba6ed8e070e05259922f56de20c105bbd83c19eb38e0eba839de85db40c9bf",
+  "example-before.json": "a896968e162cfa72d6e0af4697d50d9d11335d3588f36e4cad30103279382a0d",
+  "excerpt-coverage.json": "caf2e7ed51e343e59300845007908559549ede68af14dd27c10c3fa0cc208666",
+  "guidance-provenance.json": "3913f5adbefff551e149f023fd8a5de7551b29eef1f382da9d79363f89af3390",
+  "model-provenance.json": "aebb060618ea02fb3a633e3f2052a61538657caae27e4fcbb3e7688a9bdf306a",
+  "per-case.csv": "bcadd7107959e435f774b10020aba792371eede7e0cbfffb3f2641df11a88afe",
+  "public-source-verification.json": "c493e9f2b522f5d54d0b9130bbc708936b25e3b4a3377cd34f5f9fe64bbb8496",
+  "span-verification.json": "c7ab58fcd330e844b5d7347d0ca6f9aa6b802a2bcc3b9a081f43c1fb351446cc",
+  "summary.json": "25306fc367679446828054786384c68b97b90f749f02367829905ebdbff038b1",
+  "trials.json": "09f00df28780de9e2297aab26a624bda3e4319bb0388b2b06643153130a2e000"
+}

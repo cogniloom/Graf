@@ -1,0 +1,11 @@
+model,effort,kind,case_id,trial,status,seconds,passed,input_tokens,cached_input_tokens,output_tokens
+gpt-6-luna,low,code,code-03,trial-0048,answered,10.130100432987092,False,21438,7936,370
+gpt-6-luna,low,code,code-06,trial-0068,answered,16.540818932000548,True,19971,0,727
+gpt-6-luna,low,code,code-09,trial-0099,answered,11.332211342989467,True,20402,7936,397
+gpt-6-luna,low,code,code-02,trial-0148,answered,16.841110145003768,True,20602,7936,543
+gpt-6-luna,low,code,code-01,trial-0251,answered,17.642024595988914,False,20589,7936,687
+gpt-6-luna,low,code,code-10,trial-0460,answered,6.8757032409776,True,20275,7936,189
+gpt-6-luna,low,code,code-08,trial-0525,answered,21.997800089011434,False,100031,77824,732
+gpt-6-luna,low,code,code-05,trial-0607,answered,13.33485585899325,False,19728,7936,560
+gpt-6-luna,low,code,code-04,trial-0660,answered,13.485628006019397,False,19856,7936,515
+gpt-6-luna,low,code,code-07,trial-0796,answered,18.64390631200513,False,20756,7936,686

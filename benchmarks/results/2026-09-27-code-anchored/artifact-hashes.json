@@ -1,0 +1,18 @@
+{
+  "REPORT.md": "0fc335a25737cfff04b2e451537f222d6dbc304c8841609d6ccfdc3e1ca7ab82",
+  "anchored-1-per-case.csv": "5dc9301bfe18f0c66461cc5961cf0e30341fdb0559d7fe5592df0dda30bdee8b",
+  "anchored-1-summary.json": "5e6af3a4ffb62b98e50a1ced24e1e64276f94876f5b15c8918639a1df3afebc8",
+  "anchored-2-per-case.csv": "457ece864cc5a327ebbb95bb829fd3ac6e4100c15801878d44de833a0d628c71",
+  "anchored-2-summary.json": "3e2bc0b4c1c786227d56911835b81fe475d8c7c082bf059806bfcddd97c6e0d5",
+  "answers-and-original-scores.json": "a6ac7bb14b1055fe3261875344c197af489060056e3b32deb94b49c74c3f295f",
+  "benchmark-provenance-review.md": "823a8fabdcfc59d1cccea56dfa62879d8e1813ed542707525b1cef35e9d122ee",
+  "example-reply.json": "72c3afb980180a8236fd4d2a77d1fe0e7400030089355be914649e5b271ba0d3",
+  "original-1-per-case.csv": "e0d3a6b19d9772c6c03778951e1a223c7f7749656a67770465f5c5189f6e7608",
+  "original-1-summary.json": "f72e0141b80e6753672ebee5163af0d0ea98762d1bd9f8896a8fdf96925514b8",
+  "original-2-per-case.csv": "c56206336dcf5154156b94cf92abcadc1481dc64cd857d2e17bac1355d6b39d7",
+  "original-2-summary.json": "6c3ae7b7c81819d882a0d4b36784567e40f959cc98e8c359e411b56bda893a85",
+  "preparation.json": "78c8b9ae206a68407418b851c4e0c82d321daf05302fba55c29d2e5dcbc19dc1",
+  "provenance.json": "85e37c94dee8d024dbf3a3d1659a77cbe87d74cda14f3bb6506b9c42b901136e",
+  "summaries.json": "2042d148198be66f75842bef0043865c66910efe88f729b70e4acabfd96f415c",
+  "verification.json": "54099cffba7176d7d86d373c924cc78a0201fdf2ac672b6e1acf965c9d162d16"
+}

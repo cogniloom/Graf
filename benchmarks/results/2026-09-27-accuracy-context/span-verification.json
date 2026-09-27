@@ -1,0 +1,16 @@
+{
+  "exploratory": {
+    "regions": 225,
+    "references": 348,
+    "original_passages_retained": 96,
+    "min_bytes": 72199,
+    "max_bytes": 123177
+  },
+  "final": {
+    "regions": 225,
+    "references": 349,
+    "original_passages_retained": 96,
+    "min_bytes": 72199,
+    "max_bytes": 123414
+  }
+}

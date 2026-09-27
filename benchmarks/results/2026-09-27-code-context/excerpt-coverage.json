@@ -1,0 +1,62 @@
+[
+  {
+    "case_id": "code-01",
+    "required_evidence": 3,
+    "baseline": 1,
+    "enriched": 2
+  },
+  {
+    "case_id": "code-02",
+    "required_evidence": 2,
+    "baseline": 2,
+    "enriched": 2
+  },
+  {
+    "case_id": "code-03",
+    "required_evidence": 4,
+    "baseline": 3,
+    "enriched": 3
+  },
+  {
+    "case_id": "code-04",
+    "required_evidence": 3,
+    "baseline": 2,
+    "enriched": 1
+  },
+  {
+    "case_id": "code-05",
+    "required_evidence": 3,
+    "baseline": 2,
+    "enriched": 3
+  },
+  {
+    "case_id": "code-06",
+    "required_evidence": 1,
+    "baseline": 1,
+    "enriched": 1
+  },
+  {
+    "case_id": "code-07",
+    "required_evidence": 1,
+    "baseline": 1,
+    "enriched": 1
+  },
+  {
+    "case_id": "code-08",
+    "required_evidence": 3,
+    "baseline": 0,
+    "enriched": 3
+  },
+  {
+    "case_id": "code-09",
+    "required_evidence": 1,
+    "baseline": 1,
+    "enriched": 0
+  },
+  {
+    "case_id": "code-10",
+    "required_evidence": 1,
+    "baseline": 1,
+    "enriched": 1
+  }
+]

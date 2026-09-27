@@ -1,0 +1,7 @@
+{
+  "original_passages_retained": true,
+  "underlying_segments_unchanged": true,
+  "cache_verified": true,
+  "cli_matches_runtime": true,
+  "frozen_builder_matches": true
+}

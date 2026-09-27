@@ -1,0 +1,3042 @@
+[
+  {
+    "experiment": "exploratory",
+    "case_id": "code-10",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-10-r1",
+    "trial": "trial-0000",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The cited code confirms that seccomp load failure raises RuntimeError and that the worker calls deny_network() before resource limits and extraction, with no handler allowing continuation. Initialization and rule-configuration error claims are also supported. The answer omits the reference\u2019s finally-based context release, but that cleanup detail is not material to whether parsing continues."
+    },
+    "answer_usage": {
+      "input_tokens": 72907,
+      "cached_input_tokens": 43520,
+      "output_tokens": 774
+    },
+    "judge_usage": {
+      "input_tokens": 14918,
+      "cached_input_tokens": 8832,
+      "output_tokens": 123
+    },
+    "retrieval_seconds_historical": 17.69014821999008,
+    "context_build_seconds": 3.485865260998253,
+    "answer_seconds": 19.73112322000088,
+    "judge_seconds": 7.575538717996096,
+    "end_to_end_seconds_estimate": 40.90713670098921,
+    "tool_calls": 1,
+    "total_tokens": 73681,
+    "context_bytes": 101194
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-10",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-10-r1",
+    "trial": "trial-0001",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer correctly explains that seccomp loading failure raises RuntimeError and fails extraction, with valid implementation and README citations. Its additional initialization/configuration claims and distinction between denial testing and load-failure testing match the full sources. It omits the reference\u2019s finally-based context cleanup, but that detail is not material to whether parsing can continue."
+    },
+    "answer_usage": {
+      "input_tokens": 20268,
+      "cached_input_tokens": 7936,
+      "output_tokens": 471
+    },
+    "judge_usage": {
+      "input_tokens": 18864,
+      "cached_input_tokens": 8832,
+      "output_tokens": 125
+    },
+    "retrieval_seconds_historical": 17.69014821999008,
+    "context_build_seconds": 0,
+    "answer_seconds": 13.686102748994017,
+    "judge_seconds": 7.626535652991151,
+    "end_to_end_seconds_estimate": 31.376250968984095,
+    "tool_calls": 0,
+    "total_tokens": 20739,
+    "context_bytes": 43326
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-02",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-02-r1",
+    "trial": "trial-0002",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer accurately states that snapshot or scope-hash mismatches raise ValueError(\"Invalid cursor\") before the cursor position is used or a page returned. It covers both requested cases. Its citations match the supplied sources, which also support the query/mode examples, equivalent cache validation, and cross-snapshot test. No discrepancy with the reference rubric."
+    },
+    "answer_usage": {
+      "input_tokens": 34524,
+      "cached_input_tokens": 7936,
+      "output_tokens": 510
+    },
+    "judge_usage": {
+      "input_tokens": 18138,
+      "cached_input_tokens": 0,
+      "output_tokens": 96
+    },
+    "retrieval_seconds_historical": 17.740907150000567,
+    "context_build_seconds": 3.2922357829811517,
+    "answer_seconds": 13.780997156020021,
+    "judge_seconds": 6.87509662998491,
+    "end_to_end_seconds_estimate": 34.81414008900174,
+    "tool_calls": 0,
+    "total_tokens": 35034,
+    "context_bytes": 93943
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-02",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-02-r1",
+    "trial": "trial-0003",
+    "status": "graded",
+    "citation_gate": false,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer accurately describes snapshot/scope mismatch validation and the wrapping of the inner error as ValueError(\"Invalid cursor\"). It covers all required behavior. Its additional review-evidence claim is supported by the result-set hash included in that view\u2019s scope, and all citations match the supplied sources."
+    },
+    "answer_usage": {
+      "input_tokens": 20595,
+      "cached_input_tokens": 7936,
+      "output_tokens": 536
+    },
+    "judge_usage": {
+      "input_tokens": 17524,
+      "cached_input_tokens": 0,
+      "output_tokens": 85
+    },
+    "retrieval_seconds_historical": 17.740907150000567,
+    "context_build_seconds": 0,
+    "answer_seconds": 17.493626774987206,
+    "judge_seconds": 7.676341830025194,
+    "end_to_end_seconds_estimate": 35.23453392498777,
+    "tool_calls": 0,
+    "total_tokens": 21131,
+    "context_bytes": 43253
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-05",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-05-r0",
+    "trial": "trial-0004",
+    "status": "graded",
+    "citation_gate": false,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": false,
+      "rationale": "The answer correctly covers rejection of unknown IDs and extra fields, validated catalog references, and copying rather than repairing quotations. However, its ASSURANCE.md claim cannot be verified from the supplied sources, and the structured test citation misquotes the second resolve call. It also omits a citation to the exact-substring validation supporting its source-validation claim."
+    },
+    "answer_usage": {
+      "input_tokens": 19721,
+      "cached_input_tokens": 7936,
+      "output_tokens": 546
+    },
+    "judge_usage": {
+      "input_tokens": 15958,
+      "cached_input_tokens": 8832,
+      "output_tokens": 119
+    },
+    "retrieval_seconds_historical": 19.097084689012263,
+    "context_build_seconds": 0,
+    "answer_seconds": 18.494387334008934,
+    "judge_seconds": 7.977020291000372,
+    "end_to_end_seconds_estimate": 37.5914720230212,
+    "tool_calls": 0,
+    "total_tokens": 20267,
+    "context_bytes": 43099
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-05",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-05-r0",
+    "trial": "trial-0005",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": true,
+      "supported": false,
+      "rationale": "The core answer correctly and completely explains exact-quote validation and rejection of unknown IDs or extra fields, with valid citations. However, the added claim that a separate legacy engine repairs offsets has no support in the supplied sources or citations; its behavior and historical status cannot be established. That unsupported factual addition prevents full correctness and support."
+    },
+    "answer_usage": {
+      "input_tokens": 68598,
+      "cached_input_tokens": 40448,
+      "output_tokens": 627
+    },
+    "judge_usage": {
+      "input_tokens": 15889,
+      "cached_input_tokens": 8832,
+      "output_tokens": 181
+    },
+    "retrieval_seconds_historical": 19.097084689012263,
+    "context_build_seconds": 3.943900404003216,
+    "answer_seconds": 17.285204836982302,
+    "judge_seconds": 9.980786607979098,
+    "end_to_end_seconds_estimate": 40.32618992999778,
+    "tool_calls": 1,
+    "total_tokens": 69225,
+    "context_bytes": 92674
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-07",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-07-r1",
+    "trial": "trial-0006",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer correctly explains retrying failed extractions with a new identity, reparsing, ordinary reuse, and preservation of the failed snapshot, with valid code and test citations. Its separate corpus.py cache distinction is also supported. The reference slightly overgeneralizes: the failed/reextract retry rule applies within the incoming status == \"pending\" branch; it does not cover every acquisition failure."
+    },
+    "answer_usage": {
+      "input_tokens": 31601,
+      "cached_input_tokens": 7936,
+      "output_tokens": 806
+    },
+    "judge_usage": {
+      "input_tokens": 42557,
+      "cached_input_tokens": 8832,
+      "output_tokens": 177
+    },
+    "retrieval_seconds_historical": 18.711670757998945,
+    "context_build_seconds": 3.4366169839922804,
+    "answer_seconds": 18.542497395013925,
+    "judge_seconds": 13.035688035015482,
+    "end_to_end_seconds_estimate": 40.69078513700515,
+    "tool_calls": 0,
+    "total_tokens": 32407,
+    "context_bytes": 81120
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-07",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-07-r1",
+    "trial": "trial-0007",
+    "status": "graded",
+    "citation_gate": false,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": false,
+      "rationale": "The core answer correctly describes the pending-ingest branch: a failed extraction or reextract triggers a fresh UUID-based retry identity, clears existing, and runs parsing again. Its quoted code covers the material details. However, the additional corpus.py.txt cache claim cites a source absent from the supplied documents, so full support cannot be established. The candidate appropriately specifies pending ingest; the reference omits that condition."
+    },
+    "answer_usage": {
+      "input_tokens": 20749,
+      "cached_input_tokens": 7936,
+      "output_tokens": 361
+    },
+    "judge_usage": {
+      "input_tokens": 14127,
+      "cached_input_tokens": 8832,
+      "output_tokens": 189
+    },
+    "retrieval_seconds_historical": 18.711670757998945,
+    "context_build_seconds": 0,
+    "answer_seconds": 9.72949688899098,
+    "judge_seconds": 9.979882039013319,
+    "end_to_end_seconds_estimate": 28.441167646989925,
+    "tool_calls": 0,
+    "total_tokens": 21110,
+    "context_bytes": 43602
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-03",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-03-r0",
+    "trial": "trial-0008",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "The process-group SIGKILL, child wait, failed empty parse result, warning, and 180-second default are accurate. However, the answer conflates evidencekg ingestion with unrelated corpus.py exception handling. Evidencekg consumes the returned status and warnings directly and creates an empty failed segment; it does not catch this timeout as an ingestion exception or record 'no units.' The ingestion citations therefore do not support the claimed behavior. It also omits that failed PDF/DOCX/EML containers mark inventory incomplete because descendants could not be enumerated\u2014a material consequence absent from the reference summary too."
+    },
+    "answer_usage": {
+      "input_tokens": 65161,
+      "cached_input_tokens": 37376,
+      "output_tokens": 751
+    },
+    "judge_usage": {
+      "input_tokens": 40038,
+      "cached_input_tokens": 8832,
+      "output_tokens": 145
+    },
+    "retrieval_seconds_historical": 19.99879633798264,
+    "context_build_seconds": 3.740180616005091,
+    "answer_seconds": 20.49183945299592,
+    "judge_seconds": 8.627130343025783,
+    "end_to_end_seconds_estimate": 44.23081640698365,
+    "tool_calls": 1,
+    "total_tokens": 65912,
+    "context_bytes": 72602
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-03",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-03-r0",
+    "trial": "trial-0009",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "The process-group cleanup and empty failed parse are accurate. However, the claimed lack of an ingestion link contradicts evidencekg/ingest.py: it calls parsers.parse, adopts its failed status, accumulates warnings, and records both. Citing the separate corpus.py implementation does not support that conclusion. The answer also omits the configured parser_timeout bound. The reference is supported, though the full ingestion source additionally flags failed container formats as having unknown descendants."
+    },
+    "answer_usage": {
+      "input_tokens": 21431,
+      "cached_input_tokens": 7936,
+      "output_tokens": 441
+    },
+    "judge_usage": {
+      "input_tokens": 38613,
+      "cached_input_tokens": 8832,
+      "output_tokens": 119
+    },
+    "retrieval_seconds_historical": 19.99879633798264,
+    "context_build_seconds": 0,
+    "answer_seconds": 13.085947926010704,
+    "judge_seconds": 7.870113142998889,
+    "end_to_end_seconds_estimate": 33.08474426399334,
+    "tool_calls": 0,
+    "total_tokens": 21872,
+    "context_bytes": 42993
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-04",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-04-r1",
+    "trial": "trial-0010",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer correctly connects potentially hidden PDF descendants to inventory_complete=false, a null inventory total, and preserved known_matches. Its citations are valid and the full cited sources also support the distinction between overall failure, ordinary page/OCR warnings, and descendant-enumeration warnings. It covers every material part of the reference without contradiction."
+    },
+    "answer_usage": {
+      "input_tokens": 19849,
+      "cached_input_tokens": 7936,
+      "output_tokens": 451
+    },
+    "judge_usage": {
+      "input_tokens": 26110,
+      "cached_input_tokens": 0,
+      "output_tokens": 91
+    },
+    "retrieval_seconds_historical": 18.23661659102072,
+    "context_build_seconds": 0,
+    "answer_seconds": 11.332198066986166,
+    "judge_seconds": 6.472215116984444,
+    "end_to_end_seconds_estimate": 29.568814658006886,
+    "tool_calls": 0,
+    "total_tokens": 20300,
+    "context_bytes": 43258
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-04",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-04-r1",
+    "trial": "trial-0011",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer accurately connects failed PDF extraction to potentially unenumerated descendants, inventory_complete=false, and inventory total=null while preserving known_matches. Its citations match the supplied sources. The additional distinction between page-level OCR gaps and descendant-enumeration failures is supported by the full code and usefully clarifies the reference answer."
+    },
+    "answer_usage": {
+      "input_tokens": 107400,
+      "cached_input_tokens": 77056,
+      "output_tokens": 910
+    },
+    "judge_usage": {
+      "input_tokens": 26350,
+      "cached_input_tokens": 8832,
+      "output_tokens": 90
+    },
+    "retrieval_seconds_historical": 18.23661659102072,
+    "context_build_seconds": 4.62945584100089,
+    "answer_seconds": 29.45326744101476,
+    "judge_seconds": 7.92555519999587,
+    "end_to_end_seconds_estimate": 52.31933987303637,
+    "tool_calls": 2,
+    "total_tokens": 108310,
+    "context_bytes": 96828
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-01",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-01-r1",
+    "trial": "trial-0012",
+    "status": "graded",
+    "citation_gate": false,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "The snapshot-specific FTS creation and population are accurately cited, but the claimed missing connection contradicts the supplied sources: ingest.py explicitly calls freeze_fts(store, snapshot), and retrieval.py uses fts_name(snapshot_id) for MATCH and BM25 queries. The answer omits this essential search path and the condition that existing snapshot tables are reused. Its citations do not support the claimed evidentiary gap; the separate in-memory index does not change the demonstrated path."
+    },
+    "answer_usage": {
+      "input_tokens": 20582,
+      "cached_input_tokens": 7936,
+      "output_tokens": 983
+    },
+    "judge_usage": {
+      "input_tokens": 20347,
+      "cached_input_tokens": 8832,
+      "output_tokens": 120
+    },
+    "retrieval_seconds_historical": 27.856052083981922,
+    "context_build_seconds": 0,
+    "answer_seconds": 21.850996811001096,
+    "judge_seconds": 7.325166885013459,
+    "end_to_end_seconds_estimate": 49.70704889498302,
+    "tool_calls": 0,
+    "total_tokens": 21565,
+    "context_bytes": 42974
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-01",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-01-r1",
+    "trial": "trial-0013",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": false,
+      "rationale": "Accurately explains the full mechanism: ingestion calls freeze_fts after recording snapshot membership, copies that snapshot\u2019s segments into its own FTS5 table, and lexical search selects it via fts_name with a snapshot filter. However, the additional claim about hybrid.LexicalIndex has no citation or supplied source, so the answer is not fully supported."
+    },
+    "answer_usage": {
+      "input_tokens": 39269,
+      "cached_input_tokens": 7936,
+      "output_tokens": 863
+    },
+    "judge_usage": {
+      "input_tokens": 19897,
+      "cached_input_tokens": 0,
+      "output_tokens": 174
+    },
+    "retrieval_seconds_historical": 27.856052083981922,
+    "context_build_seconds": 4.900583242007997,
+    "answer_seconds": 19.395426964998478,
+    "judge_seconds": 9.679738594015362,
+    "end_to_end_seconds_estimate": 52.1520622909884,
+    "tool_calls": 0,
+    "total_tokens": 40132,
+    "context_bytes": 117438
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-01",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-01-r0",
+    "trial": "trial-0014",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "The snapshot-table creation and copying mechanism is accurate and cited. However, the claim that ingestion's call site is absent contradicts supplied ingest.py, which calls freeze_fts after populating snapshot membership and before updating current_snapshot. The answer also omits and does not cite the essential retrieval link: lexical search uses fts_name(snapshot_id) for MATCH and BM25 against the frozen table. The reference answer is consistent with the sources."
+    },
+    "answer_usage": {
+      "input_tokens": 20582,
+      "cached_input_tokens": 7936,
+      "output_tokens": 980
+    },
+    "judge_usage": {
+      "input_tokens": 20357,
+      "cached_input_tokens": 8832,
+      "output_tokens": 114
+    },
+    "retrieval_seconds_historical": 27.856052083981922,
+    "context_build_seconds": 0,
+    "answer_seconds": 21.449238411994884,
+    "judge_seconds": 11.33227689799969,
+    "end_to_end_seconds_estimate": 49.305290495976806,
+    "tool_calls": 0,
+    "total_tokens": 21562,
+    "context_bytes": 42974
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-01",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-01-r0",
+    "trial": "trial-0015",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": true,
+      "supported": false,
+      "rationale": "Covers the full mechanism and correct chronology: freeze_fts copies snapshot-member segments once, and lexical search uses that table for MATCH and BM25. However, the stated table name `fts_<snapshot-id>` is inaccurate: fts_name returns `fts_` plus snapshot_id[1:], stripping the leading N. Its own citation contradicts that naming claim; the remaining explanation is supported."
+    },
+    "answer_usage": {
+      "input_tokens": 122415,
+      "cached_input_tokens": 116992,
+      "output_tokens": 956
+    },
+    "judge_usage": {
+      "input_tokens": 19743,
+      "cached_input_tokens": 8832,
+      "output_tokens": 214
+    },
+    "retrieval_seconds_historical": 27.856052083981922,
+    "context_build_seconds": 4.900583242007997,
+    "answer_seconds": 24.0445848669915,
+    "judge_seconds": 10.781223408994265,
+    "end_to_end_seconds_estimate": 56.80122019298142,
+    "tool_calls": 2,
+    "total_tokens": 123371,
+    "context_bytes": 117438
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-09",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-09-r1",
+    "trial": "trial-0016",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "Accurately states the 750,000-byte serialized-row budget, the empty-page ValueError and bounded-read guidance, and termination of a page containing earlier items. Valid citations and their full sources also support the cache equivalence and continuation behavior. All material parts of the reference answer are covered."
+    },
+    "answer_usage": {
+      "input_tokens": 41119,
+      "cached_input_tokens": 7936,
+      "output_tokens": 279
+    },
+    "judge_usage": {
+      "input_tokens": 16930,
+      "cached_input_tokens": 0,
+      "output_tokens": 86
+    },
+    "retrieval_seconds_historical": 18.311514353990788,
+    "context_build_seconds": 4.475512108998373,
+    "answer_seconds": 9.423666913004126,
+    "judge_seconds": 6.473943755001528,
+    "end_to_end_seconds_estimate": 32.21069337599329,
+    "tool_calls": 0,
+    "total_tokens": 41398,
+    "context_bytes": 123796
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-09",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-09-r1",
+    "trial": "trial-0017",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": false,
+      "supported": true,
+      "rationale": "Correctly describes the first-item ValueError, exact guidance, and stopping with a continuation cursor after earlier items; the cited source supports these claims. It omits that the 750,000-byte budget measures encoded JSON bytes, computed as len(dump(row).encode())."
+    },
+    "answer_usage": {
+      "input_tokens": 20395,
+      "cached_input_tokens": 0,
+      "output_tokens": 286
+    },
+    "judge_usage": {
+      "input_tokens": 15935,
+      "cached_input_tokens": 8832,
+      "output_tokens": 209
+    },
+    "retrieval_seconds_historical": 18.311514353990788,
+    "context_build_seconds": 0,
+    "answer_seconds": 8.478306320990669,
+    "judge_seconds": 12.584342240996193,
+    "end_to_end_seconds_estimate": 26.789820674981456,
+    "tool_calls": 0,
+    "total_tokens": 20681,
+    "context_bytes": 43424
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-05",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-05-r1",
+    "trial": "trial-0018",
+    "status": "graded",
+    "citation_gate": false,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": false,
+      "rationale": "The substantive answer matches the reference: references are validated, unknown IDs and extra fields are rejected, and separate offset normalization does not alter quote text. However, the lawcase citation is not verbatim: it omits the bounds condition `lo <= q[\"start\"] < q[\"end\"] <= hi and` while presenting the modified line as an exact quotation. The full source supports the explanation, but this invalid citation prevents full support."
+    },
+    "answer_usage": {
+      "input_tokens": 69095,
+      "cached_input_tokens": 40448,
+      "output_tokens": 624
+    },
+    "judge_usage": {
+      "input_tokens": 37585,
+      "cached_input_tokens": 8832,
+      "output_tokens": 195
+    },
+    "retrieval_seconds_historical": 19.097084689012263,
+    "context_build_seconds": 3.943900404003216,
+    "answer_seconds": 16.3883264370088,
+    "judge_seconds": 9.578746314015007,
+    "end_to_end_seconds_estimate": 39.42931153002428,
+    "tool_calls": 1,
+    "total_tokens": 69719,
+    "context_bytes": 92674
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-05",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-05-r1",
+    "trial": "trial-0019",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": false,
+      "rationale": "The answer correctly covers both prohibitions: catalog references are validated, and resolution rejects unknown IDs and choices with extra fields. The supplied tests also confirm rejection of output altered after model output. However, the quoted ASSURANCE.md statement cannot be verified because that source was not supplied. The central conclusion agrees with the reference rubric, but this additional claim prevents full citation support."
+    },
+    "answer_usage": {
+      "input_tokens": 19721,
+      "cached_input_tokens": 7936,
+      "output_tokens": 505
+    },
+    "judge_usage": {
+      "input_tokens": 15928,
+      "cached_input_tokens": 0,
+      "output_tokens": 163
+    },
+    "retrieval_seconds_historical": 19.097084689012263,
+    "context_build_seconds": 0,
+    "answer_seconds": 12.234128947020508,
+    "judge_seconds": 8.878474396013189,
+    "end_to_end_seconds_estimate": 31.33121363603277,
+    "tool_calls": 0,
+    "total_tokens": 20226,
+    "context_bytes": 43099
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-06",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-06-r1",
+    "trial": "trial-0020",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer covers the required ident('Q', segment ID, start, end) binding, reference validation, and ValueError rejection of duplicate catalog IDs. Its additional details about span generation, selection resolution, and submission lineage are supported by the cited full sources. References are validated during catalog construction and again during result validation, consistent with the described safeguards."
+    },
+    "answer_usage": {
+      "input_tokens": 69107,
+      "cached_input_tokens": 40448,
+      "output_tokens": 976
+    },
+    "judge_usage": {
+      "input_tokens": 30211,
+      "cached_input_tokens": 8832,
+      "output_tokens": 147
+    },
+    "retrieval_seconds_historical": 19.178011796990177,
+    "context_build_seconds": 3.3150780699797906,
+    "answer_seconds": 21.940790985012427,
+    "judge_seconds": 11.224467321997508,
+    "end_to_end_seconds_estimate": 44.433880851982394,
+    "tool_calls": 1,
+    "total_tokens": 70083,
+    "context_bytes": 90798
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-06",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-06-r1",
+    "trial": "trial-0021",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer covers reference validation, the exact ID derivation (shown in its evidence), and ValueError rejection of mismatched or duplicate catalog IDs. Its additional claims about immutable resolution, malformed selections, changed duplicate submissions, and limits on claim support are supported by the cited full sources. It correctly distinguishes catalog duplicates from submission-lineage checks."
+    },
+    "answer_usage": {
+      "input_tokens": 19964,
+      "cached_input_tokens": 7936,
+      "output_tokens": 527
+    },
+    "judge_usage": {
+      "input_tokens": 15240,
+      "cached_input_tokens": 8832,
+      "output_tokens": 94
+    },
+    "retrieval_seconds_historical": 19.178011796990177,
+    "context_build_seconds": 0,
+    "answer_seconds": 14.988482018001378,
+    "judge_seconds": 6.425613398983842,
+    "end_to_end_seconds_estimate": 34.166493814991554,
+    "tool_calls": 0,
+    "total_tokens": 20491,
+    "context_bytes": 42733
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-10",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-10-r0",
+    "trial": "trial-0022",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": false,
+      "rationale": "The code confirms that seccomp load failure raises RuntimeError and stops the worker before extraction. This fully answers the question; the reference\u2019s finally-block cleanup detail is not necessary to explain whether parsing continues. However, the README claim has no citation or supplied source, so the answer is not fully supported."
+    },
+    "answer_usage": {
+      "input_tokens": 36257,
+      "cached_input_tokens": 7936,
+      "output_tokens": 353
+    },
+    "judge_usage": {
+      "input_tokens": 14575,
+      "cached_input_tokens": 0,
+      "output_tokens": 134
+    },
+    "retrieval_seconds_historical": 17.69014821999008,
+    "context_build_seconds": 3.485865260998253,
+    "answer_seconds": 10.021102616999997,
+    "judge_seconds": 7.826840794994496,
+    "end_to_end_seconds_estimate": 31.197116097988328,
+    "tool_calls": 0,
+    "total_tokens": 36610,
+    "context_bytes": 101194
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-10",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-10-r0",
+    "trial": "trial-0023",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The cited code raises RuntimeError on seccomp initialization, rule-addition, or load failure, and the README explicitly says policy-establishment failure fails extraction. This fully answers whether parsing can continue. The reference also mentions context release in finally; omitting that cleanup detail does not materially affect this answer."
+    },
+    "answer_usage": {
+      "input_tokens": 20268,
+      "cached_input_tokens": 7936,
+      "output_tokens": 224
+    },
+    "judge_usage": {
+      "input_tokens": 15088,
+      "cached_input_tokens": 8832,
+      "output_tokens": 117
+    },
+    "retrieval_seconds_historical": 17.69014821999008,
+    "context_build_seconds": 0,
+    "answer_seconds": 8.47849103200133,
+    "judge_seconds": 8.577860805002274,
+    "end_to_end_seconds_estimate": 26.168639251991408,
+    "tool_calls": 0,
+    "total_tokens": 20492,
+    "context_bytes": 43326
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-06",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-06-r0",
+    "trial": "trial-0024",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer correctly explains deterministic IDs from segment identity and offsets, source-reference validation, and rejection of invalid or duplicate catalog IDs via ValueError. It covers every material part of the reference answer. Its additional details about span generation, resolution, quote fidelity, and idempotent citation-selection submissions are supported by the cited full sources and distinguish catalog duplicates from repeat submissions."
+    },
+    "answer_usage": {
+      "input_tokens": 103372,
+      "cached_input_tokens": 73984,
+      "output_tokens": 1133
+    },
+    "judge_usage": {
+      "input_tokens": 30114,
+      "cached_input_tokens": 8832,
+      "output_tokens": 140
+    },
+    "retrieval_seconds_historical": 19.178011796990177,
+    "context_build_seconds": 3.3150780699797906,
+    "answer_seconds": 25.544304615003057,
+    "judge_seconds": 8.7166990939877,
+    "end_to_end_seconds_estimate": 48.037394481973024,
+    "tool_calls": 2,
+    "total_tokens": 104505,
+    "context_bytes": 90798
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-06",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-06-r0",
+    "trial": "trial-0025",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer correctly states the deterministic ID formula, source-reference validation, and rejection of mismatched or duplicate catalog IDs with ValueError. Its additional explanation of selection resolution, immutable spans, stored raw/resolved results, and strict quotation handling is supported by the cited sources. It covers every material part of the reference answer without contradicting the full sources."
+    },
+    "answer_usage": {
+      "input_tokens": 19964,
+      "cached_input_tokens": 7936,
+      "output_tokens": 680
+    },
+    "judge_usage": {
+      "input_tokens": 13682,
+      "cached_input_tokens": 8832,
+      "output_tokens": 134
+    },
+    "retrieval_seconds_historical": 19.178011796990177,
+    "context_build_seconds": 0,
+    "answer_seconds": 15.38884819400846,
+    "judge_seconds": 9.479269893985474,
+    "end_to_end_seconds_estimate": 34.56685999099864,
+    "tool_calls": 0,
+    "total_tokens": 20644,
+    "context_bytes": 42733
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-08",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-08-r0",
+    "trial": "trial-0026",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "Accurately explains head-first selection, fallback only when the head row is absent, and the exact fallback ordering. Correctly locates the ingestion upsert after FTS freezing; the full cited source confirms the preceding membership operations. The cited regression test supports restoring an earlier snapshot as the default head. All material parts are covered and consistent with the reference."
+    },
+    "answer_usage": {
+      "input_tokens": 76652,
+      "cached_input_tokens": 37632,
+      "output_tokens": 990
+    },
+    "judge_usage": {
+      "input_tokens": 22275,
+      "cached_input_tokens": 8832,
+      "output_tokens": 98
+    },
+    "retrieval_seconds_historical": 17.310020417004125,
+    "context_build_seconds": 3.278615137998713,
+    "answer_seconds": 26.246391820022836,
+    "judge_seconds": 10.129333535995102,
+    "end_to_end_seconds_estimate": 46.835027375025675,
+    "tool_calls": 1,
+    "total_tokens": 77642,
+    "context_bytes": 110044
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-08",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-08-r0",
+    "trial": "trial-0027",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": false,
+      "rationale": "The answer accurately covers head-first lookup, the created_at/id fallback, and ingestion\u2019s head upsert after freezing FTS, matching the full sources and reference. However, its additional attribution to the README has no citation or supplied README evidence, so not every claim is supported."
+    },
+    "answer_usage": {
+      "input_tokens": 96309,
+      "cached_input_tokens": 75776,
+      "output_tokens": 779
+    },
+    "judge_usage": {
+      "input_tokens": 17484,
+      "cached_input_tokens": 8832,
+      "output_tokens": 129
+    },
+    "retrieval_seconds_historical": 17.310020417004125,
+    "context_build_seconds": 0,
+    "answer_seconds": 22.550729023001622,
+    "judge_seconds": 8.176888960006181,
+    "end_to_end_seconds_estimate": 39.86074944000575,
+    "tool_calls": 3,
+    "total_tokens": 97088,
+    "context_bytes": 43235
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-03",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-03-r1",
+    "trial": "trial-0028",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": true,
+      "supported": false,
+      "rationale": "Covers the required group SIGKILL, child wait, empty failed result, warning, and ingestion status. However, the opening misstates chronology: the new session and communicate call precede the timeout. The claimed 180-second default cites an unavailable config source, and canonical\u2019s implementation is absent, so empty text is not established. The additional inventory-incomplete behavior is supported by ingest.py."
+    },
+    "answer_usage": {
+      "input_tokens": 164198,
+      "cached_input_tokens": 134912,
+      "output_tokens": 938
+    },
+    "judge_usage": {
+      "input_tokens": 15515,
+      "cached_input_tokens": 8832,
+      "output_tokens": 257
+    },
+    "retrieval_seconds_historical": 19.99879633798264,
+    "context_build_seconds": 3.740180616005091,
+    "answer_seconds": 25.14837033499498,
+    "judge_seconds": 11.481310739996843,
+    "end_to_end_seconds_estimate": 48.88734728898271,
+    "tool_calls": 4,
+    "total_tokens": 165136,
+    "context_bytes": 72602
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-03",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-03-r1",
+    "trial": "trial-0029",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "Process-group termination, waiting, and the empty failed parser result are accurate and cited. However, the answer conflates EvidenceKG ingestion with unrelated corpus.py exception handling. EvidenceKG consumes the returned result, preserves its failed status and warnings in extraction records and the manifest, and creates an empty segment; it does not catch this timeout as an exception and store it as error with units=[]. The claimed uncertainty about warning preservation directly contradicts ingest.py. Thus the material ingestion behavior is incorrect and missing, and the corpus.py citations do not support it."
+    },
+    "answer_usage": {
+      "input_tokens": 21431,
+      "cached_input_tokens": 7936,
+      "output_tokens": 664
+    },
+    "judge_usage": {
+      "input_tokens": 38840,
+      "cached_input_tokens": 8832,
+      "output_tokens": 136
+    },
+    "retrieval_seconds_historical": 19.99879633798264,
+    "context_build_seconds": 0,
+    "answer_seconds": 16.84058356200694,
+    "judge_seconds": 8.216761410003528,
+    "end_to_end_seconds_estimate": 36.83937989998958,
+    "tool_calls": 0,
+    "total_tokens": 22095,
+    "context_bytes": 42993
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-04",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-04-r0",
+    "trial": "trial-0030",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer captures the full causal chain: failed PDF extraction implies potentially unknown descendants, ingestion marks inventory incomplete, and inventory reports total=null while retaining known_matches and known records. Its ingestion and README quotations are valid and support every material claim, consistent with the retrieval implementation and reference answer."
+    },
+    "answer_usage": {
+      "input_tokens": 19849,
+      "cached_input_tokens": 7936,
+      "output_tokens": 543
+    },
+    "judge_usage": {
+      "input_tokens": 23071,
+      "cached_input_tokens": 8832,
+      "output_tokens": 83
+    },
+    "retrieval_seconds_historical": 18.23661659102072,
+    "context_build_seconds": 0,
+    "answer_seconds": 14.137128948001191,
+    "judge_seconds": 6.925128720002249,
+    "end_to_end_seconds_estimate": 32.37374553902191,
+    "tool_calls": 0,
+    "total_tokens": 20392,
+    "context_bytes": 43258
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-04",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-04-r0",
+    "trial": "trial-0031",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer accurately explains the full chain: failed PDF extraction sets unknown_descendants, marks inventory incomplete, and causes inventory paging to return total=null while preserving known_matches. Its cited distinction between page-level OCR warnings producing partial extraction and failed status is also supported. It matches the reference and does not imply that failed status is the only route to incompleteness."
+    },
+    "answer_usage": {
+      "input_tokens": 70758,
+      "cached_input_tokens": 42496,
+      "output_tokens": 512
+    },
+    "judge_usage": {
+      "input_tokens": 22348,
+      "cached_input_tokens": 8832,
+      "output_tokens": 98
+    },
+    "retrieval_seconds_historical": 18.23661659102072,
+    "context_build_seconds": 4.62945584100089,
+    "answer_seconds": 14.731021810992388,
+    "judge_seconds": 9.830314547987655,
+    "end_to_end_seconds_estimate": 37.597094243014,
+    "tool_calls": 1,
+    "total_tokens": 71270,
+    "context_bytes": 96828
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-07",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-07-r0",
+    "trial": "trial-0032",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer correctly explains that pending ingests retry failed extractions with a new identity instead of reusing them, and covers reextract and matching-version reuse. Its citations show the fresh UUID and clearing of existing. The pending-status qualification improves on the reference\u2019s broader wording. The separate corpus cache behavior is accurately distinguished and cited."
+    },
+    "answer_usage": {
+      "input_tokens": 20749,
+      "cached_input_tokens": 7936,
+      "output_tokens": 487
+    },
+    "judge_usage": {
+      "input_tokens": 37562,
+      "cached_input_tokens": 0,
+      "output_tokens": 126
+    },
+    "retrieval_seconds_historical": 18.711670757998945,
+    "context_build_seconds": 0,
+    "answer_seconds": 12.834634200000437,
+    "judge_seconds": 8.424524267000379,
+    "end_to_end_seconds_estimate": 31.546304957999382,
+    "tool_calls": 0,
+    "total_tokens": 21236,
+    "context_bytes": 43602
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-07",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-07-r0",
+    "trial": "trial-0033",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer covers the retry identity, reparsing, reextract override, and preservation of the failed snapshot, supported by valid code and test citations. Its additional corpus.py comparison is consistent with that source and does not contradict the reference. The retry rule applies to pending acquisitions; \u201chistory\u201d here means retained prior snapshots, not necessarily the new manifest\u2019s history list."
+    },
+    "answer_usage": {
+      "input_tokens": 31601,
+      "cached_input_tokens": 7936,
+      "output_tokens": 499
+    },
+    "judge_usage": {
+      "input_tokens": 42248,
+      "cached_input_tokens": 0,
+      "output_tokens": 192
+    },
+    "retrieval_seconds_historical": 18.711670757998945,
+    "context_build_seconds": 3.4366169839922804,
+    "answer_seconds": 12.32708592902054,
+    "judge_seconds": 9.726287405006588,
+    "end_to_end_seconds_estimate": 34.475373671011766,
+    "tool_calls": 0,
+    "total_tokens": 32100,
+    "context_bytes": 81120
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-02",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-02-r0",
+    "trial": "trial-0034",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": false,
+      "rationale": "The answer correctly and completely explains snapshot/scope matching and the mismatch being wrapped as ValueError(\"Invalid cursor\"), stopping pagination. However, its additional claim that the cache enforces both checks is not fully supported: the supplied cache test verifies snapshot rejection only, and no cache implementation or scope-mismatch test is supplied."
+    },
+    "answer_usage": {
+      "input_tokens": 20595,
+      "cached_input_tokens": 7936,
+      "output_tokens": 445
+    },
+    "judge_usage": {
+      "input_tokens": 17071,
+      "cached_input_tokens": 8832,
+      "output_tokens": 169
+    },
+    "retrieval_seconds_historical": 17.740907150000567,
+    "context_build_seconds": 0,
+    "answer_seconds": 12.333364629972493,
+    "judge_seconds": 9.67973390800762,
+    "end_to_end_seconds_estimate": 30.07427177997306,
+    "tool_calls": 0,
+    "total_tokens": 21040,
+    "context_bytes": 43253
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-02",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-02-r0",
+    "trial": "trial-0035",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": false,
+      "rationale": "The answer accurately and fully explains snapshot/scope matching, rejection with ValueError(\"Invalid cursor\"), exception chaining, and validation before pagination selection. The supplied code and core test support these claims. However, the additional claim about test_reference_cache.py is unverifiable: that source and its relevant quotation were not supplied."
+    },
+    "answer_usage": {
+      "input_tokens": 70943,
+      "cached_input_tokens": 41472,
+      "output_tokens": 690
+    },
+    "judge_usage": {
+      "input_tokens": 18645,
+      "cached_input_tokens": 8832,
+      "output_tokens": 122
+    },
+    "retrieval_seconds_historical": 17.740907150000567,
+    "context_build_seconds": 3.2922357829811517,
+    "answer_seconds": 16.733888590009883,
+    "judge_seconds": 10.730661746987607,
+    "end_to_end_seconds_estimate": 37.7670315229916,
+    "tool_calls": 1,
+    "total_tokens": 71633,
+    "context_bytes": 93943
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-09",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-09-r0",
+    "trial": "trial-0036",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer correctly distinguishes an oversized first row, which raises the stated ValueError, from overflow after accepted rows, which ends the page with a continuation cursor. It covers the 750,000-byte budget and bounded-read guidance; the quoted size calculation establishes encoded serialization bytes. Citations and full sources support the additional cache and lexical-adapter claims. No material discrepancy with the reference."
+    },
+    "answer_usage": {
+      "input_tokens": 41119,
+      "cached_input_tokens": 7936,
+      "output_tokens": 411
+    },
+    "judge_usage": {
+      "input_tokens": 20355,
+      "cached_input_tokens": 8832,
+      "output_tokens": 129
+    },
+    "retrieval_seconds_historical": 18.311514353990788,
+    "context_build_seconds": 4.475512108998373,
+    "answer_seconds": 10.422902644990245,
+    "judge_seconds": 9.128621172974817,
+    "end_to_end_seconds_estimate": 33.209929107979406,
+    "tool_calls": 0,
+    "total_tokens": 41530,
+    "context_bytes": 123796
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-09",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-09-r0",
+    "trial": "trial-0037",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer accurately distinguishes an oversized first item, which raises the exact ValueError, from an oversized item after fitting items, which ends the page. It includes the budget and bounded-read guidance. Its additional cursor and subsequent-page behavior is supported by the cited source\u2019s full implementation. No material discrepancy with the reference."
+    },
+    "answer_usage": {
+      "input_tokens": 40940,
+      "cached_input_tokens": 28160,
+      "output_tokens": 354
+    },
+    "judge_usage": {
+      "input_tokens": 15944,
+      "cached_input_tokens": 8832,
+      "output_tokens": 164
+    },
+    "retrieval_seconds_historical": 18.311514353990788,
+    "context_build_seconds": 0,
+    "answer_seconds": 11.03109211201081,
+    "judge_seconds": 9.82986152099329,
+    "end_to_end_seconds_estimate": 29.342606466001598,
+    "tool_calls": 1,
+    "total_tokens": 41294,
+    "context_bytes": 43424
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-08",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-08-r1",
+    "trial": "trial-0038",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "Accurately explains head-first lookup, fallback ordering, explicit-ID lookup, and ingestion\u2019s singleton upsert after FTS freezing. It covers both requested parts. Citations match the supplied sources, including the test demonstrating that re-ingestion can restore an older snapshot as the head. Additional transaction and timestamp details agree with the full sources; no discrepancy with the reference."
+    },
+    "answer_usage": {
+      "input_tokens": 157274,
+      "cached_input_tokens": 121856,
+      "output_tokens": 1434
+    },
+    "judge_usage": {
+      "input_tokens": 22762,
+      "cached_input_tokens": 0,
+      "output_tokens": 146
+    },
+    "retrieval_seconds_historical": 17.310020417004125,
+    "context_build_seconds": 3.278615137998713,
+    "answer_seconds": 39.77431053202599,
+    "judge_seconds": 8.176762044022325,
+    "end_to_end_seconds_estimate": 60.36294608702883,
+    "tool_calls": 3,
+    "total_tokens": 158708,
+    "context_bytes": 110044
+  },
+  {
+    "experiment": "exploratory",
+    "case_id": "code-08",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-08-r1",
+    "trial": "trial-0039",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "Accurately explains head-first lookup, fallback ordering by created_at DESC and id DESC, and ingestion\u2019s head upsert after relationship resolution and FTS freezing. Covers both requested parts. Citations are valid, and their full sources confirm the chronology and additional inventory, audit, and schema details. No discrepancy with the reference."
+    },
+    "answer_usage": {
+      "input_tokens": 127403,
+      "cached_input_tokens": 100096,
+      "output_tokens": 1266
+    },
+    "judge_usage": {
+      "input_tokens": 25619,
+      "cached_input_tokens": 8832,
+      "output_tokens": 92
+    },
+    "retrieval_seconds_historical": 17.310020417004125,
+    "context_build_seconds": 0,
+    "answer_seconds": 30.362039580999408,
+    "judge_seconds": 7.064112362015294,
+    "end_to_end_seconds_estimate": 47.67205999800353,
+    "tool_calls": 4,
+    "total_tokens": 128669,
+    "context_bytes": 43235
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-01",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-01-r1",
+    "trial": "trial-0000",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "The snapshot-table construction is accurately cited, but the claimed uncertainty about ingestion contradicts ingest.py: freeze_fts runs after snapshot membership and relationship resolution, before updating current_snapshot. The answer also omits the essential retrieval link: API.search uses fts_name(snapshot_id) for MATCH and BM25. The separately cited in-memory LexicalIndex does not establish that link. Thus the answer misses material steps and its caveat conflicts with the supplied sources."
+    },
+    "answer_usage": {
+      "input_tokens": 20585,
+      "cached_input_tokens": 7936,
+      "output_tokens": 1100
+    },
+    "judge_usage": {
+      "input_tokens": 20478,
+      "cached_input_tokens": 8832,
+      "output_tokens": 117
+    },
+    "retrieval_seconds_historical": 27.856052083981922,
+    "context_build_seconds": 0,
+    "answer_seconds": 24.002125981991412,
+    "judge_seconds": 7.42648348302464,
+    "end_to_end_seconds_estimate": 51.858178065973334,
+    "tool_calls": 0,
+    "total_tokens": 21685,
+    "context_bytes": 42974
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-01",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-01-r1",
+    "trial": "trial-0001",
+    "status": "graded",
+    "citation_gate": false,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer accurately explains membership creation, freeze_fts copying snapshot-specific segment rows only when the FTS table is absent, and lexical retrieval selecting that table via fts_name. It correctly places freezing before the current_snapshot update and distinguishes the global segment_fts table. Inline file citations are valid and the full supplied sources support the claims despite the empty structured citations array. All material reference points are covered."
+    },
+    "answer_usage": {
+      "input_tokens": 124463,
+      "cached_input_tokens": 86272,
+      "output_tokens": 872
+    },
+    "judge_usage": {
+      "input_tokens": 19605,
+      "cached_input_tokens": 8832,
+      "output_tokens": 107
+    },
+    "retrieval_seconds_historical": 27.856052083981922,
+    "context_build_seconds": 5.066090498992708,
+    "answer_seconds": 24.29255732501042,
+    "judge_seconds": 7.676717335998546,
+    "end_to_end_seconds_estimate": 57.21469990798505,
+    "tool_calls": 2,
+    "total_tokens": 125335,
+    "context_bytes": 117525
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-09",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-09-r1",
+    "trial": "trial-0002",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "Matches the source: sizes use encoded serialized JSON bytes; exceeding 750,000 bytes raises ValueError if no items were collected, otherwise ends the page before that result. The citations and full source support the continuation claim. An individually oversized result remains pending and would raise on the next page, rather than successfully fit there."
+    },
+    "answer_usage": {
+      "input_tokens": 41243,
+      "cached_input_tokens": 7936,
+      "output_tokens": 235
+    },
+    "judge_usage": {
+      "input_tokens": 15882,
+      "cached_input_tokens": 8832,
+      "output_tokens": 116
+    },
+    "retrieval_seconds_historical": 18.311514353990788,
+    "context_build_seconds": 4.449053626012756,
+    "answer_seconds": 8.578820076014381,
+    "judge_seconds": 7.976580146001652,
+    "end_to_end_seconds_estimate": 31.339388056017924,
+    "tool_calls": 0,
+    "total_tokens": 41478,
+    "context_bytes": 124044
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-09",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-09-r1",
+    "trial": "trial-0003",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer captures the 750,000-byte threshold, exact first-item error and bounded-read guidance, and page termination after existing items. Its cursor continuation, cache behavior, and read_segments distinction are supported by the cited sources. The byte count uses encoded serialized rows; the answer agrees with the reference and covers all material behavior."
+    },
+    "answer_usage": {
+      "input_tokens": 20398,
+      "cached_input_tokens": 7936,
+      "output_tokens": 412
+    },
+    "judge_usage": {
+      "input_tokens": 17065,
+      "cached_input_tokens": 8832,
+      "output_tokens": 120
+    },
+    "retrieval_seconds_historical": 18.311514353990788,
+    "context_build_seconds": 0,
+    "answer_seconds": 11.182349627022631,
+    "judge_seconds": 7.876344094984233,
+    "end_to_end_seconds_estimate": 29.49386398101342,
+    "tool_calls": 0,
+    "total_tokens": 20810,
+    "context_bytes": 43424
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-10",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-10-r1",
+    "trial": "trial-0004",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": false,
+      "rationale": "The answer correctly and fully explains that policy-loading failure raises RuntimeError and prevents extraction; the worker and README citations support this. The reference also mentions finally releasing the context, but that cleanup detail is not material to whether parsing continues. However, the acceptance-test claim has no citation or supplied test source, so not every material claim is supported."
+    },
+    "answer_usage": {
+      "input_tokens": 109203,
+      "cached_input_tokens": 79104,
+      "output_tokens": 797
+    },
+    "judge_usage": {
+      "input_tokens": 18700,
+      "cached_input_tokens": 8832,
+      "output_tokens": 134
+    },
+    "retrieval_seconds_historical": 17.69014821999008,
+    "context_build_seconds": 3.0615027449966874,
+    "answer_seconds": 20.99082862699288,
+    "judge_seconds": 8.327686680015177,
+    "end_to_end_seconds_estimate": 41.742479591979645,
+    "tool_calls": 2,
+    "total_tokens": 110000,
+    "context_bytes": 101194
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-10",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-10-r1",
+    "trial": "trial-0005",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer correctly states that policy-loading failure raises RuntimeError and fails extraction, with valid citations for initialization, configuration, loading, and extraction failure. The reference also mentions context release in finally; that cleanup detail is not material to whether parsing can continue."
+    },
+    "answer_usage": {
+      "input_tokens": 20271,
+      "cached_input_tokens": 7936,
+      "output_tokens": 227
+    },
+    "judge_usage": {
+      "input_tokens": 15098,
+      "cached_input_tokens": 0,
+      "output_tokens": 100
+    },
+    "retrieval_seconds_historical": 17.69014821999008,
+    "context_build_seconds": 0,
+    "answer_seconds": 7.476075555023272,
+    "judge_seconds": 6.875445989018772,
+    "end_to_end_seconds_estimate": 25.16622377501335,
+    "tool_calls": 0,
+    "total_tokens": 20498,
+    "context_bytes": 43326
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-04",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-04-r1",
+    "trial": "trial-0006",
+    "status": "graded",
+    "citation_gate": false,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": true,
+      "supported": false,
+      "rationale": "The answer covers the full core chain: failed PDF \u2192 unknown descendants \u2192 incomplete inventory \u2192 total=null while retaining known_matches. However, it misleadingly treats unreadable pages as a cause of an unknown inventory count. The full parser source shows page extraction/OCR gaps can yield partial extraction without making inventory incomplete; the relevant uncertainty concerns unenumerated attachments/descendants. The citations support the core explanation, but not this added causal claim."
+    },
+    "answer_usage": {
+      "input_tokens": 71998,
+      "cached_input_tokens": 42496,
+      "output_tokens": 675
+    },
+    "judge_usage": {
+      "input_tokens": 26313,
+      "cached_input_tokens": 8832,
+      "output_tokens": 159
+    },
+    "retrieval_seconds_historical": 18.23661659102072,
+    "context_build_seconds": 4.536016722006025,
+    "answer_seconds": 17.941083567013266,
+    "judge_seconds": 8.468946414999664,
+    "end_to_end_seconds_estimate": 40.71371688004001,
+    "tool_calls": 1,
+    "total_tokens": 72673,
+    "context_bytes": 97088
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-04",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-04-r1",
+    "trial": "trial-0007",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer correctly explains the full chain: failed PDF extraction creates uncertainty about descendants, ingestion marks inventory incomplete, and reporting returns total=null while preserving known_matches. Its citations match the supplied sources. The additional encryption and OCR examples are supported, and it appropriately avoids equating individual page failures with unknown descendants. No material discrepancy with the reference."
+    },
+    "answer_usage": {
+      "input_tokens": 19852,
+      "cached_input_tokens": 7936,
+      "output_tokens": 583
+    },
+    "judge_usage": {
+      "input_tokens": 26240,
+      "cached_input_tokens": 8832,
+      "output_tokens": 94
+    },
+    "retrieval_seconds_historical": 18.23661659102072,
+    "context_build_seconds": 0,
+    "answer_seconds": 13.836167458008276,
+    "judge_seconds": 9.277128367015393,
+    "end_to_end_seconds_estimate": 32.072784049028996,
+    "tool_calls": 0,
+    "total_tokens": 20435,
+    "context_bytes": 43258
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-02",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-02-r1",
+    "trial": "trial-0008",
+    "status": "graded",
+    "citation_gate": false,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer correctly explains that snapshot or scope-hash mismatches reject the cursor, with the underlying mismatch error wrapped as ValueError(\"Invalid cursor\"). It covers both requested cases. Its additional details about cursor contents, cache request matching and fallback, and the cross-snapshot test are supported by valid citations and the full supplied sources. No material discrepancy with the reference."
+    },
+    "answer_usage": {
+      "input_tokens": 20598,
+      "cached_input_tokens": 7936,
+      "output_tokens": 691
+    },
+    "judge_usage": {
+      "input_tokens": 18329,
+      "cached_input_tokens": 0,
+      "output_tokens": 100
+    },
+    "retrieval_seconds_historical": 17.740907150000567,
+    "context_build_seconds": 0,
+    "answer_seconds": 15.589087815023959,
+    "judge_seconds": 6.67510006800876,
+    "end_to_end_seconds_estimate": 33.329994965024525,
+    "tool_calls": 0,
+    "total_tokens": 21289,
+    "context_bytes": 43253
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-02",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-02-r1",
+    "trial": "trial-0009",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer accurately explains snapshot/scope-hash validation and the mismatch exception being wrapped as ValueError(\"Invalid cursor\"), preventing pagination. It covers all material parts of the question. Its additional cache, README, and snapshot-reuse test claims have valid citations consistent with the full supplied sources."
+    },
+    "answer_usage": {
+      "input_tokens": 186972,
+      "cached_input_tokens": 154368,
+      "output_tokens": 756
+    },
+    "judge_usage": {
+      "input_tokens": 23252,
+      "cached_input_tokens": 8832,
+      "output_tokens": 85
+    },
+    "retrieval_seconds_historical": 17.740907150000567,
+    "context_build_seconds": 3.455239218979841,
+    "answer_seconds": 24.350249573006295,
+    "judge_seconds": 6.5245630760036875,
+    "end_to_end_seconds_estimate": 45.5463959419867,
+    "tool_calls": 4,
+    "total_tokens": 187728,
+    "context_bytes": 93943
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-06",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-06-r1",
+    "trial": "trial-0010",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": true,
+      "supported": false,
+      "rationale": "Covers the required ID formula, reference validation, and duplicate catalog-ID rejection. However, it incorrectly claims duplicate selections reusing an ID are durably rejected. The code checks catalog duplicates, while ASSURANCE.md addresses changed raw duplicate submissions, not repeated citation selections. Its later caveat does not resolve that unsupported claim. The reference answer is consistent with the implementation."
+    },
+    "answer_usage": {
+      "input_tokens": 19967,
+      "cached_input_tokens": 7936,
+      "output_tokens": 546
+    },
+    "judge_usage": {
+      "input_tokens": 15974,
+      "cached_input_tokens": 8832,
+      "output_tokens": 151
+    },
+    "retrieval_seconds_historical": 19.178011796990177,
+    "context_build_seconds": 0,
+    "answer_seconds": 13.135395845019957,
+    "judge_seconds": 9.629210806975607,
+    "end_to_end_seconds_estimate": 32.313407642010134,
+    "tool_calls": 0,
+    "total_tokens": 20513,
+    "context_bytes": 42733
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-06",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-06-r1",
+    "trial": "trial-0011",
+    "status": "graded",
+    "citation_gate": false,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": false,
+      "rationale": "The answer correctly covers deterministic span IDs, reference validation, and duplicate-ID rejection with ValueError, matching the reference. The additional resolution and submission-lineage details agree with the supplied code. However, the claim that the adapter gives the model the catalog-ID schema is not established: the supplied sources define selection_schema(), but show no adapter invoking or delivering it."
+    },
+    "answer_usage": {
+      "input_tokens": 69132,
+      "cached_input_tokens": 40448,
+      "output_tokens": 1008
+    },
+    "judge_usage": {
+      "input_tokens": 30238,
+      "cached_input_tokens": 8832,
+      "output_tokens": 196
+    },
+    "retrieval_seconds_historical": 19.178011796990177,
+    "context_build_seconds": 3.496048574015731,
+    "answer_seconds": 23.495509612985188,
+    "judge_seconds": 9.473322589998133,
+    "end_to_end_seconds_estimate": 46.169569983991096,
+    "tool_calls": 1,
+    "total_tokens": 70140,
+    "context_bytes": 92694
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-03",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-03-r0",
+    "trial": "trial-0012",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "The timeout, SIGKILL, child wait, failed empty result, and 180-second default are accurately cited. However, abstaining on ingestion is unjustified: supplied evidencekg/ingest.py explicitly calls parsers.parse, adopts its status and warnings, and persists them in extractions and the manifest. The claim that available evidence does not establish this contradicts the full source and omits a material part of the question. Distinguishing corpus.py is valid but does not resolve that omission; the reference is supported."
+    },
+    "answer_usage": {
+      "input_tokens": 131880,
+      "cached_input_tokens": 101376,
+      "output_tokens": 851
+    },
+    "judge_usage": {
+      "input_tokens": 39868,
+      "cached_input_tokens": 8832,
+      "output_tokens": 132
+    },
+    "retrieval_seconds_historical": 19.99879633798264,
+    "context_build_seconds": 3.791564521001419,
+    "answer_seconds": 23.55065070098499,
+    "judge_seconds": 8.222786967002321,
+    "end_to_end_seconds_estimate": 47.34101155996905,
+    "tool_calls": 3,
+    "total_tokens": 132731,
+    "context_bytes": 72602
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-03",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-03-r0",
+    "trial": "trial-0013",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": false,
+      "supported": false,
+      "rationale": "The timeout, group SIGKILL, child wait, failed empty result, and .txt/.md exception are accurate and cited. However, the answer omits ingestion\u2019s recording of status and warnings and its marking inventory incomplete for failed containers (.eml/.pdf/.docx or message/rfc822). The latter is also omitted by the reference. Its ingestion claim lacks an ingest.py citation."
+    },
+    "answer_usage": {
+      "input_tokens": 21434,
+      "cached_input_tokens": 7936,
+      "output_tokens": 408
+    },
+    "judge_usage": {
+      "input_tokens": 15285,
+      "cached_input_tokens": 8832,
+      "output_tokens": 184
+    },
+    "retrieval_seconds_historical": 19.99879633798264,
+    "context_build_seconds": 0,
+    "answer_seconds": 12.23347900097724,
+    "judge_seconds": 9.279070760007016,
+    "end_to_end_seconds_estimate": 32.23227533895988,
+    "tool_calls": 0,
+    "total_tokens": 21842,
+    "context_bytes": 42993
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-01",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-01-r0",
+    "trial": "trial-0014",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer accurately covers ingestion\u2019s freeze_fts call, conditional creation and population of a snapshot-specific FTS5 table, validated naming, and lexical query routing with snapshot membership filtering. All material claims have matching citations consistent with the full sources. The caveat about global-index queries is unnecessary but does not undermine the explanation. No material discrepancy with the reference."
+    },
+    "answer_usage": {
+      "input_tokens": 80494,
+      "cached_input_tokens": 46592,
+      "output_tokens": 724
+    },
+    "judge_usage": {
+      "input_tokens": 19709,
+      "cached_input_tokens": 8832,
+      "output_tokens": 98
+    },
+    "retrieval_seconds_historical": 27.856052083981922,
+    "context_build_seconds": 5.066090498992708,
+    "answer_seconds": 17.942203611979494,
+    "judge_seconds": 7.626214761985466,
+    "end_to_end_seconds_estimate": 50.86434619495412,
+    "tool_calls": 1,
+    "total_tokens": 81218,
+    "context_bytes": 117525
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-01",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-01-r0",
+    "trial": "trial-0015",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "The snapshot-specific FTS construction is accurately cited, but the claimed evidence gap contradicts the supplied sources: ingest.py explicitly calls freeze_fts(store, snapshot), and retrieval.py selects fts_name(snapshot_id) for MATCH and BM25. The answer therefore omits the ingestion and query wiring central to the question and unjustifiably declines to establish them. The separate hybrid index does not resolve these omissions."
+    },
+    "answer_usage": {
+      "input_tokens": 20585,
+      "cached_input_tokens": 7936,
+      "output_tokens": 780
+    },
+    "judge_usage": {
+      "input_tokens": 20153,
+      "cached_input_tokens": 0,
+      "output_tokens": 108
+    },
+    "retrieval_seconds_historical": 27.856052083981922,
+    "context_build_seconds": 0,
+    "answer_seconds": 17.69102598799509,
+    "judge_seconds": 7.525942793989088,
+    "end_to_end_seconds_estimate": 45.54707807197701,
+    "tool_calls": 0,
+    "total_tokens": 21365,
+    "context_bytes": 42974
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-09",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-09-r0",
+    "trial": "trial-0016",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "Correctly states the 750,000-byte threshold, oversized-first-item ValueError and bounded-read guidance, and page termination after fitting items. Both citations match the supplied sources; the full retrieval source also supports returning a continuation cursor. All material parts of the reference answer are covered."
+    },
+    "answer_usage": {
+      "input_tokens": 20398,
+      "cached_input_tokens": 7936,
+      "output_tokens": 381
+    },
+    "judge_usage": {
+      "input_tokens": 17025,
+      "cached_input_tokens": 8832,
+      "output_tokens": 83
+    },
+    "retrieval_seconds_historical": 18.311514353990788,
+    "context_build_seconds": 0,
+    "answer_seconds": 15.137700191990007,
+    "judge_seconds": 6.674641438992694,
+    "end_to_end_seconds_estimate": 33.449214545980794,
+    "tool_calls": 0,
+    "total_tokens": 20779,
+    "context_bytes": 43424
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-09",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-09-r0",
+    "trial": "trial-0017",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer matches the 750,000-byte encoded serialization check, the exact ValueError and bounded-read guidance when the first item is oversized, and page termination after previously collected items. The full source confirms cursor continuation leaves the excluded result pending; an individually oversized result would then raise on the next page. The additional cache and lexical-adapter claims are supported by their citations. No material discrepancy with the reference."
+    },
+    "answer_usage": {
+      "input_tokens": 129154,
+      "cached_input_tokens": 91392,
+      "output_tokens": 566
+    },
+    "judge_usage": {
+      "input_tokens": 20335,
+      "cached_input_tokens": 8832,
+      "output_tokens": 108
+    },
+    "retrieval_seconds_historical": 18.311514353990788,
+    "context_build_seconds": 4.449053626012756,
+    "answer_seconds": 16.435190189018613,
+    "judge_seconds": 7.376082670001779,
+    "end_to_end_seconds_estimate": 39.195758169022156,
+    "tool_calls": 2,
+    "total_tokens": 129720,
+    "context_bytes": 124044
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-02",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-02-r0",
+    "trial": "trial-0018",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer correctly explains snapshot and scope-hash validation and the wrapping of a mismatch as ValueError(\"Invalid cursor\"). It covers both requested reuse cases. Its additional claims about scope hashing, search fields, cache validation, and the cross-snapshot test are supported by valid citations and consistent with the full supplied sources."
+    },
+    "answer_usage": {
+      "input_tokens": 20598,
+      "cached_input_tokens": 20224,
+      "output_tokens": 656
+    },
+    "judge_usage": {
+      "input_tokens": 18358,
+      "cached_input_tokens": 0,
+      "output_tokens": 90
+    },
+    "retrieval_seconds_historical": 17.740907150000567,
+    "context_build_seconds": 0,
+    "answer_seconds": 15.08839548699325,
+    "judge_seconds": 6.474653898010729,
+    "end_to_end_seconds_estimate": 32.829302636993816,
+    "tool_calls": 0,
+    "total_tokens": 21254,
+    "context_bytes": 43253
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-02",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-02-r0",
+    "trial": "trial-0019",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": false,
+      "rationale": "The answer correctly covers snapshot/scope matching, rejection with ValueError(\"Invalid cursor\"), and the cross-snapshot test. However, its SHA-256 claim is unsupported: the supplied source calls sha(dump(scope)) but does not provide the sha helper\u2019s implementation. The reference\u2019s core conclusion matches the evidence."
+    },
+    "answer_usage": {
+      "input_tokens": 34527,
+      "cached_input_tokens": 7936,
+      "output_tokens": 406
+    },
+    "judge_usage": {
+      "input_tokens": 18421,
+      "cached_input_tokens": 8832,
+      "output_tokens": 147
+    },
+    "retrieval_seconds_historical": 17.740907150000567,
+    "context_build_seconds": 3.455239218979841,
+    "answer_seconds": 10.480767634988297,
+    "judge_seconds": 9.679988458985463,
+    "end_to_end_seconds_estimate": 31.676914003968704,
+    "tool_calls": 0,
+    "total_tokens": 34933,
+    "context_bytes": 93943
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-08",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-08-r0",
+    "trial": "trial-0020",
+    "status": "graded",
+    "citation_gate": false,
+    "abstention_gate": false,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "The abstention is unjustified: the supplied full sources explicitly contain both implementations. Store.snapshot(None) reads current_snapshot at singleton=1 and returns that snapshot, falling back only when no head exists to ordering by created_at DESC, id DESC. ingest() upserts the head after freeze_fts(store, snapshot), within store.write(). The candidate omits both requested facts, incorrectly claims the implementations are absent, and provides no citations. The reference agrees with the sources."
+    },
+    "answer_usage": {
+      "input_tokens": 20286,
+      "cached_input_tokens": 7936,
+      "output_tokens": 94
+    },
+    "judge_usage": {
+      "input_tokens": 16797,
+      "cached_input_tokens": 8832,
+      "output_tokens": 121
+    },
+    "retrieval_seconds_historical": 17.310020417004125,
+    "context_build_seconds": 0,
+    "answer_seconds": 6.023832328995923,
+    "judge_seconds": 8.877905168017605,
+    "end_to_end_seconds_estimate": 23.333852746000048,
+    "tool_calls": 0,
+    "total_tokens": 20380,
+    "context_bytes": 43235
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-08",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-08-r0",
+    "trial": "trial-0021",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "Accurately explains head-first lookup, the fallback ordering when no head row exists, and explicit-ID behavior. Correctly locates the head upsert after membership creation, relationship resolution, and FTS freezing. The cited files also support inventory\u2019s manifest read and reverting the head to an earlier snapshot. Covers all material requirements without contradicting the full sources."
+    },
+    "answer_usage": {
+      "input_tokens": 205056,
+      "cached_input_tokens": 167680,
+      "output_tokens": 870
+    },
+    "judge_usage": {
+      "input_tokens": 26820,
+      "cached_input_tokens": 8832,
+      "output_tokens": 98
+    },
+    "retrieval_seconds_historical": 17.310020417004125,
+    "context_build_seconds": 3.406761527992785,
+    "answer_seconds": 25.99954588501714,
+    "judge_seconds": 9.270747937000124,
+    "end_to_end_seconds_estimate": 46.71632783001405,
+    "tool_calls": 4,
+    "total_tokens": 205926,
+    "context_bytes": 110044
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-06",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-06-r0",
+    "trial": "trial-0022",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "Covers the required ID formula, source-reference validation, and ValueError for invalid or duplicate catalog IDs. The cited sources also support span construction, resolution, and conditional idempotent submissions. Its clarification that resolve() permits repeated selections accurately distinguishes response duplicates from catalog duplicates; this refines rather than contradicts the reference answer."
+    },
+    "answer_usage": {
+      "input_tokens": 106011,
+      "cached_input_tokens": 73984,
+      "output_tokens": 1015
+    },
+    "judge_usage": {
+      "input_tokens": 27805,
+      "cached_input_tokens": 8832,
+      "output_tokens": 132
+    },
+    "retrieval_seconds_historical": 19.178011796990177,
+    "context_build_seconds": 3.496048574015731,
+    "answer_seconds": 26.14502939299564,
+    "judge_seconds": 7.614809366990812,
+    "end_to_end_seconds_estimate": 48.819089764001546,
+    "tool_calls": 2,
+    "total_tokens": 107026,
+    "context_bytes": 92694
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-06",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-06-r0",
+    "trial": "trial-0023",
+    "status": "graded",
+    "citation_gate": false,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": false,
+      "rationale": "The core explanation accurately covers reference validation, deterministic IDs tied to segment and offsets, and ValueError for duplicate catalog IDs. It also correctly distinguishes catalog duplicates from repeated selections. However, adapter version gating, assurance documentation, integrity checks, and test claims cite files not supplied as source documents; submission/result consistency checks are not established by the available code."
+    },
+    "answer_usage": {
+      "input_tokens": 19967,
+      "cached_input_tokens": 7936,
+      "output_tokens": 682
+    },
+    "judge_usage": {
+      "input_tokens": 12034,
+      "cached_input_tokens": 0,
+      "output_tokens": 184
+    },
+    "retrieval_seconds_historical": 19.178011796990177,
+    "context_build_seconds": 0,
+    "answer_seconds": 16.440722456987714,
+    "judge_seconds": 9.229090716020437,
+    "end_to_end_seconds_estimate": 35.61873425397789,
+    "tool_calls": 0,
+    "total_tokens": 20649,
+    "context_bytes": 42733
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-08",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-08-r1",
+    "trial": "trial-0024",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "Accurately explains the singleton head lookup, fallback ordering, and ingestion upsert after FTS freezing. The cited files confirm the processing order and manifest delegation, while the cited regression test supports returning to an earlier snapshot identity. All material parts are covered, with no contradiction or discrepancy from the reference."
+    },
+    "answer_usage": {
+      "input_tokens": 76699,
+      "cached_input_tokens": 45568,
+      "output_tokens": 643
+    },
+    "judge_usage": {
+      "input_tokens": 21964,
+      "cached_input_tokens": 8832,
+      "output_tokens": 87
+    },
+    "retrieval_seconds_historical": 17.310020417004125,
+    "context_build_seconds": 3.406761527992785,
+    "answer_seconds": 17.53171219100477,
+    "judge_seconds": 6.224142321996624,
+    "end_to_end_seconds_estimate": 38.24849413600168,
+    "tool_calls": 1,
+    "total_tokens": 77342,
+    "context_bytes": 110044
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-08",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-08-r1",
+    "trial": "trial-0025",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": false,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "Abstention is unjustified: db.py explicitly shows Store.snapshot(None) reading current_snapshot first, then falling back to snapshots ordered by created_at DESC, id DESC if no head exists. ingest.py updates the singleton head via upsert immediately after freeze_fts, within the write transaction. The answer omits both requested facts; its snapshots.py citation is valid but cannot support the claim that the supplied evidence does not establish them. The reference answer agrees with the full sources."
+    },
+    "answer_usage": {
+      "input_tokens": 20286,
+      "cached_input_tokens": 7936,
+      "output_tokens": 220
+    },
+    "judge_usage": {
+      "input_tokens": 17204,
+      "cached_input_tokens": 8832,
+      "output_tokens": 122
+    },
+    "retrieval_seconds_historical": 17.310020417004125,
+    "context_build_seconds": 0,
+    "answer_seconds": 7.376275396003621,
+    "judge_seconds": 7.877077788987663,
+    "end_to_end_seconds_estimate": 24.686295813007746,
+    "tool_calls": 0,
+    "total_tokens": 20506,
+    "context_bytes": 43235
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-04",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-04-r0",
+    "trial": "trial-0026",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer accurately explains the full causal chain: failed PDFs imply unknown descendants, ingestion marks inventory incomplete, and inventory paging returns total=null while preserving known_matches. Its additional distinction between ordinary OCR warnings and attachment-enumeration failures agrees with the full sources. Citations support all material claims; there is no substantive discrepancy with the reference."
+    },
+    "answer_usage": {
+      "input_tokens": 109037,
+      "cached_input_tokens": 70144,
+      "output_tokens": 801
+    },
+    "judge_usage": {
+      "input_tokens": 22434,
+      "cached_input_tokens": 8832,
+      "output_tokens": 93
+    },
+    "retrieval_seconds_historical": 18.23661659102072,
+    "context_build_seconds": 4.536016722006025,
+    "answer_seconds": 20.49618237899267,
+    "judge_seconds": 7.676051567977993,
+    "end_to_end_seconds_estimate": 43.268815692019416,
+    "tool_calls": 2,
+    "total_tokens": 109838,
+    "context_bytes": 97088
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-04",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-04-r0",
+    "trial": "trial-0027",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer correctly connects failed PDF extraction to potentially undiscovered descendants, inventory_complete=false, and a null inventory total while retaining known_matches. Its citations are valid and consistent with the full sources. The additional distinction between page-level warnings/OCR fallback and document-level failure is also supported. It covers all material parts of the reference answer."
+    },
+    "answer_usage": {
+      "input_tokens": 19852,
+      "cached_input_tokens": 7936,
+      "output_tokens": 662
+    },
+    "judge_usage": {
+      "input_tokens": 26319,
+      "cached_input_tokens": 8832,
+      "output_tokens": 93
+    },
+    "retrieval_seconds_historical": 18.23661659102072,
+    "context_build_seconds": 0,
+    "answer_seconds": 15.339298548991792,
+    "judge_seconds": 8.615648499020608,
+    "end_to_end_seconds_estimate": 33.57591514001251,
+    "tool_calls": 0,
+    "total_tokens": 20514,
+    "context_bytes": 43258
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-07",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-07-r0",
+    "trial": "trial-0028",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "The core retry explanation matches the reference, but both omit a material condition: it applies only when the current acquisition status is pending. An identical non-pending failed record can be reused, even with reextract. The corpus.py uncertainty is also unjustified by the full source: extraction exceptions do not write a new cache, while failures after cache creation can leave reusable cached data. The quotations are authentic but do not support the answer\u2019s unconditional failure-retry claim or its asserted uncertainty."
+    },
+    "answer_usage": {
+      "input_tokens": 20752,
+      "cached_input_tokens": 7936,
+      "output_tokens": 511
+    },
+    "judge_usage": {
+      "input_tokens": 37593,
+      "cached_input_tokens": 8832,
+      "output_tokens": 189
+    },
+    "retrieval_seconds_historical": 18.711670757998945,
+    "context_build_seconds": 0,
+    "answer_seconds": 15.890022302017314,
+    "judge_seconds": 12.125285010988591,
+    "end_to_end_seconds_estimate": 34.60169306001626,
+    "tool_calls": 0,
+    "total_tokens": 21263,
+    "context_bytes": 43602
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-07",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-07-r0",
+    "trial": "trial-0029",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer accurately describes retrying a failed parser extraction with a fresh UUID-based identity and clearing the reuse reference, as shown in its quoted code. It covers the reference\u2019s material points, including reextract, and validly cites the test for preserved failed snapshots and subsequent successful reuse. Its distinction between evidencekg and corpus.py is supported and avoids conflating their implementations."
+    },
+    "answer_usage": {
+      "input_tokens": 31860,
+      "cached_input_tokens": 7936,
+      "output_tokens": 742
+    },
+    "judge_usage": {
+      "input_tokens": 42494,
+      "cached_input_tokens": 8832,
+      "output_tokens": 148
+    },
+    "retrieval_seconds_historical": 18.711670757998945,
+    "context_build_seconds": 3.360579100000905,
+    "answer_seconds": 18.191340945020784,
+    "judge_seconds": 8.574039099999936,
+    "end_to_end_seconds_estimate": 40.263590803020634,
+    "tool_calls": 0,
+    "total_tokens": 32602,
+    "context_bytes": 82653
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-05",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-05-r0",
+    "trial": "trial-0030",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": false,
+      "supported": false,
+      "rationale": "The core conclusion and rejection of unknown IDs or extra fields are accurate and cited. However, the answer omits choices() validating source references and exact quote substrings through validate_refs(), a material safeguard against altered catalog quotes. Its additional claim quoting adapter documentation is unsupported: that documentation is not supplied or cited."
+    },
+    "answer_usage": {
+      "input_tokens": 19724,
+      "cached_input_tokens": 7936,
+      "output_tokens": 472
+    },
+    "judge_usage": {
+      "input_tokens": 15892,
+      "cached_input_tokens": 8832,
+      "output_tokens": 142
+    },
+    "retrieval_seconds_historical": 19.097084689012263,
+    "context_build_seconds": 0,
+    "answer_seconds": 13.08614889997989,
+    "judge_seconds": 7.726725277985679,
+    "end_to_end_seconds_estimate": 32.18323358899215,
+    "tool_calls": 0,
+    "total_tokens": 20196,
+    "context_bytes": 43099
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-05",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-05-r0",
+    "trial": "trial-0031",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": false,
+      "rationale": "The substantive answer matches the code and covers both prohibitions: altered quotes fail validation, and unknown IDs or extra fields are rejected. It correctly distinguishes exact-text offset correction from wording repair. However, the supplied sources do not establish that lawcase_engine.py is \u201colder,\u201d so that chronological claim is unsupported."
+    },
+    "answer_usage": {
+      "input_tokens": 33722,
+      "cached_input_tokens": 7936,
+      "output_tokens": 406
+    },
+    "judge_usage": {
+      "input_tokens": 26791,
+      "cached_input_tokens": 8832,
+      "output_tokens": 260
+    },
+    "retrieval_seconds_historical": 19.097084689012263,
+    "context_build_seconds": 3.74909433798166,
+    "answer_seconds": 12.829810323019046,
+    "judge_seconds": 11.478375133010559,
+    "end_to_end_seconds_estimate": 35.67598935001297,
+    "tool_calls": 0,
+    "total_tokens": 34128,
+    "context_bytes": 92934
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-05",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-05-r1",
+    "trial": "trial-0032",
+    "status": "graded",
+    "citation_gate": false,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "Correctly answers both parts: valid IDs expand to catalog quotes and offsets, while unknown IDs and selections with extra quote fields are rejected. The cited implementation, tests, and assurance text directly support these claims. Although it does not detail catalog exact-substring validation, it adequately explains the requested behavior and does not contradict that additional safeguard."
+    },
+    "answer_usage": {
+      "input_tokens": 19724,
+      "cached_input_tokens": 7936,
+      "output_tokens": 478
+    },
+    "judge_usage": {
+      "input_tokens": 17511,
+      "cached_input_tokens": 8832,
+      "output_tokens": 131
+    },
+    "retrieval_seconds_historical": 19.097084689012263,
+    "context_build_seconds": 0,
+    "answer_seconds": 11.933501758991042,
+    "judge_seconds": 8.27747401301167,
+    "end_to_end_seconds_estimate": 31.030586448003305,
+    "tool_calls": 0,
+    "total_tokens": 20202,
+    "context_bytes": 43099
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-05",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-05-r1",
+    "trial": "trial-0033",
+    "status": "graded",
+    "citation_gate": false,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer correctly distinguishes immutable ID substitution from quote repair, explains rejection of unknown IDs and extra fields, and covers exact-span quotation validation. Its citations support these claims and the adapter\u2019s error handling. The full sources agree; there is no material discrepancy with the reference."
+    },
+    "answer_usage": {
+      "input_tokens": 70232,
+      "cached_input_tokens": 41472,
+      "output_tokens": 632
+    },
+    "judge_usage": {
+      "input_tokens": 18314,
+      "cached_input_tokens": 8832,
+      "output_tokens": 119
+    },
+    "retrieval_seconds_historical": 19.097084689012263,
+    "context_build_seconds": 3.74909433798166,
+    "answer_seconds": 17.345594551006798,
+    "judge_seconds": 10.030091941007413,
+    "end_to_end_seconds_estimate": 40.19177357800072,
+    "tool_calls": 1,
+    "total_tokens": 70864,
+    "context_bytes": 92934
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-10",
+    "repetition": 0,
+    "arm": "baseline",
+    "pair": "code-10-r0",
+    "trial": "trial-0034",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The answer correctly states that seccomp load failure raises RuntimeError and prevents extraction, with valid citations supporting initialization, rule-configuration, and load failures. It appropriately avoids asserting that the wider application stops. Although it omits the reference\u2019s finally-block cleanup detail, that detail is not material to whether parsing can continue."
+    },
+    "answer_usage": {
+      "input_tokens": 20271,
+      "cached_input_tokens": 7936,
+      "output_tokens": 241
+    },
+    "judge_usage": {
+      "input_tokens": 15112,
+      "cached_input_tokens": 0,
+      "output_tokens": 112
+    },
+    "retrieval_seconds_historical": 17.69014821999008,
+    "context_build_seconds": 0,
+    "answer_seconds": 8.127514872001484,
+    "judge_seconds": 6.975813942000968,
+    "end_to_end_seconds_estimate": 25.817663091991562,
+    "tool_calls": 0,
+    "total_tokens": 20512,
+    "context_bytes": 43326
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-10",
+    "repetition": 0,
+    "arm": "treatment",
+    "pair": "code-10-r0",
+    "trial": "trial-0035",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "The cited code shows seccomp load failure raises RuntimeError, which propagates before resource limits or extraction; the README confirms policy failure fails extraction. All material claims have valid citations consistent with the full sources. The reference additionally mentions context release in finally, but that cleanup detail is not material to whether parsing continues."
+    },
+    "answer_usage": {
+      "input_tokens": 36260,
+      "cached_input_tokens": 7936,
+      "output_tokens": 594
+    },
+    "judge_usage": {
+      "input_tokens": 18587,
+      "cached_input_tokens": 0,
+      "output_tokens": 89
+    },
+    "retrieval_seconds_historical": 17.69014821999008,
+    "context_build_seconds": 3.0615027449966874,
+    "answer_seconds": 14.582879371999297,
+    "judge_seconds": 6.374359645007644,
+    "end_to_end_seconds_estimate": 35.33453033698606,
+    "tool_calls": 0,
+    "total_tokens": 36854,
+    "context_bytes": 101194
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-07",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-07-r1",
+    "trial": "trial-0036",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "The evidencekg retry explanation and preservation of the old snapshot are supported. However, corpus.py caches only after extract() returns; an extraction exception creates no failed-result cache, so the claimed reuse of failed extractions needs qualification about failures after caching. The answer also omits explicit reextract behavior and the pending-status restriction. The reference itself overgeneralizes: evidencekg\u2019s UUID retry and existing=None reset occur only when acquisition status is pending, not for every failed inventory or capture record."
+    },
+    "answer_usage": {
+      "input_tokens": 31860,
+      "cached_input_tokens": 7936,
+      "output_tokens": 346
+    },
+    "judge_usage": {
+      "input_tokens": 42094,
+      "cached_input_tokens": 0,
+      "output_tokens": 243
+    },
+    "retrieval_seconds_historical": 18.711670757998945,
+    "context_build_seconds": 3.360579100000905,
+    "answer_seconds": 9.67734601200209,
+    "judge_seconds": 13.175437618017895,
+    "end_to_end_seconds_estimate": 31.74959587000194,
+    "tool_calls": 0,
+    "total_tokens": 32206,
+    "context_bytes": 82653
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-07",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-07-r1",
+    "trial": "trial-0037",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "The normal parsing retry is described accurately, but the answer and reference omit a material condition: retry logic runs only when the incoming status is `pending`. An acquisition already marked `failed` can reuse an existing extraction with the same identity without reparsing. The citations are genuine but do not support the unconditional failed-extraction claim; the answer also leaves `reextract` as an evidencekg retry trigger unexplained."
+    },
+    "answer_usage": {
+      "input_tokens": 20752,
+      "cached_input_tokens": 7936,
+      "output_tokens": 342
+    },
+    "judge_usage": {
+      "input_tokens": 37420,
+      "cached_input_tokens": 8832,
+      "output_tokens": 222
+    },
+    "retrieval_seconds_historical": 18.711670757998945,
+    "context_build_seconds": 0,
+    "answer_seconds": 9.98014996299753,
+    "judge_seconds": 14.729029546986567,
+    "end_to_end_seconds_estimate": 28.691820720996475,
+    "tool_calls": 0,
+    "total_tokens": 21094,
+    "context_bytes": 43602
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-03",
+    "repetition": 1,
+    "arm": "baseline",
+    "pair": "code-03-r1",
+    "trial": "trial-0038",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": false,
+    "strict_gate": false,
+    "failures": [],
+    "grade": {
+      "correct": false,
+      "complete": false,
+      "supported": false,
+      "rationale": "The process-group kill, child wait, and empty failed parser result are accurate. However, the ingestion account incorrectly imports corpus.py behavior into EvidenceKG: EvidenceKG records status and warnings and creates an empty failed segment, rather than recording an error with no work units. The answer also omits the parser_timeout configuration and ingestion\u2019s warning propagation. Its corpus.py citation does not support the claimed downstream behavior of this parser."
+    },
+    "answer_usage": {
+      "input_tokens": 21434,
+      "cached_input_tokens": 21248,
+      "output_tokens": 363
+    },
+    "judge_usage": {
+      "input_tokens": 38543,
+      "cached_input_tokens": 8832,
+      "output_tokens": 138
+    },
+    "retrieval_seconds_historical": 19.99879633798264,
+    "context_build_seconds": 0,
+    "answer_seconds": 9.68084430199815,
+    "judge_seconds": 8.975223997986177,
+    "end_to_end_seconds_estimate": 29.67964063998079,
+    "tool_calls": 0,
+    "total_tokens": 21797,
+    "context_bytes": 42993
+  },
+  {
+    "experiment": "final",
+    "case_id": "code-03",
+    "repetition": 1,
+    "arm": "treatment",
+    "pair": "code-03-r1",
+    "trial": "trial-0039",
+    "status": "graded",
+    "citation_gate": true,
+    "abstention_gate": true,
+    "semantic_gate": true,
+    "strict_gate": true,
+    "failures": [],
+    "grade": {
+      "correct": true,
+      "complete": true,
+      "supported": true,
+      "rationale": "Accurately describes the timeout sequence: kill the worker\u2019s process group, wait for the child, re-raise, then return an empty failed result with the exception warning. It covers ingestion\u2019s retention of status and warnings. The cited full sources also support empty-text segmentation/indexing, incomplete inventory for failed containers, and the 180-second default. These additional details are consistent with the reference."
+    },
+    "answer_usage": {
+      "input_tokens": 137388,
+      "cached_input_tokens": 104448,
+      "output_tokens": 785
+    },
+    "judge_usage": {
+      "input_tokens": 16558,
+      "cached_input_tokens": 8832,
+      "output_tokens": 215
+    },
+    "retrieval_seconds_historical": 19.99879633798264,
+    "context_build_seconds": 3.791564521001419,
+    "answer_seconds": 20.583239699015394,
+    "judge_seconds": 9.880193547985982,
+    "end_to_end_seconds_estimate": 44.37360055799945,
+    "tool_calls": 3,
+    "total_tokens": 138173,
+    "context_bytes": 72602
+  }
+]

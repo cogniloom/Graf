@@ -1,0 +1,122 @@
+[
+  {
+    "experiment": "exploratory",
+    "case": "code-01",
+    "required": 3,
+    "retrieved": 3
+  },
+  {
+    "experiment": "exploratory",
+    "case": "code-02",
+    "required": 2,
+    "retrieved": 2
+  },
+  {
+    "experiment": "exploratory",
+    "case": "code-03",
+    "required": 4,
+    "retrieved": 3
+  },
+  {
+    "experiment": "exploratory",
+    "case": "code-04",
+    "required": 3,
+    "retrieved": 3
+  },
+  {
+    "experiment": "exploratory",
+    "case": "code-05",
+    "required": 3,
+    "retrieved": 3
+  },
+  {
+    "experiment": "exploratory",
+    "case": "code-06",
+    "required": 1,
+    "retrieved": 1
+  },
+  {
+    "experiment": "exploratory",
+    "case": "code-07",
+    "required": 1,
+    "retrieved": 1
+  },
+  {
+    "experiment": "exploratory",
+    "case": "code-08",
+    "required": 3,
+    "retrieved": 3
+  },
+  {
+    "experiment": "exploratory",
+    "case": "code-09",
+    "required": 1,
+    "retrieved": 1
+  },
+  {
+    "experiment": "exploratory",
+    "case": "code-10",
+    "required": 1,
+    "retrieved": 1
+  },
+  {
+    "experiment": "final",
+    "case": "code-01",
+    "required": 3,
+    "retrieved": 3
+  },
+  {
+    "experiment": "final",
+    "case": "code-02",
+    "required": 2,
+    "retrieved": 2
+  },
+  {
+    "experiment": "final",
+    "case": "code-03",
+    "required": 4,
+    "retrieved": 3
+  },
+  {
+    "experiment": "final",
+    "case": "code-04",
+    "required": 3,
+    "retrieved": 3
+  },
+  {
+    "experiment": "final",
+    "case": "code-05",
+    "required": 3,
+    "retrieved": 3
+  },
+  {
+    "experiment": "final",
+    "case": "code-06",
+    "required": 1,
+    "retrieved": 1
+  },
+  {
+    "experiment": "final",
+    "case": "code-07",
+    "required": 1,
+    "retrieved": 1
+  },
+  {
+    "experiment": "final",
+    "case": "code-08",
+    "required": 3,
+    "retrieved": 3
+  },
+  {
+    "experiment": "final",
+    "case": "code-09",
+    "required": 1,
+    "retrieved": 1
+  },
+  {
+    "experiment": "final",
+    "case": "code-10",
+    "required": 1,
+    "retrieved": 1
+  }
+]

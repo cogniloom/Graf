@@ -1,0 +1,21 @@
+[
+  {
+    "model": "gpt-6-luna",
+    "effort": "low",
+    "workload": "code",
+    "scheduled": 10,
+    "attempted": 10,
+    "status": "complete",
+    "halted_at": null,
+    "answered": 10,
+    "graded": 10,
+    "strict_passes": 3,
+    "accuracy": 0.3,
+    "elapsed_seconds": 138.16096866800217,
+    "median_seconds": 12.608933122493909,
+    "usage_known": 10,
+    "input_tokens": 203907,
+    "cached_input_tokens": 63488,
+    "output_tokens": 5334
+  }
+]
