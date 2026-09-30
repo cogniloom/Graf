@@ -46,8 +46,15 @@ class Search(Payload):
     limit: int = Field(default=12, ge=1, le=12, strict=True)
 
 
+class Attachment(Payload):
+    name: str = Field(min_length=1, max_length=200)
+    data: str = Field(min_length=1, max_length=2_796_204)
+
+
 class Investigation(Payload):
     prompt: str = Field(min_length=1, max_length=16000)
+    include_collection: StrictBool = True
+    attachments: list[Attachment] = Field(default_factory=list, max_length=5)
     allow_partial: StrictBool = False
     parent_id: str | None = Field(default=None, max_length=64)
     request_id: str = Field(min_length=16, max_length=64)
@@ -136,7 +143,7 @@ def create_app(config, *, manager=None, start_background=True, investigations=No
                 body = bytearray()
                 async for chunk in request.stream():
                     body.extend(chunk)
-                    if len(body) > 32_768:
+                    if len(body) > (12 * 1024 * 1024 if path == "/api/investigations" else 32_768):
                         return JSONResponse({"detail": "Request body too large"}, status_code=413)
                 request._body = bytes(body)
         response = await call_next(request)
@@ -267,6 +274,34 @@ def create_app(config, *, manager=None, start_background=True, investigations=No
     def graph(limit: int = Query(2000, ge=1, le=5000)):
         return manager.graph(limit)
 
+    @app.get("/api/knowledge")
+    def knowledge(
+        kind: str = Query("claim", max_length=32),
+        entity: str | None = Query(None, max_length=200),
+        predicate: str | None = Query(None, max_length=200),
+        applicable_on: str | None = Query(None, max_length=200),
+        valid_at: str | None = Query(None, max_length=200),
+        group_id: str | None = Query(None, max_length=200),
+        concept: str | None = Query(None, max_length=2000),
+        text: str | None = Query(None, max_length=2000),
+        segment_id: str | None = Query(None, max_length=2000),
+        cursor: str | None = Query(None, max_length=4096),
+        limit: int = Query(100, ge=1, le=1000),
+    ):
+        return manager.knowledge(
+            kind=kind,
+            entity=entity,
+            predicate=predicate,
+            applicable_on=applicable_on,
+            valid_at=valid_at,
+            group_id=group_id,
+            concept=concept,
+            text=text,
+            segment_id=segment_id,
+            cursor=cursor,
+            limit=limit,
+        )
+
     @app.get("/api/documents")
     def documents(
         query: str = Query("", max_length=4096),
@@ -274,6 +309,14 @@ def create_app(config, *, manager=None, start_background=True, investigations=No
         limit: int = Query(50, ge=1, le=200),
     ):
         return manager.documents(query, offset, limit)
+
+    @app.get("/api/document-issues")
+    def document_issues(
+        kind: str = Query("unsupported", pattern="^(all|unsupported|failed|partial)$"),
+        offset: int = Query(0, ge=0),
+        limit: int = Query(50, ge=1, le=200),
+    ):
+        return manager.documents("", offset, limit, issues=kind)
 
     @app.get("/api/documents/{document_id}")
     def document(document_id: str, offset: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=200)):
@@ -301,7 +344,7 @@ def create_app(config, *, manager=None, start_background=True, investigations=No
 
     @app.post("/api/investigations")
     def investigation_create(body: Investigation):
-        return investigations.create(**body.model_dump())
+        return investigations.create(**body.model_dump(), defer=True)
 
     @app.get("/api/investigations/{run_id}")
     def investigation_detail(run_id: str):

@@ -77,6 +77,9 @@ def verify(store):
     for snap in store.rows("SELECT * FROM snapshots"):
         try:
             manifest = store.manifest(snap["id"])
+            from .knowledge import verify as verify_knowledge
+
+            verify_knowledge(store, snap["id"])
             expected = {(d["document_version_id"], d["extraction_id"]) for d in manifest["documents"]}
             actual = {
                 (r["document_version_id"], r["extraction_id"])
@@ -341,6 +344,9 @@ class DerivationRecorder:
 
     def get(self, *args):
         return self.store.get(*args)
+
+    def verify_blob(self, *args):
+        return self.store.verify_blob(*args)
 
     def manifest(self, *args):
         return self.store.manifest(*args)

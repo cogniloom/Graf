@@ -25,6 +25,61 @@
     error = "",
     refresh = 0;
   let requestId = crypto.randomUUID();
+  let files: File[] = [];
+  let includeCollection = true;
+  let answers: Record<string, string> = {};
+  let answerRun: string | null = null;
+  $: if (selected !== answerRun) {
+    answers = {};
+    answerRun = selected;
+  }
+  function attach(event: Event) {
+    const input = event.currentTarget as HTMLInputElement;
+    const next = [...files, ...Array.from(input.files || [])];
+    input.value = "";
+    if (
+      next.length > 5 ||
+      next.some((f) => !f.size || f.size > 2 * 1024 * 1024) ||
+      next.reduce((n, f) => n + f.size, 0) > 8 * 1024 * 1024
+    ) {
+      error =
+        "Attach up to 5 nonempty files, at most 2 MiB each and 8 MiB total.";
+      return;
+    }
+    if (new Set(next.map((f) => f.name)).size !== next.length) {
+      error = "Attachment filenames must be unique.";
+      return;
+    }
+    if (next.some((f) => !/\.(txt|md|pdf|docx|csv|json)$/i.test(f.name))) {
+      error = "Supported attachments: TXT, MD, PDF, DOCX, CSV and JSON.";
+      return;
+    }
+    error = "";
+    files = next;
+    requestId = crypto.randomUUID();
+  }
+  function encode(file: File): Promise<{ name: string; data: string }> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () =>
+        resolve({ name: file.name, data: String(reader.result).split(",")[1] });
+      reader.onerror = () => reject(new Error(`Could not read ${file.name}`));
+      reader.readAsDataURL(file);
+    });
+  }
+  function replyToQuestions() {
+    if (!detail || busy) return;
+    const questions = detail.result.questions || [];
+    parent = detail.id;
+    includeCollection = detail.snapshot.retrieval !== "prompt_attachments_only";
+    partial = !!detail.partial;
+    prompt = questions
+      .map((q) => `${q.question}\n${answers[q.id]?.trim() || ""}`)
+      .join("\n\n");
+    requestId = crypto.randomUUID();
+    files = [];
+    select(null);
+  }
   let preview: { text: string; truncated: boolean; artifact: Artifact } | null =
     null;
   let annotation = "",
@@ -40,6 +95,8 @@
     reason = "",
     erasePreview: ErasurePreview | null = null,
     confirmation = "";
+  let pendingLoad: string | null = null,
+    pendingComparison: string | null = null;
   let generation = 0,
     graphGeneration = 0,
     compareGeneration = 0,
@@ -77,6 +134,8 @@
   }
   function select(id: string | null) {
     generation++;
+    pendingLoad = null;
+    pendingComparison = null;
     graphGeneration++;
     compareGeneration++;
     selected = id;
@@ -90,6 +149,9 @@
     history.replaceState(null, "", url);
   }
   async function load(_tick: number, _refresh: number, id: string | null) {
+    const key = JSON.stringify([id, _refresh]);
+    if (pendingLoad === key) return;
+    pendingLoad = key;
     const version = ++generation;
     try {
       const [list, value] = await Promise.all([
@@ -114,6 +176,8 @@
         clearSensitive();
         error = (e as Error).message;
       }
+    } finally {
+      if (version === generation) pendingLoad = null;
     }
   }
   async function loadGraph(
@@ -146,9 +210,13 @@
     _selected: string | null,
     _tick: number,
   ) {
+    const key = JSON.stringify([id, _selected]);
+    if (pendingComparison === key) return;
+    pendingComparison = key;
     const v = ++compareGeneration;
     if (!id) {
       comparison = null;
+      pendingComparison = null;
       return;
     }
     try {
@@ -157,6 +225,8 @@
         comparison = ["erased", "deleting"].includes(d.state) ? null : d;
     } catch {
       if (mounted && v === compareGeneration) comparison = null;
+    } finally {
+      if (v === compareGeneration) pendingComparison = null;
     }
   }
   async function action(fn: () => Promise<void>) {
@@ -178,20 +248,26 @@
       ...(body ? { body: JSON.stringify(body) } : {}),
     });
   function submit() {
+    const draft = {
+      prompt,
+      allow_partial: partial,
+      parent_id: parent,
+      request_id: requestId,
+      model,
+      effort,
+      include_collection: includeCollection,
+    };
+    const draftFiles = [...files];
     void action(async () => {
+      const attachments = await Promise.all(draftFiles.map(encode));
       const run = await api<Run>("/investigations", {
         method: "POST",
-        body: JSON.stringify({
-          prompt,
-          allow_partial: partial,
-          parent_id: parent,
-          request_id: requestId,
-          model,
-          effort,
-        }),
+        body: JSON.stringify({ ...draft, attachments }),
       });
+      if (!mounted || requestId !== draft.request_id) return;
       requestId = crypto.randomUUID();
       prompt = "";
+      files = [];
       parent = null;
       select(run.id);
     });
@@ -235,6 +311,11 @@
     });
   }
   function followup() {
+    if (busy) return;
+    includeCollection =
+      detail?.snapshot.retrieval !== "prompt_attachments_only";
+    partial = !!detail?.partial;
+    requestId = crypto.randomUUID();
     parent = selected;
     select(null);
   }
@@ -256,6 +337,7 @@
         aria-label="New session"
         on:click={() => {
           parent = null;
+          requestId = crypto.randomUUID();
           select(null);
         }}>＋</button
       >
@@ -309,6 +391,7 @@
             >What would you like to investigate?</label
           >
           <textarea
+            disabled={busy}
             id="research-prompt"
             required
             maxlength="16000"
@@ -317,9 +400,50 @@
             on:input={() => (requestId = crypto.randomUUID())}
             placeholder="What does the record tell us about…"
           ></textarea>
+          <label class="check"
+            ><input
+              type="checkbox"
+              disabled={busy}
+              bind:checked={includeCollection}
+              on:change={() => (requestId = crypto.randomUUID())}
+            /> Search the indexed collection</label
+          >
+          <p class="muted">
+            Turn off to use only this prompt, attachments and earlier replies in
+            this session.
+          </p>
+          <label for="prompt-files">Attach files</label>
+          <input
+            id="prompt-files"
+            type="file"
+            multiple
+            disabled={busy}
+            accept=".txt,.md,.pdf,.docx,.csv,.json"
+            on:change={attach}
+          />
+          <p class="muted">
+            Reference a file by its name in your prompt. Up to 5 files, 2 MiB
+            each; searchable PDF, DOCX or text. Extracted attachment text is
+            limited to 48,000 bytes.
+          </p>
+          {#each files as file, i}
+            <div>
+              {file.name} · {Math.ceil(file.size / 1024)} KiB
+              <button
+                type="button"
+                disabled={busy}
+                aria-label={`Remove ${file.name}`}
+                on:click={() => {
+                  files = files.filter((_, n) => n !== i);
+                  requestId = crypto.randomUUID();
+                }}>Remove</button
+              >
+            </div>
+          {/each}
           <div class="composer-options">
             <label
               >Model<select
+                disabled={busy}
                 bind:value={model}
                 on:change={() => (requestId = crypto.randomUUID())}
                 ><option>gpt-6-astra</option><option>gpt-6-sol</option><option
@@ -328,6 +452,7 @@
               ></label
             ><label
               >Reasoning effort<select
+                disabled={busy}
                 bind:value={effort}
                 on:change={() => (requestId = crypto.randomUUID())}
                 ><option value="low">Low</option><option value="medium"
@@ -338,7 +463,7 @@
               class="primary"
               disabled={busy ||
                 !prompt.trim() ||
-                (!isReady(status) && !partial)}
+                (includeCollection && !isReady(status) && !partial)}
               >Start investigation <span aria-hidden="true">↗</span></button
             >
           </div>
@@ -347,7 +472,7 @@
             Follow-up to run <code>{parent}</code>. This run records its own
             evidence snapshot.
           </p>{/if}
-        {#if !isReady(status)}<div class="notice">
+        {#if includeCollection && !isReady(status)}<div class="notice">
             <strong>Indexing is incomplete</strong>
             <p>
               Starting now uses an available, consistent snapshot. Evidence may
@@ -357,6 +482,7 @@
             <label class="check"
               ><input
                 type="checkbox"
+                disabled={busy}
                 bind:checked={partial}
                 on:change={() => (requestId = crypto.randomUUID())}
               /> I accept the incomplete collection for this run</label
@@ -416,6 +542,17 @@
             detail.snapshot.snapshot_id || "unavailable",
           )} · Retrieval: {String(detail.snapshot.retrieval || "unavailable")}
         </div>{/if}
+      {#if detail.snapshot.retrieval === "prompt_attachments_only"}<div
+          class="notice"
+        >
+          This run used the prompt, attachments and earlier session evidence.
+          The indexed collection was excluded.
+        </div>{/if}
+      {#if detail.snapshot.collection_documents}<p class="muted">
+          Retained {detail.coverage.total_documents} evidence documents from a collection
+          of {String(detail.snapshot.collection_documents)}. Retrieval is
+          selective, not an exhaustive review.
+        </p>{/if}
       {#if detail.error}<div class="notice error" role="alert">
           {detail.error.message}
         </div>{/if}
@@ -451,10 +588,47 @@
               <div class="answer-text">
                 {detail.result.answer ||
                   (active(detail.state)
-                    ? "The investigation is in progress. Open Activity to follow observable output."
-                    : "No final answer is available.")}
+                    ? detail.state === "preparing"
+                      ? "Preparing evidence and attachments. You can leave this page and return from history."
+                      : "Codex is working. Open Activity to follow observable output."
+                    : detail.state === "awaiting_input"
+                      ? "Please answer the clarification questions below."
+                      : "No final answer is available.")}
               </div>
             </article>
+            {#if detail.state === "awaiting_input" && detail.result.questions?.length}
+              <form
+                on:submit|preventDefault={replyToQuestions}
+                aria-label="Clarification questions"
+                class="clarification-form"
+              >
+                <h2>Codex needs your input</h2>
+                {#each detail.result.questions as q}
+                  <fieldset disabled={busy}>
+                    <legend>{q.question}</legend>
+                    {#each q.options as option}
+                      <button
+                        type="button"
+                        aria-pressed={answers[q.id] === option}
+                        on:click={() => {
+                          answers = { ...answers, [q.id]: option };
+                        }}>{option}</button
+                      >
+                    {/each}
+                    <label for={`answer-${q.id}`}>Your answer</label>
+                    <textarea
+                      id={`answer-${q.id}`}
+                      required
+                      maxlength="4000"
+                      bind:value={answers[q.id]}
+                    ></textarea>
+                  </fieldset>
+                {/each}
+                <button class="primary" disabled={busy}
+                  >Continue with answers</button
+                >
+              </form>
+            {/if}
             {#if detail.result.citations?.length}<h3 class="section-heading">
                 Citations <span>{detail.result.citations.length}</span>
               </h3>{/if}
@@ -928,3 +1102,29 @@
     {/if}
   </section>
 </div>
+
+<style>
+  .clarification-form {
+    display: grid;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .clarification-form fieldset {
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid var(--line, #cbd3c9);
+  }
+  .clarification-form legend {
+    padding: 0 0.35rem;
+  }
+  .clarification-form fieldset button {
+    margin: 0.35rem 0.35rem 0.75rem 0;
+  }
+  .clarification-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .clarification-form > button {
+    justify-self: start;
+  }
+</style>

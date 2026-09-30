@@ -96,3 +96,95 @@ it("selects a local folder and adds its actual path without an allowlist", async
     ),
   );
 });
+
+it("accepts a slow source response across multiple polling ticks", async () => {
+  let resolve!: (response: Response) => void;
+  const fetch = vi.fn(
+    () =>
+      new Promise<Response>((done) => {
+        resolve = done;
+      }),
+  );
+  vi.stubGlobal("fetch", fetch);
+  const props = {
+    view: "Sources",
+    tick: 0,
+    status: { counts: {}, state: "updating", phase: "ingesting" } as Status,
+    refresh: async () => {},
+    logout: async () => {},
+  };
+  const app = render(Management, props);
+  await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
+  await app.rerender({ ...props, tick: 1 });
+  await app.rerender({ ...props, tick: 2 });
+  expect(fetch).toHaveBeenCalledTimes(1);
+  resolve(
+    new Response(
+      JSON.stringify({
+        items: [
+          {
+            id: "s1",
+            path: "/slow/source.txt",
+            kind: "file",
+            enabled: true,
+            status: "pending",
+            file_count: 8594,
+            error: null,
+          },
+        ],
+      }),
+    ),
+  );
+  await screen.findByText("source.txt");
+});
+
+it("finishes a source mutation without waiting for status and discards the old source response", async () => {
+  let oldResponse!: (response: Response) => void;
+  let reads = 0;
+  const fetch = vi.fn((url: string, init: RequestInit) => {
+    if (init.method === "POST") return Promise.resolve(new Response("{}"));
+    if (++reads === 1)
+      return new Promise<Response>((done) => {
+        oldResponse = done;
+      });
+    return Promise.resolve(
+      new Response(
+        JSON.stringify({
+          items: [
+            {
+              id: "new",
+              path: "/new.txt",
+              kind: "file",
+              enabled: true,
+              status: "pending",
+              file_count: 1,
+              error: null,
+            },
+          ],
+        }),
+      ),
+    );
+  });
+  vi.stubGlobal("fetch", fetch);
+  render(Management, {
+    view: "Sources",
+    tick: 0,
+    status: { counts: {}, state: "updating", phase: "ingesting" } as Status,
+    refresh: () => new Promise<void>(() => {}),
+    logout: async () => {},
+  });
+  await userEvent.type(
+    screen.getByLabelText("File or directory path"),
+    "/new.txt",
+  );
+  await userEvent.click(screen.getByRole("button", { name: /Add source/ }));
+  await screen.findByText("Workspace updated.");
+  await screen.findByText("new.txt");
+  oldResponse(new Response('{"items":[]}'));
+  await waitFor(() => expect(screen.getByText("new.txt")).toBeTruthy());
+  expect(
+    screen
+      .getByRole("button", { name: "Choose folder…" })
+      .hasAttribute("disabled"),
+  ).toBe(false);
+});

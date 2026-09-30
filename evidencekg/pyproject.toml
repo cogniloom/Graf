@@ -7,11 +7,13 @@ name = "evidencekg"
 version = "0.1.0"
 description = "Immutable local evidence vault, mechanical graph and durable review queue"
 requires-python = ">=3.12"
-dependencies = ["mcp>=2,<3", "pypdf>=6,<7", "python-docx>=1,<2", "pillow>=11,<13", "beautifulsoup4>=4,<5", "jsonschema>=4,<5"]
+dependencies = ["mcp>=2,<3", "pypdf>=6,<7", "python-docx>=1,<2", "pillow>=11,<13", "beautifulsoup4>=4,<5", "jsonschema>=4,<5", "openpyxl>=3.1,<4", "xlrd>=2,<3", "striprtf>=0.0.29,<1", "defusedxml>=0.7,<1", "libarchive-c>=5,<6", "mutagen>=1.47,<2", "olefile>=0.47,<1"]
 
 [project.optional-dependencies]
-app = ["fastapi>=0.115,<1", "uvicorn>=0.34,<1", "httpx>=0.28,<1", "psycopg[binary]>=3.2,<4", "cryptography>=46,<48"]
-hybrid = ["psycopg[binary]>=3.2,<4", "numpy>=2,<3", "torch>=2.6,<3", "transformers>=4.50,<6", "huggingface-hub>=0.30,<2", "safetensors>=0.5,<1"]
+knowledge-nlp = ["spacy==3.8.16", "lingua-language-detector==2.2.0", "en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl", "de-core-news-sm @ https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-3.8.0/de_core_news_sm-3.8.0-py3-none-any.whl"]
+transcription = ["faster-whisper>=1.2,<2"]
+app = ["fastapi>=0.115,<1", "uvicorn>=0.34,<1", "httpx>=0.28,<1", "psycopg[binary]>=3.2,<4", "cryptography>=46,<48", "ladybug==0.21.0"]
+hybrid = ["psycopg[binary]>=3.2,<4", "ladybug==0.21.0", "numpy>=2,<3", "torch>=2.6,<3", "transformers>=4.50,<6", "huggingface-hub>=0.30,<2", "safetensors>=0.5,<1"]
 
 [project.scripts]
 evidencekg = "evidencekg.cli:main"
@@ -22,6 +24,9 @@ dev = ["pytest>=8,<10", "pytest-asyncio>=1,<2", "reportlab>=4,<5", "ruff>=0.12"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.ruff]
 target-version = "py312"

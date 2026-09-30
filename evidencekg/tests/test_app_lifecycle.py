@@ -78,7 +78,7 @@ def app_database(tmp_path_factory):
             db.execute(sql.SQL("DROP DATABASE {} WITH (FORCE)").format(sql.Identifier(name)))
 
 
-def imported_prepare(state, models, database_config, *, snapshot, device, output):
+def imported_prepare(state, models, database_config, *, snapshot, device, output, progress=None):
     """Only replace local model execution; retain real verified immutable import."""
     store = ReadOnlyStore(state)
     ledger = PostgresWorkset(database_dsn(database_config))
@@ -416,7 +416,7 @@ def test_stale_executor_cannot_overwrite_recovered_progress(manager):
 
 def test_unsupported_file_is_an_explicit_gap(manager):
     path = manager.config.allowed_roots[0] / "unknown.xyz"
-    path.write_bytes(b"Not a supported document format")
+    path.write_bytes(b"\x00Not a supported document format")
     manager.register(str(manager.config.allowed_roots[0]))
     assert manager.run_once()
     assert manager.status()["state"] == "ready_with_gaps"
@@ -472,3 +472,28 @@ def test_detailed_graph_includes_passages_before_any_investigation(manager):
     assert any(node["kind"] == "passage" for node in graph["nodes"])
     assert any(edge["type"] == "contains" for edge in graph["edges"])
     assert all(edge["source"] in {n["id"] for n in graph["nodes"]} for edge in graph["edges"])
+
+
+def test_retry_progress_clears_interrupted_workspace_message(manager):
+    manager.register(str(manager.config.allowed_roots[0]))
+    original = manager.builder
+
+    def interrupt(job, sources, progress):
+        raise InterruptedError("Source ingestion stopped")
+
+    manager.builder = interrupt
+    assert not manager.run_once()
+    assert manager.status()["state"] == "blocked"
+    with _connect(manager.dsn) as db:
+        db.execute("UPDATE public.docworm_jobs SET state='queued' WHERE workspace=%s AND state='interrupted'", (manager.id,))
+
+    def retry(job, sources, progress):
+        progress("ingesting", files=1)
+        status = manager.status()
+        assert status["state"] == "updating"
+        assert status["phase"] == "ingesting"
+        assert "stopped" not in status["message"]
+        return original(job, sources, progress)
+
+    manager.builder = retry
+    assert manager.run_once()

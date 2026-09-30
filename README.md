@@ -35,6 +35,16 @@ the source when a detail matters.
 **Build your collection.** Add individual files or directories. See indexing progress,
 processing gaps, and when your sources are ready. Originals stay untouched.
 
+**Connect meaning across languages.** Link English and German dates, amounts, and
+terms to shared concepts while preserving the original wording.
+
+**Keep the qualifications in view.** Extract supported approval, payment, and
+cancellation statements with their negation, conditions, and uncertainty. Bring
+contrary statements and repeated-source signals into the evidence an AI receives.
+
+**Follow connections with LadybugDB.** Graf uses the embedded graph database for
+fast local relationship traversal during retrieval.
+
 **Investigate in one place.** Start a session from the dashboard, follow its activity,
 revisit earlier work, and continue with a linked follow-up. Graf retains the prompt,
 supplied evidence, observable agent output, and generated documents.
@@ -46,6 +56,8 @@ context, then expand it for closer inspection.
 **Take the evidence with you.** Download a package containing retained sources,
 results, generated documents, and signed integrity records. Verify it independently
 with Graf's offline verifier.
+
+[See how the knowledge algorithms work—with diagrams, examples, and current limits →](docs/KNOWLEDGE_VISUAL_GUIDE.md)
 
 ## An answer is the beginning of the review
 
@@ -80,6 +92,13 @@ matter. [Read the integrity and erasure contract →](docs/INVESTIGATIONS.md#ver
 
 ## Local foundation. An explicit AI boundary.
 
+Automatic knowledge enrichment runs locally without LLM calls. Interpretations
+stay linked to their sources, with ambiguity and coverage gaps visible.
+English and German share dates and operational concepts, including mixed-language
+documents. The graph retains attributed claims, stated validity, reversible
+identity comparisons, possible source dependence and unclear audio intervals.
+[Knowledge-layer capabilities and technical details →](docs/AUTOMATIC_KNOWLEDGE.md)
+
 Indexing and retrieval run locally without generative-model calls or API keys.
 The web interface and graph assets are served from your own machine.
 
@@ -111,6 +130,35 @@ comparisons with TrustGraph, LightRAG, Cognee, and Graphiti. Full tables, protoc
 receipts, and limitations live together in the [benchmark results guide](docs/BENCHMARKS.md).
 These are scoped experiments, not universal accuracy or performance promises.
 
+## Where Graf is heading
+
+From a local evidence workspace to connected, permission-aware knowledge for
+teams and agents. These are planned directions, not dated release commitments.
+
+![Graf roadmap: current local evidence, MCP and English/German foundations; planned agent integration, automatic source retrieval, online connectors, enterprise scale, permission-aware retrieval, more languages, and managed enterprise hosting.](docs/assets/graf-roadmap.png)
+
+| Direction | What comes next |
+|---|---|
+| **Full MCP toolset** | Broader product-workflow coverage, easier setup, and verified interoperability across MCP-compatible LLM agents. |
+| **Automatic source retrieval** | Discover and fetch relevant evidence from user-authorized locations, then keep it up to date. |
+| **Online sources** | Connect email providers, cloud storage, and chatrooms, retaining source history and access metadata. |
+| **Enterprise scalability** | Larger collections and concurrent teams, with measured capacity, resilient ingestion, and efficient storage and queries. |
+| **Managed enterprise offering** | Managed hosting, upgrades, backups, monitoring, and support for enterprise customers. |
+| **Permission-aware retrieval** | Enforce each user's source permissions across search, graph traversal, citations, and cached results, including access revocation. |
+| **More languages** | Extend extraction and shared concepts beyond English and German, with language-specific evaluation and visible uncertainty. |
+
+**MCP already exists:** Graf exposes discovery, knowledge queries, original-source
+reads, graph traversal, and review tools over local stdio.
+[Connect an MCP client →](evidencekg/README.md#mcp-tools)
+The roadmap expands this foundation; universal agent compatibility and full
+product-workflow coverage are not yet established.
+
+Today, Graf targets one local owner. Registered files and folders are watched for
+changes; automatic discovery of new source locations and live provider connectors
+remain planned. Multi-user source permissions, enterprise capacity, and managed
+hosting also remain roadmap work. See the [visual knowledge guide](docs/KNOWLEDGE_VISUAL_GUIDE.md) for
+the algorithms and their current limits.
+
 ---
 
 [User manual](docs/USER-MANUAL.md) · [Operations & backups](docs/OPERATIONS.md) ·
@@ -120,3 +168,5 @@ These are scoped experiments, not universal accuracy or performance promises.
 Graf's original code is [MIT licensed](LICENSE). The included **Cosmograph component
 is CC BY-NC 4.0 for non-commercial use**; commercial use requires appropriate rights.
 See [third-party notices](THIRD_PARTY.md). Current support targets one local owner on Linux.
+
+Supported source types and extraction limits are documented in the [file format matrix](docs/FILE_FORMATS.md).

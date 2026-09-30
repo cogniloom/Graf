@@ -93,7 +93,7 @@ Supported and fixture-tested:
 - PDF via pypdf: native page text and annotations, embedded attachments, OCR on
   text-absent pages. Rendered OCR pages are retained. Text-bearing pages can still
   contain unreviewed handwriting/images; all PDF extraction carries a visual gap.
-- DOCX via python-docx/lxml: paragraphs in document XML parts, including table
+- DOCX and Word templates via lxml: paragraphs in document XML parts, including table
   text, notes/comments and text-bearing revisions; raw XML and table arrays are
   retained. Formatting/revision semantics and visuals remain unreviewed. Embedded
   objects are inventoried as children and may be unsupported.
@@ -104,8 +104,12 @@ Supported and fixture-tested:
 - PNG/JPEG/TIFF/BMP/WebP via Pillow and local Tesseract. Frames are rendered and
   retained separately. OCR output is fallible and never proves visual review.
 
-Other formats, including spreadsheets/slides/archives, remain unsupported until
-fixture-backed adapters are added. They are not silently dropped. Binary parser
+Additional readers cover spreadsheets (XLSX/XLS and templates), legacy Word
+(DOC/DOT), HTML, RTF, calendars, delimited tables, slides, OpenDocument, EPUB,
+archives and media metadata. Extensionless files are detected by their contents.
+See [the format matrix](../docs/FILE_FORMATS.md) for suffix aliases, required
+system readers and explicit limitations. Unreadable formats remain visible;
+no adapter claims full visual or semantic understanding. Binary parser
 subprocesses have memory/CPU/file/time limits and a Linux seccomp network denial
 inherited by OCR children. Failure to establish that policy fails extraction.
 This is not a complete filesystem sandbox for hostile parser exploits. Never run

@@ -7,13 +7,38 @@ of passages and connected bundles. No generative LLM, subscription, API key or
 remote inference is used for graph construction, indexing, or default retrieval.
 Embeddings/reranking are local neural models; this is not a model-free system.
 
-PostgreSQL stores immutable snapshot documents, passages, typed edges and their
-provenance, retained candidate queues, append-only review receipts, and hash-bound
-query results. Transactions publish complete imports and results; advisory locks
-suppress duplicate concurrent queries. Both edge directions are indexed. Sources
+LadybugDB 0.21.0 is the graph backend for newly prepared hybrid generations.
+It stores the explicit-link graph and retrieves incident edges in both directions
+using native Cypher. PostgreSQL retains verified snapshot records and provenance,
+candidate queues, append-only review receipts, jobs, and hash-bound query results.
+Transactions publish complete imports and results; advisory locks suppress
+duplicate concurrent queries. Sources
 and preserved original artifacts remain in the content-addressed local vault.
 PostgreSQL is a serving copy and durable retrieval-state store; the existing
 SQLite ingestion/exhaustive-review engine has not been destructively migrated.
+
+Graph preparation creates a separate, immutable LadybugDB generation. Readers
+open it read-only; a new ingestion builds a new generation without modifying
+the graph being served. The serving configuration binds the graph to its source
+snapshot and content hash. A missing or invalid graph is an error, with no
+automatic fallback to Python adjacency or PostgreSQL traversal.
+
+Existing serving configurations require an explicit `prepare-hybrid` after the
+upgrade. The app already prepares new generations after processing sources.
+This rebuild preserves the evidence vault and PostgreSQL records; it does not
+perform an in-place data migration. Discovery responses identify the backend as
+`local-hybrid-ladybugdb`, with `records_backend: postgresql`.
+
+Graph expansion retains Graf's bounded breadth-first policy, stable edge order,
+incoming and outgoing relationships, and per-edge provenance. Each hop asks the
+native database for incident edges; Python applies the existing evidence and
+document budgets. The compatibility discovery class still supports its explicit
+in-memory path for legacy callers, but the serving runtime requires LadybugDB.
+
+This is the graph-storage integration, not a claim that the entire retrieval
+pipeline is ready for millions of documents: snapshot validation, passage text,
+lexical/dense ranking, and retained source-link records still load into memory.
+Those paths need separate streaming/index work and end-to-end scale validation.
 
 The resident MCP process reuses loaded models and lexical term results. Identical
 queries reuse persisted results across processes/restarts. The exact local dense
@@ -93,7 +118,8 @@ PYTHONPATH=evidencekg/src evidencekg/.venv/bin/python deploy/postgres/manage.py 
 The backup is a consistent PostgreSQL custom-format dump with a SHA-256 sidecar.
 Verification restores into a new disposable database and validates snapshot,
 workset and cached-result payloads; it never overwrites the running database. Back up the original vault,
-model/config identities and credential files separately using protected storage.
+model/config identities, the immutable `hybrid-graphs` generations, and credential
+files separately using protected storage.
 The PostgreSQL dump alone does not contain original document binaries. Dense and
 lexical indexes can be rebuilt. After a database outage, failed requests remain
 errors; completed transactions survive and may be resumed without remote calls.

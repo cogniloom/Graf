@@ -10,6 +10,7 @@ from pathlib import Path
 
 from evidencekg.benchmark import STOP
 from evidencekg.db import dump, sha
+from evidencekg.knowledge_language import query_concepts
 from evidencekg.reference_ranking import _LexicalRows
 from evidencekg.relationships import postings, verify_posting
 
@@ -26,6 +27,7 @@ class Policy:
     bundles: int = 24
     bundle_segments: int = 4
     evidence_bytes: int = 45000
+    knowledge_candidates: int = 100
 
 
 class HybridDiscovery:
@@ -42,18 +44,26 @@ class HybridDiscovery:
         sources=None,
         typed=None,
         lexical=None,
+        graph=None,
     ):
         self.store, self.snapshot = store, snapshot
         self.manifest, self.segments, self.links = (
             sources if sources is not None else load_sources(store, snapshot)
         )
         self.by_doc = defaultdict(list)
+        self.concepts = defaultdict(set)
+        self.claim_contexts = defaultdict(set)
         for sid, segment in self.segments.items():
             self.by_doc[segment["document_version_id"]].append(sid)
+            for concept in segment.get("knowledge_concepts", []):
+                self.concepts[concept].add(sid)
+            for claim in segment.get("knowledge_claim_index", []):
+                self.claim_contexts[(claim["entity_key"], claim["predicate"])].add(sid)
         for ids in self.by_doc.values():
             ids.sort(key=lambda sid: (self.segments[sid]["ordinal"], sid))
+        self.graph = graph
         self.adjacency = defaultdict(list)
-        for link in self.links:
+        for link in self.links if graph is None else ():
             if (
                 link["status"] == "resolved"
                 and link["from_node"] in self.by_doc
@@ -86,6 +96,9 @@ class HybridDiscovery:
             "policy": asdict(self.policy),
             "models": model_identity,
             "code_sha": sha(Path(__file__).read_bytes()),
+            "query_normalizer_sha": sha(
+                (Path(__file__).parent.parent / "knowledge_language.py").read_bytes()
+            ),
         }
 
     def context(self, sid):
@@ -97,6 +110,12 @@ class HybridDiscovery:
             "document_version_id": s["document_version_id"],
             "text": s["text"],
         }
+
+    def neighbors(self, document):
+        """Fetch native graph edges; the compatibility path is explicit at construction."""
+        if self.graph is not None:
+            return self.graph.neighbors(document)
+        return self.adjacency.get(document, [])
 
     def retrieve(self, question, limit=12):
         if not isinstance(question, str) or not question.strip() or len(question) > 4096:
@@ -124,6 +143,23 @@ class HybridDiscovery:
                 if hit["id"] in eligible:
                     lexical_scores[hit["id"]] += 1 / (60 + rank)
         route("lexical", sorted(lexical_scores, key=lambda sid: (-lexical_scores[sid], sid)))
+        concepts = query_concepts(question)
+        concept_matches = defaultdict(set)
+        for concept in concepts:
+            for sid in self.concepts.get(concept, ()):
+                if sid in eligible:
+                    concept_matches[sid].add(concept)
+        concept_order = sorted(concept_matches, key=lambda sid: (-len(concept_matches[sid]), sid))
+        concept_selected = concept_order[: self.policy.knowledge_candidates]
+        for sid in concept_selected:
+            reasons[sid].append(
+                {
+                    "route": "bilingual_concept",
+                    "matched_concepts": sorted(concept_matches[sid]),
+                    "status": "lexical or parser candidate; not resolved identity or factual support",
+                }
+            )
+        route("bilingual_concept", concept_selected)
         # Literal routes keep punctuation, case and identifiers, independent of tokenizer folding.
         probes = [question] + re.findall(r'["“]([^"”]+)["”]', question)
         probes += re.findall(r"\b[\w.+-]+@[\w.-]+\b|\b\d[\w./-]*\b", question)
@@ -160,6 +196,16 @@ class HybridDiscovery:
         dense = self.dense_search(question)
         route("dense", [sid for sid, score in dense[: self.policy.dense_candidates]])
         base_order = sorted(fused, key=lambda sid: (-fused[sid], sid))
+        # Follow typed claim context separately from mechanical graph links.
+        # Literal keys are discovery candidates, not confirmed entity identity.
+        related = set()
+        for sid in base_order[:32]:
+            related.update(self.segments[sid].get("knowledge_related", []))
+            for claim in self.segments[sid].get("knowledge_claim_index", []):
+                related.update(self.claim_contexts[(claim["entity_key"], claim["predicate"])])
+        related_order = sorted(related & eligible, key=lambda sid: (-fused.get(sid, 0), sid))
+        route("claim_context", related_order[: self.policy.knowledge_candidates])
+        base_order = sorted(fused, key=lambda sid: (-fused[sid], sid))
         seed_docs = list(dict.fromkeys(self.segments[sid]["document_version_id"] for sid in base_order))[
             : self.policy.seed_documents
         ]
@@ -168,7 +214,7 @@ class HybridDiscovery:
         for depth in range(1, self.policy.graph_depth + 1):
             following = []
             for doc in frontier:
-                for link in self.adjacency.get(doc, []):
+                for link in self.neighbors(doc):
                     target = link["to_node"] if link["from_node"] == doc else link["from_node"]
                     if target not in seen and len(seen) >= self.policy.graph_documents:
                         pending.append({"link_id": link["id"], "target_document": target, "depth": depth})
@@ -190,7 +236,7 @@ class HybridDiscovery:
                             )
             frontier = following
         for doc in frontier:
-            for link in self.adjacency.get(doc, []):
+            for link in self.neighbors(doc):
                 target = link["to_node"] if link["from_node"] == doc else link["from_node"]
                 if target not in seen:
                     pending.append(
@@ -219,9 +265,32 @@ class HybridDiscovery:
             ids = self.by_doc[doc]
             i = ids.index(sid)
             members = [sid]
+            anchors = self.segments[sid].get("knowledge_claim_index", [])
+            context_keys = {(c["entity_key"], c["predicate"]) for c in anchors}
+            context_candidates = (
+                set().union(*(self.claim_contexts[key] for key in context_keys)) if context_keys else set()
+            )
+            context_candidates.update(self.segments[sid].get("knowledge_related", []))
+
+            # Prefer different roles (negative/qualified/planned/undated), with
+            # the normal relevance score breaking ties. Keep original passages.
+            def role_score(candidate):
+                return sum(
+                    claim.get(field) != anchor.get(field)
+                    for claim in self.segments[candidate].get("knowledge_claim_index", [])
+                    for anchor in anchors
+                    if (claim["entity_key"], claim["predicate"])
+                    == (anchor["entity_key"], anchor["predicate"])
+                    for field in ("polarity", "qualified", "modality", "applicable_on", "attribution")
+                )
+
+            members += sorted(
+                (context_candidates & set(scores)) - {sid},
+                key=lambda candidate: (-role_score(candidate), -scores[candidate], candidate),
+            )
             # Explicit endpoints precede neighbours; prefer separately scored original evidence.
             bundle_links = []
-            for link in self.adjacency.get(doc, []):
+            for link in self.neighbors(doc):
                 target = link["to_node"] if link["from_node"] == doc else link["from_node"]
                 targets = [x for x in self.by_doc[target] if x in scores]
                 if targets:
@@ -241,7 +310,32 @@ class HybridDiscovery:
                 and link["from_node"] in retained_docs
                 and link["to_node"] in retained_docs
             ]
-            bundles.append({"segment_ids": members, "links": links})
+            bundle = {"segment_ids": members, "links": links}
+            if context_keys or context_candidates:
+                bundle["claim_context"] = {
+                    "scope": "literal claim, identity, supersession and dependence candidates; identity and truth unresolved",
+                    "related_segments": len(context_candidates),
+                    "omitted_related_segments": len(context_candidates - set(members)),
+                    "continuations": [
+                        {
+                            "tool": "knowledge_query",
+                            "snapshot_id": self.snapshot,
+                            "kind": "evidence_set",
+                            "entity": entity,
+                            "predicate": predicate,
+                        }
+                        for entity, predicate in sorted(context_keys)
+                    ]
+                    + [
+                        {
+                            "tool": "knowledge_query",
+                            "snapshot_id": self.snapshot,
+                            "kind": "edge",
+                            "segment_id": sid,
+                        }
+                    ],
+                }
+            bundles.append(bundle)
         bundled = self.reranker.score(
             question,
             [
@@ -303,7 +397,32 @@ class HybridDiscovery:
         workset = self.worksets.freeze(
             {"retrieval": self.identity, "question": question, "limit": limit}, rows, accounting
         )
+        from evidencekg.knowledge import discovery_hint
+
         return {
+            "knowledge_context": discovery_hint(
+                self.manifest, self.snapshot, [self.segments[sid] for sid in selected]
+            ),
+            "knowledge_retrieval": {
+                "languages": ["en", "de"],
+                "query_concepts": concepts,
+                "matched_segments": len(concept_order),
+                "candidate_limit": self.policy.knowledge_candidates,
+                "omitted_candidates": max(0, len(concept_order) - len(concept_selected)),
+                "claim_context_omitted_candidates": max(
+                    0, len(related_order) - self.policy.knowledge_candidates
+                ),
+                "segments_with_incomplete_claim_index": sum(
+                    s.get("knowledge_claim_index_complete") is False for s in self.segments.values()
+                ),
+                "segments_with_omitted_concepts": sum(
+                    bool(s.get("knowledge_concepts_remaining")) for s in self.segments.values()
+                ),
+                "omitted_relationship_memberships": sum(
+                    s.get("knowledge_related_omitted", 0) for s in self.segments.values()
+                ),
+                "contract": "bounded discovery, not exhaustive semantic matching",
+            },
             "segments": [self.segments[sid] for sid in selected],
             "snapshot_id": self.snapshot,
             "source_context": {sid: self.context(sid) for sid in selected},
@@ -318,5 +437,5 @@ class HybridDiscovery:
                 "candidate_windows": sum(map(len, singles.windows)),
                 "bundle_windows": sum(map(len, bundled.windows)),
             },
-            "costs": {"retrieval_passes": 6, "model_calls": 0, "input_bytes": 0, "output_bytes": 0},
+            "costs": {"retrieval_passes": len(routes), "model_calls": 0, "input_bytes": 0, "output_bytes": 0},
         }

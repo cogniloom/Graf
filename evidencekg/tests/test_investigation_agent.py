@@ -13,6 +13,7 @@ from evidencekg.investigations.agent import AgentExecutionError, CodexSubscripti
 
 ANSWER = {
     "answer": "Synthetic answer",
+    "questions": [],
     "citations": [{"segment_id": "s1", "quote": "one"}],
     "documents": [{"name": "report.md", "media_type": "text/markdown", "content": "one"}],
 }
@@ -263,3 +264,11 @@ def test_cli_warning_items_are_retained_with_completed_answer(tmp_path):
     assert result == ANSWER
     assert events[-1]["item_diagnostics"][0]["message"] == "Synthetic startup warning"
     assert events[-1]["outcome"] == "succeeded"
+
+
+@pytest.mark.parametrize("ids", [("same", "same"), ("", "other"), (" ", "other")])
+def test_invalid_clarification_ids_are_rejected(tmp_path, ids):
+    answer = dict(ANSWER, questions=[{"id": key, "question": "Question?", "options": []} for key in ids])
+    with pytest.raises(AgentExecutionError, match="Invalid structured answer") as caught:
+        execute(tmp_path, cli(tmp_path, success(answer)))
+    assert caught.value.outcome == "malformed"

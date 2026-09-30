@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
   import Relationship from "./Relationship.svelte";
+  import SpeechConfidence from "./SpeechConfidence.svelte";
   import { api, isReady, type Status, type Doc, type Detail } from "./api";
   export let status: Status;
   export let query: string;
@@ -137,6 +138,7 @@
               </p>{/each}
             <h3>Passages ({detail.passages.length} shown)</h3>
             {#each detail.passages as p}<article class="passage">
+                <SpeechConfidence locators={p.locators} />
                 <blockquote>{p.text}</blockquote>
                 <details>
                   <summary>Source locator</summary>

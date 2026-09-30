@@ -331,7 +331,7 @@ def test_cli_adapter_identity_and_credential_environment(vault, monkeypatch):
 
 def test_unresolved_inventory_and_nonexhaustive_never_unqualified(vault):
     root, store = vault
-    (root / "unknown.bin").write_bytes(b"unsupported")
+    (root / "unknown.bin").write_bytes(b"\x00unsupported")
     queue = Queue(store)
     run_id = queue.start_review(ingest(store), "Review")["run_id"]
     drain(queue, run_id)

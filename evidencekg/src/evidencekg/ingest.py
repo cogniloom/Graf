@@ -10,12 +10,36 @@ from . import parsers
 from .db import atomic, dump, ident, sha
 from .features import index_extraction
 from .inventory import capture, inventory
+from .knowledge import enrich_document
+from .knowledge import freeze as freeze_knowledge
 from .segmentation import canonical, split
 
 
-def ingest(store, reextract=False):
+def ingest(store, reextract=False, progress=None, diagnostic=None):
+    """Build a snapshot; progress describes acquisition, not snapshot publication.
+
+    Callback errors propagate and abort the transaction rather than inventing progress.
+    """
     cfg = store.config()
     items, errors = inventory(cfg["root"], cfg["excludes"])
+    counts = dict(
+        processed_files=0,
+        total_files=len(items),
+        processed_documents=0,
+        failed_documents=0,
+        partial_documents=0,
+        unsupported_documents=0,
+        stage="extracting",
+        extraction_complete=False,
+    )
+
+    def report():
+        if progress is not None:
+            progress(dict(counts))
+
+    if diagnostic is not None:
+        diagnostic({"stage": "initializing"})
+    report()
     parser_signature = parsers.signature(cfg)
     parser_hash = sha(dump(parser_signature))
     config_hash = sha(dump(cfg))
@@ -38,6 +62,8 @@ def ingest(store, reextract=False):
 
         def acquire(path, data, status="pending", warnings=None, parent=None, part=None, mime=None, depth=0):
             nonlocal attachment_count, attachment_bytes
+            if diagnostic is not None:
+                diagnostic({"stage": "extracting", "path": path})
             warnings = list(warnings or [])
             parent_entry = (
                 store.one("SELECT source_entry_id FROM document_versions WHERE id=?", (parent,))[
@@ -89,7 +115,19 @@ def ingest(store, reextract=False):
                 children = artifact["children"]
             else:
                 if status == "pending":
-                    result = parsers.parse(data, Path(path).suffix.lower(), cfg)
+                    result = parsers.parse(
+                        data,
+                        Path(path).suffix.lower(),
+                        cfg
+                        | {
+                            "_transcription_model_identity": parser_signature.get(
+                                "transcription_model_sha256"
+                            ),
+                            "_transcription_calibration_sha256": parser_signature.get(
+                                "transcription_calibration_sha256"
+                            ),
+                        },
+                    )
                     status = result["status"]
                     warnings += result["warnings"]
                 else:
@@ -97,10 +135,9 @@ def ingest(store, reextract=False):
                 text, locators = canonical(result["sections"])
                 children = []
                 for child in result["attachments"]:
-                    children.append(
-                        {k: v for k, v in child.items() if k != "data"}
-                        | {"blob": store.put(child["data"]) if child["data"] is not None else None}
-                    )
+                    payload = child.pop("data")
+                    children.append(child | {"blob": store.put(payload) if payload is not None else None})
+                    del payload
                 artifacts = [
                     {k: v for k, v in a.items() if k != "data"} | {"blob": store.put(a["data"])}
                     for a in result["artifacts"]
@@ -115,6 +152,9 @@ def ingest(store, reextract=False):
                     artifacts=artifacts,
                     empty=data is not None and len(data) == 0,
                 )
+                # Children now live in the vault. Do not retain every sibling payload
+                # in each recursive acquisition frame.
+                del result
                 artifact_sha = store.put(dump(artifact))
                 store.db.execute(
                     "INSERT INTO extractions VALUES(?,?,?,?,?,?,?,?)",
@@ -146,7 +186,13 @@ def ingest(store, reextract=False):
                             start,
                             end,
                             dump(locations),
-                            "ocr" if any(location["modality"] == "ocr" for location in locations) else "text",
+                            "asr"
+                            if any(location["modality"] == "asr" for location in locations)
+                            else (
+                                "ocr"
+                                if any(location["modality"] == "ocr" for location in locations)
+                                else "text"
+                            ),
                             status,
                             body,
                         ),
@@ -159,9 +205,7 @@ def ingest(store, reextract=False):
                 or "enumeration failed" in warning
                 for warning in warnings
             )
-            if status == "failed" and (
-                Path(path).suffix.lower() in (".eml", ".pdf", ".docx") or mime == "message/rfc822"
-            ):
+            if status == "failed":
                 unknown_descendants = True
             if unknown_descendants:
                 manifest["inventory_complete"] = False
@@ -187,6 +231,11 @@ def ingest(store, reextract=False):
                     artifacts=[{"name": a["name"], "blob": a["blob"]} for a in artifact["artifacts"]],
                 )
             )
+            document = manifest["documents"][-1]
+            document["knowledge"] = enrich_document(store, document, previous)
+            counts["processed_documents"] += 1
+            if status in ("failed", "partial", "unsupported"):
+                counts[status + "_documents"] += 1
             for child in children:
                 attachment_count += 1
                 child_data = store.get(child["blob"]) if child["blob"] else None
@@ -213,6 +262,8 @@ def ingest(store, reextract=False):
                 )
 
         for item in items:
+            if diagnostic is not None:
+                diagnostic({"stage": "reading", "path": item["path"]})
             data = None
             warnings = [item["warning"]] if item["warning"] else []
             status = item["status"]
@@ -223,6 +274,12 @@ def ingest(store, reextract=False):
                     status = "failed"
                     warnings.append(str(exc))
             acquire(item["path"], data, status, warnings)
+            counts["processed_files"] += 1
+            report()
+        if diagnostic is not None:
+            diagnostic({"stage": "finalizing"})
+        counts.update(stage="finalizing", extraction_complete=True)
+        report()
         manifest["documents"].sort(key=lambda x: x["path"])
         previous_extracts = {
             d["document_version_id"]: d["extraction_id"]
@@ -246,6 +303,10 @@ def ingest(store, reextract=False):
         manifest["history"] = [
             {"document_version_id": d, "extraction_id": x} for d, x in sorted(history.items())
         ]
+        manifest["knowledge"] = freeze_knowledge(
+            store, manifest["documents"], previous_manifest.get("knowledge")
+        )
+        manifest["ruleset_hash"] = sha(dump([manifest["ruleset_hash"], manifest["knowledge"]["signature"]]))
         manifest_sha = store.put(dump(manifest))
         snapshot = ident("N", manifest_sha, manifest["ruleset_hash"])
         store.db.execute(

@@ -142,7 +142,7 @@ def test_email_order_ambiguity_attachments(vault):
     reply.set_content("Reply body")
     nested = EmailMessage()
     nested.set_content("Nested text")
-    nested.add_attachment(b"unknown", maintype="application", subtype="octet-stream", filename="unknown.xyz")
+    nested.add_attachment(b"\x00unknown", maintype="application", subtype="octet-stream", filename="unknown.xyz")
     reply.add_attachment(nested)
     (root / "reply.eml").write_bytes(reply.as_bytes())
     first = ingest(store)

@@ -180,13 +180,15 @@
           onClick: (index) => {
             if (index !== undefined) {
               const n = data.nodes[index];
-              if (n?.document_id) onSelect(n.document_id);
+              if (n?.details) onSelect(n.id);
+              else if (n?.document_id) onSelect(n.document_id);
               else if (n) onSelect(n.id);
             }
           },
           onLabelClick: (index) => {
             const n = data.nodes[index];
-            if (n?.document_id) onSelect(n.document_id);
+            if (n?.details) onSelect(n.id);
+            else if (n?.document_id) onSelect(n.document_id);
             else if (n) onSelect(n.id);
           },
           onLinkClick: (index) => {

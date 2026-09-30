@@ -216,7 +216,8 @@ def test_source_restrictions_apply_to_watcher_inventory(service, tmp_path):
     (source / "invoice.txt").write_text(service.manager.text)
     (source / "other.txt").write_text("Unrelated retained source")
     config = SimpleNamespace(
-        home=service.home.parent, source=lambda value: source,
+        home=service.home.parent,
+        source=lambda value: source,
         private_source=lambda path: path.is_relative_to(service.home.parent),
     )
     items = inventory(config, {"path": str(source), "kind": "directory"})
@@ -276,3 +277,224 @@ def test_second_server_cannot_start_on_same_workspace(service):
     other = Investigations(service.manager, Answerer())
     with pytest.raises(RuntimeError, match="Another Graf"):
         other.start()
+
+
+def upload(name, text):
+    import base64
+
+    return {"name": name, "data": base64.b64encode(text.encode()).decode()}
+
+
+def test_acceptance_is_fast_and_history_cancel_remain_responsive(service):
+    entered, release = threading.Event(), threading.Event()
+    original = service.manager.investigation_snapshot
+
+    def slow(*args):
+        entered.set()
+        assert release.wait(5)
+        return original(*args)
+
+    service.manager.investigation_snapshot = slow
+    run = service.create("Question", request_id="queued-request", defer=True)
+    assert run["state"] == "preparing"
+    assert not entered.is_set()  # Acceptance never invokes retrieval.
+    service.start()
+    # start() marks unfinished preparations interrupted on restart; queue after ownership starts.
+    run = service.create("Question", request_id="running-request", defer=True)
+    try:
+        assert entered.wait(2)
+        assert service.list()["items"]
+        assert service.detail(run["id"])["state"] == "preparing"
+        assert service.create("Question", request_id="running-request", defer=True)["id"] == run["id"]
+        assert service.cancel(run["id"])["state"] == "cancelling"
+    finally:
+        release.set()
+        service.stop()
+    assert service.detail(run["id"])["state"] == "cancelled"
+
+
+def test_preparation_error_is_retained_without_killing_queue(service):
+    def broken(*args):
+        raise ValueError("Source unavailable: retry after indexing")
+
+    service.manager.investigation_snapshot = broken
+    service.start()
+    run = service.create("Question", defer=True)
+    for _ in range(100):
+        detail = service.detail(run["id"])
+        if detail["state"] == "failed":
+            break
+        time.sleep(0.01)
+    assert detail["state"] == "failed"
+    assert "Source unavailable" in detail["error"]["message"]
+    assert service.worker.is_alive()
+
+
+def test_attachment_referenced_in_questions_and_followup_preserves_source(service, tmp_path):
+    class Clarifying:
+        def execute(self, prompt, *args, **kwargs):
+            ctx = json.loads(prompt)
+            attachment = next(p for p in ctx["passages"] if p.get("attachment"))
+            assert attachment["source_path"] == "memo.txt"
+            assert attachment["text"] == "Release marker: BLUE-742"
+            if not ctx.get("previous_result"):
+                return {
+                    "answer": "Which format?",
+                    "citations": [],
+                    "documents": [],
+                    "questions": [
+                        {"id": "format", "question": "Which format?", "options": ["Short", "Long"]}
+                    ],
+                }
+            assert ctx["previous_result"]["questions"][0]["id"] == "format"
+            assert ctx["previous_prompt"] == "Read memo.txt"
+            return {
+                "answer": "BLUE-742",
+                "questions": [],
+                "documents": [],
+                "citations": [{"segment_id": attachment["id"], "quote": "BLUE-742"}],
+            }
+
+    service.adapter = Clarifying()
+    first = service.create("Read memo.txt", attachments=[upload("memo.txt", "Release marker: BLUE-742")])
+    service.execute(first["id"])
+    assert service.detail(first["id"])["state"] == "awaiting_input"
+    child = service.create("Short", parent_id=first["id"])
+    service.execute(child["id"])
+    detail = service.detail(child["id"])
+    assert detail["state"] == "completed", detail["error"]
+    assert detail["result"]["citations"][0]["valid"]
+    evidence = next(e for e in detail["evidence"] if e["path"] == "memo.txt")
+    assert service.vault.read_artifact(evidence["artifact_id"]) == b"Release marker: BLUE-742"
+    assert verify_package(service.export(child["id"], tmp_path / "followup.zip"))["integrity"]
+
+
+def test_upload_limits_idempotency_and_erasure(service):
+    a = upload("memo.txt", "Attachment content")
+    run = service.create("Read memo.txt", attachments=[a], request_id="upload-retry", defer=True)
+    assert (
+        service.create("Read memo.txt", attachments=[a], request_id="upload-retry", defer=True)["id"]
+        == run["id"]
+    )
+    with pytest.raises(ValueError, match="different input"):
+        service.create(
+            "Read memo.txt",
+            attachments=[upload("memo.txt", "Changed")],
+            request_id="upload-retry",
+            defer=True,
+        )
+    for invalid in [upload("../memo.txt", "x"), upload("memo.exe", "x"), {"name": "memo.txt", "data": "%%%"}]:
+        with pytest.raises(ValueError):
+            service.create("Read", attachments=[invalid], defer=True)
+    target = next(a["id"] for a in service.vault.artifacts(run["id"]) if a["kind"] == "source")
+    preview = service.erasure_preview(run["id"], [target], "Test deletion")
+    assert preview["active_runs"] == [run["id"]]
+    service.cancel(run["id"])
+    preview = service.erasure_preview(run["id"], [target], "Test deletion")
+    service.erase(run["id"], [target], "Test deletion", preview["preview_hash"], preview["confirmation"])
+    with pytest.raises(NotReady, match="erased evidence"):
+        service.create("Read", attachments=[a], defer=True)
+
+
+def test_oversize_extracted_text_fails_without_silent_truncation(service):
+    with pytest.raises(ValueError, match="nothing was truncated"):
+        service.create("Read", attachments=[upload("large.txt", "X" * 48001)])
+
+
+@pytest.mark.parametrize("suffix", ["txt", "md", "csv", "json", "pdf", "docx"])
+def test_supported_upload_formats_retain_original_and_supply_text(service, suffix):
+    import base64
+    import io
+
+    text = "File marker BLUE-742"
+    data = text.encode()
+    if suffix == "pdf":
+        from reportlab.pdfgen.canvas import Canvas
+
+        stream = io.BytesIO()
+        canvas = Canvas(stream)
+        canvas.drawString(50, 700, text)
+        canvas.save()
+        data = stream.getvalue()
+    elif suffix == "docx":
+        from docx import Document
+
+        stream = io.BytesIO()
+        document = Document()
+        document.add_paragraph(text)
+        document.save(stream)
+        data = stream.getvalue()
+    run = service.create(
+        "Read the attachment",
+        include_collection=False,
+        attachments=[{"name": "memo." + suffix, "data": base64.b64encode(data).decode()}],
+    )
+    with service.db() as db:
+        row = service._row(db, run["id"])
+        context = service._json(row["context_id"])
+    assert text in "\n".join(p["text"] for p in context["passages"])
+    source = service.detail(run["id"])["evidence"][0]
+    assert source["path"] == "memo." + suffix
+    assert service.vault.read_artifact(source["artifact_id"]) == data
+
+
+def test_restricted_second_upload_writes_no_orphan_artifacts(service):
+    from evidencekg.db import sha
+
+    with service.db() as db:
+        db.execute("INSERT INTO restrictions VALUES(?,?)", (sha(b"blocked"), "restriction-test"))
+    before = service.vault.artifacts()
+    with pytest.raises(NotReady, match="erased evidence"):
+        service.create(
+            "Read files",
+            attachments=[upload("first.txt", "retained secret"), upload("blocked.txt", "blocked")],
+            defer=True,
+        )
+    assert service.list()["items"] == []
+    assert service.vault.artifacts() == before
+
+
+def test_storage_failure_keeps_partial_uploads_reachable_in_failed_run(service, monkeypatch):
+    original = service._artifact
+
+    def fail_second(content, kind, *args, **kwargs):
+        if kind == "source" and kwargs.get("name") == "second.txt":
+            raise OSError("Synthetic storage failure")
+        return original(content, kind, *args, **kwargs)
+
+    monkeypatch.setattr(service, "_artifact", fail_second)
+    with pytest.raises(OSError, match="storage failure"):
+        service.create(
+            "Read files",
+            attachments=[upload("first.txt", "retained content"), upload("second.txt", "second content")],
+            defer=True,
+        )
+    run = service.list()["items"][0]
+    assert run["state"] == "failed"
+    detail = service.detail(run["id"])
+    assert "fully retained" in detail["error"]["message"]
+    retained = next(a for a in detail["artifacts"] if a["kind"] == "source")
+    assert retained["run_id"] == run["id"]
+    preview = service.erasure_preview(run["id"], [retained["id"]], "Remove failed upload")
+    assert preview["affected_runs"] == [run["id"]]
+
+
+def test_duplicate_question_ids_never_become_awaiting_input(service):
+    class InvalidQuestions:
+        def execute(self, *args, **kwargs):
+            return {
+                "answer": "",
+                "citations": [],
+                "documents": [],
+                "questions": [
+                    {"id": "same", "question": "First?", "options": []},
+                    {"id": "same", "question": "Second?", "options": []},
+                ],
+            }
+
+    service.adapter = InvalidQuestions()
+    run = service.create("Clarify")
+    service.execute(run["id"])
+    detail = service.detail(run["id"])
+    assert detail["state"] == "failed"
+    assert "distinct nonempty IDs" in detail["error"]["message"]

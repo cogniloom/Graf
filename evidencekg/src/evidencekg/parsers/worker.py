@@ -1,18 +1,38 @@
 from __future__ import annotations
 
-import base64
 import io
 import json
 import resource
 import subprocess
 import sys
-import zipfile
 from email import policy
 from email.parser import BytesParser
 from pathlib import Path
 
+from .payloads import write_payload
+
 
 def extract(data, suffix, cfg, directory):
+    from .archives import extract_archive
+    from .documents import extract_document
+    from .formats import SUPPORTED, detect
+    from .media import extract_media
+
+    suffix = detect(data, suffix, cfg)
+    for adapter in (extract_archive, extract_document, extract_media):
+        adapted = adapter(data, suffix, cfg, directory)
+        if adapted is not None:
+            return adapted
+    if suffix not in SUPPORTED:
+        return dict(
+            sections=[],
+            warnings=["Unsupported format: " + suffix],
+            attachments=[],
+            artifacts=[],
+            status="unsupported",
+        )
+    if suffix in (".dotx", ".docm", ".dotm", ".doct"):
+        suffix = ".docx"
     result = dict(sections=[], warnings=[], attachments=[], artifacts=[], status="ready")
 
     def add(text, locator, modality="native"):
@@ -26,7 +46,7 @@ def extract(data, suffix, cfg, directory):
         result["sections"].append(dict(text=text, locator=locator, modality=modality))
 
     def artifact(name, content):
-        result["artifacts"].append(dict(name=name, data=base64.b64encode(content).decode()))
+        result["artifacts"].append(dict(name=name, **write_payload(directory, content)))
 
     def child(name, content, part, mime):
         if len(result["attachments"]) >= cfg["max_attachments"]:
@@ -35,7 +55,7 @@ def extract(data, suffix, cfg, directory):
             result["attachments"].append(dict(name=name, data=None, part=part, mime=mime, gap=gap))
             return
         result["attachments"].append(
-            dict(name=name, data=base64.b64encode(content).decode(), part=part, mime=mime)
+            dict(name=name, **write_payload(directory, content), part=part, mime=mime)
         )
 
     def decode(payload, charset="utf-8-sig"):
@@ -117,9 +137,20 @@ def extract(data, suffix, cfg, directory):
                         soup = BeautifulSoup(text, "html.parser")
                         for node in soup(["script", "style"]):
                             node.decompose()
-                        text = soup.get_text("\n")
+                        lines = []
+                        for node in soup.find_all(string=True):
+                            depth = sum(parent.name == "blockquote" for parent in node.parents)
+                            for line in str(node).splitlines():
+                                if line.strip():
+                                    lines.append("> " * depth + line.strip())
+                        text = "\n".join(lines)
                         result["warnings"].append("HTML MIME body formatting and visual content not reviewed")
-                    add(text, {"kind": "mime_body", "mime_part": path})
+                    from .structure import email_sections
+
+                    for section in email_sections(
+                        text, path, str(msg.get("From", "")), str(msg.get("Date", ""))
+                    ):
+                        add(section["text"], section["locator"])
 
         for i, (key, value) in enumerate(msg.raw_items()):
             add(str(value), {"kind": "email_header", "header": key, "index": i, "mime_part": "0"})
@@ -129,11 +160,14 @@ def extract(data, suffix, cfg, directory):
                 "Decoded MIME children are derived representations; exact wire bytes remain in parent original"
             )
     elif suffix == ".docx":
-        from docx import Document
+        from .documents import checked_zip
 
-        with zipfile.ZipFile(io.BytesIO(data)) as z:
+        with checked_zip(data, cfg) as z:
             infos = z.infolist()
-            if len(infos) > 20000 or sum(x.file_size for x in infos) > min(cfg["max_file_bytes"], 100_000_000) * 8:
+            if (
+                len(infos) > 20000
+                or sum(x.file_size for x in infos) > min(cfg["max_file_bytes"], 100_000_000) * 8
+            ):
                 raise ValueError("Office archive expansion limit")
             # Preserve raw XML, including table/revision structure, as a separate artifact.
             for name in sorted(z.namelist()):
@@ -142,32 +176,35 @@ def extract(data, suffix, cfg, directory):
             for name in sorted(z.namelist()):
                 if name.startswith("word/embeddings/") and not name.endswith("/"):
                     child(Path(name).name, z.read(name), "docx:" + name, "application/octet-stream")
-            document = Document(io.BytesIO(data))
             # XML iteration includes tables, text boxes, footnotes, comments and deleted text.
             from lxml import etree
 
+            tables = []
             for name in sorted(z.namelist()):
                 if name.startswith("word/") and name.endswith(".xml"):
                     root = etree.fromstring(
                         z.read(name), parser=etree.XMLParser(resolve_entities=False, no_network=True)
                     )
-                    for i, paragraph in enumerate(root.xpath('//*[local-name()="p"]')):
-                        tokens = []
-                        for node in paragraph.iter():
-                            tag = etree.QName(node).localname
-                            if tag in ("t", "delText"):
-                                tokens.append(node.text or "")
-                            elif tag == "tab":
-                                tokens.append("\t")
-                            elif tag in ("br", "cr"):
-                                tokens.append("\n")
-                        add("".join(tokens), {"kind": "docx", "part": name, "paragraph": i})
-            artifact(
-                "tables.json",
-                json.dumps([[[c.text for c in r.cells] for r in t.rows] for t in document.tables]).encode(),
-            )
+                    if name == "word/document.xml":
+                        for table in root.xpath('//*[local-name()="tbl"]'):
+                            tables.append(
+                                [
+                                    [
+                                        "\n".join(
+                                            "".join(p.itertext()) for p in cell.xpath('./*[local-name()="p"]')
+                                        )
+                                        for cell in row.xpath('./*[local-name()="tc"]')
+                                    ]
+                                    for row in table.xpath('./*[local-name()="tr"]')
+                                ]
+                            )
+                    from .structure import docx_sections
+
+                    for section in docx_sections(root, name):
+                        add(section["text"], section["locator"])
+            artifact("tables.json", json.dumps(tables).encode())
         result["warnings"].append(
-            "DOCX formatting, revisions, embedded media and field evaluation require original visual review"
+            "DOCX revision scopes preserved; formatting, revision acceptance, embedded media and field evaluation require original visual review"
         )
     elif suffix == ".pdf":
         from pypdf import PdfReader
@@ -182,6 +219,34 @@ def extract(data, suffix, cfg, directory):
             try:
                 try:
                     text = page.extract_text(extraction_mode="layout") or ""
+                    runs = []
+
+                    def capture_run(value, cm, tm, font, size):
+                        if value.strip() and len(runs) < 20000:
+                            runs.append(
+                                dict(
+                                    text=value,
+                                    user_matrix=list(cm),
+                                    text_matrix=list(tm),
+                                    font_size=float(size),
+                                )
+                            )
+
+                    try:
+                        page.extract_text(visitor_text=capture_run)
+                        artifact(
+                            f"pdf-page-{i}-text-runs.json",
+                            json.dumps(
+                                {
+                                    "runs": runs,
+                                    "coordinate_status": "parser_estimate_unvalidated",
+                                    "limit_reached": len(runs) >= 20000,
+                                    "warning": "Coordinates and content-stream order may be wrong; no table or reading-order guarantee",
+                                }
+                            ).encode(),
+                        )
+                    except Exception:
+                        result["warnings"].append(f"Page {i}: coordinate extraction unavailable")
                 except Exception as exc:
                     text = ""
                     result["warnings"].append(
@@ -277,7 +342,8 @@ def main():
         json.loads((directory / "config.json").read_text()),
         directory,
     )
-    (directory / "result.json").write_text(json.dumps(result, ensure_ascii=False))
+    with (directory / "result.json").open("w", encoding="utf-8") as output:
+        json.dump(result, output)
 
 
 if __name__ == "__main__":

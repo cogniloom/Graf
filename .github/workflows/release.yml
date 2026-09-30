@@ -36,7 +36,7 @@ jobs:
           fi
           apt-get update
           apt-get install -y --no-install-recommends \
-            ca-certificates git poppler-utils tesseract-ocr tesseract-ocr-eng libseccomp2
+            ca-certificates git poppler-utils tesseract-ocr tesseract-ocr-eng libseccomp2 libarchive13 antiword ffmpeg
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
@@ -67,14 +67,16 @@ jobs:
           BUILD_VERSION: ${{ steps.version.outputs.version }}
         run: uv run --no-project python scripts/set_release_version.py "$BUILD_VERSION"
       - name: Install Python dependencies
-        run: uv sync --project evidencekg --frozen --extra app
+        run: uv sync --project evidencekg --frozen --extra app --extra transcription
       - name: Check parser prerequisites
         run: |
           command -v pdftoppm
+          command -v antiword
+          command -v ffprobe
           tesseract --list-langs | grep -Fx eng
-          uv run --project evidencekg --frozen --extra app python -c 'import ctypes; ctypes.CDLL("libseccomp.so.2")'
+          uv run --project evidencekg --frozen --extra app --extra transcription python -c 'import ctypes; import libarchive.ffi; ctypes.CDLL("libseccomp.so.2"); libarchive.ffi.version_number()'
       - name: Test Python
-        run: uv run --project evidencekg --frozen --extra app python -m pytest evidencekg/tests product/tests -q --tb=short
+        run: uv run --project evidencekg --frozen --extra app --extra transcription python -m pytest evidencekg/tests product/tests -q --tb=short
       - name: Test and build dashboard
         working-directory: product/ui
         run: |
@@ -90,7 +92,7 @@ jobs:
         run: |
           output=$(mktemp -d "$RUNNER_TEMP/docworm-release.XXXXXX")
           tag="$RELEASE_TAG"
-          uv run --project evidencekg --frozen --extra app python scripts/build_release.py --output "$output" --tag "$tag"
+          uv run --project evidencekg --frozen --extra app --extra transcription python scripts/build_release.py --output "$output" --tag "$tag"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           cd "$output"
           sha256sum --check ./*.tar.gz.sha256

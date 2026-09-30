@@ -272,6 +272,8 @@ def install(args, home):
                 "app",
                 "--extra",
                 "hybrid",
+                "--extra",
+                "transcription",
                 "--no-dev",
             ],
             env={**os.environ, "UV_PROJECT_ENVIRONMENT": str(home / "runtime")},
@@ -298,6 +300,10 @@ def install(args, home):
         "database_config": str(home / "evidencekg.json"),
         "models": str(models),
         "device": args.device,
+        "transcription_model": (
+            str(args.transcription_model.expanduser().resolve()) if args.transcription_model else None
+        ),
+        "transcription_language": args.transcription_language,
         "allowed_roots": roots,
         "host": "127.0.0.1",
         "port": port,
@@ -351,8 +357,13 @@ def main():
     setup = commands.add_parser("install")
     setup.add_argument("--allow-root", action="append", default=[])
     setup.add_argument("--demo", action="store_true")
-    setup.add_argument("--device", choices=["cpu", "cuda"], default="cpu")
+    setup.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
     setup.add_argument("--models", type=Path)
+    setup.add_argument(
+        "--transcription-model", type=Path,
+        help="Existing local faster-whisper model directory; no download",
+    )
+    setup.add_argument("--transcription-language", help="Optional speech language code, e.g. en or de")
     setup.add_argument("--skip-model-download", action="store_true")
     setup.add_argument(
         "--runtime",
@@ -466,6 +477,8 @@ def main():
                     "app",
                     "--extra",
                     "hybrid",
+                    "--extra",
+                    "transcription",
                     "--no-dev",
                 ],
                 env={**os.environ, "UV_PROJECT_ENVIRONMENT": str(home / "runtime")},

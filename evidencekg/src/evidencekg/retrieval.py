@@ -10,6 +10,40 @@ class API:
     def __init__(self, store):
         self.store = store
 
+    def knowledge_query(
+        self,
+        snapshot_id,
+        kind="claim",
+        entity=None,
+        predicate=None,
+        applicable_on=None,
+        valid_at=None,
+        group_id=None,
+        cursor=None,
+        limit=100,
+        concept=None,
+        text=None,
+        segment_id=None,
+    ):
+        """Enumerate frozen derived knowledge, retaining uncertainty and exact source spans."""
+        from .knowledge import query
+
+        return query(
+            self,
+            snapshot_id,
+            kind=kind,
+            entity=entity,
+            predicate=predicate,
+            applicable_on=applicable_on,
+            valid_at=valid_at,
+            group_id=group_id,
+            cursor=cursor,
+            limit=limit,
+            concept=concept,
+            text=text,
+            segment_id=segment_id,
+        )
+
     def page(self, snapshot, scope, rows, cursor=None, limit=100, key=lambda x: x["id"]):
         self.store.snapshot(snapshot)
         if not 1 <= limit <= 1000:

@@ -63,6 +63,9 @@ class ReadOnlyStore(Store):
 def load_sources(store, snapshot):
     verified = _sources(store, snapshot)
     segments = {s["id"]: s for s in verified["segments"]}
+    from evidencekg.knowledge import annotate_segments
+
+    annotate_segments(store, snapshot, segments)
     links = store.rows(
         """SELECT l.* FROM explicit_links l JOIN snapshot_links sl ON sl.link_id=l.id
                           WHERE sl.snapshot_id=? ORDER BY l.id""",

@@ -65,7 +65,7 @@ and package repositories, plus the standard GitHub Actions runner prerequisites.
 The build runs in `node:22-bookworm-slim` with `no-new-privileges` enabled. It
 installs packages as the container's root user without `sudo` or host package
 changes. The build job installs Git, CA certificates, and
-`poppler-utils tesseract-ocr tesseract-ocr-eng libseccomp2` before checking
+`poppler-utils tesseract-ocr tesseract-ocr-eng libseccomp2 libarchive13 antiword ffmpeg` before checking
 Poppler (`pdftoppm`), English OCR data, and `libseccomp.so.2`.
 Actions also installs Node 22, uv and
 Python 3.12. Only the publishing job gets `contents: write`, using the built-in

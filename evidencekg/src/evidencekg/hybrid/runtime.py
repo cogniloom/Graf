@@ -1,4 +1,4 @@
-"""Default local retrieval service. PostgreSQL persistence; no generative clients."""
+"""Local retrieval with LadybugDB graphs and PostgreSQL evidence/workset records."""
 
 import json
 import os
@@ -34,7 +34,9 @@ def implementation():
 
 
 def dependencies():
-    return {name: version(name) for name in ("numpy", "torch", "transformers", "tokenizers", "psycopg")}
+    return {
+        name: version(name) for name in ("numpy", "torch", "transformers", "tokenizers", "psycopg", "ladybug")
+    }
 
 
 def publish_config(target, config):
@@ -48,11 +50,43 @@ def publish_config(target, config):
         atomic(target, dump({"sha256": sha(dump(config)), "value": config}).encode())
 
 
-def prepare(state, models, database_config, *, snapshot=None, device="cuda", output=None):
+def resolve_device(device):
+    """Auto uses usable CUDA; explicit CPU/CUDA choices remain authoritative."""
+    if device not in ("auto", "cpu", "cuda"):
+        raise ValueError("device must be auto, cpu or cuda")
+    if device != "auto":
+        return device
+    import torch
+
+    if torch.cuda.is_available():
+        try:
+            # Availability alone need not imply that kernels can execute on this GPU.
+            torch.ones(1, device="cuda").sum().item()
+            return "cuda"
+        except RuntimeError:
+            pass
+    return "cpu"
+
+
+def prepare(state, models, database_config, *, snapshot=None, device="auto", output=None, progress=None):
     """Explicit verified import; publish config only after the complete index exists."""
+    from .graph import prepare_graph
     from .index import DenseIndex
     from .semantic import RERANKER_MODEL_ID, DenseAdapter, snapshot_identity
 
+    device = resolve_device(device)
+    device_name = "CPU"
+    if device == "cuda":
+        import torch
+
+        device_name = torch.cuda.get_device_name(0)
+
+    def report(**counts):
+        if progress is not None:
+            progress(**counts, indexing_device=device, indexing_device_name=device_name,
+                     indexing_updated_at=time.time())
+
+    report(indexing_stage="loading_sources")
     state, models = Path(state).resolve(), Path(models).resolve()
     database_config = Path(database_config).resolve()
     store = ReadOnlyStore(state)
@@ -60,6 +94,7 @@ def prepare(state, models, database_config, *, snapshot=None, device="cuda", out
     try:
         sid = store.snapshot(snapshot)["id"]
         manifest, segments, links = load_sources(store, sid)
+        report(indexing_stage="verifying_sources")
         typed = postings(store, sid)
         cache = {}
         for posting in typed:
@@ -67,7 +102,16 @@ def prepare(state, models, database_config, *, snapshot=None, device="cuda", out
         manifest = dict(
             manifest, hybrid_typed_postings=typed, hybrid_manifest_sha=store.snapshot(sid)["manifest_sha"]
         )
+        report(indexing_stage="importing_snapshot")
         ledger.import_snapshot(sid, manifest["hybrid_manifest_sha"], manifest, segments, links)
+        graph = prepare_graph(
+            state / "hybrid-graphs",
+            sid,
+            manifest["hybrid_manifest_sha"],
+            {segment["document_version_id"] for segment in segments.values()},
+            links,
+        )
+        report(indexing_stage="loading_model")
         dense = DenseAdapter.from_local(
             models / "dense", MODELS["dense"][1], max_tokens=1024, batch_size=4, device=device
         )
@@ -85,10 +129,12 @@ def prepare(state, models, database_config, *, snapshot=None, device="cuda", out
             )
         )
         cache_dir = state / "hybrid" / sid / index_generation
-        index = DenseIndex(cache_dir, dense, segments, sid, manifest["hybrid_manifest_sha"])
+        index = DenseIndex(cache_dir, dense, segments, sid, manifest["hybrid_manifest_sha"], progress=report if progress is not None else None)
+        report(indexing_stage="finalizing")
         cross_identity = snapshot_identity(models / "reranker", RERANKER_MODEL_ID, MODELS["reranker"][1])
         config = {
-            "version": 1,
+            "version": 2,
+            "graph": graph,
             "snapshot_id": sid,
             "manifest_sha": manifest["hybrid_manifest_sha"],
             "models": str(models),
@@ -123,6 +169,12 @@ class Runtime:
                 "Hybrid retrieval is the default; run prepare-hybrid first (see HYBRID.md). No mechanical fallback."
             )
         self.config = _read(path)
+        if self.config.get("version") != 2 or "graph" not in self.config:
+            raise ValueError(
+                "LadybugDB graph not prepared; run prepare-hybrid to build a new serving generation"
+            )
+        if any(self.config["graph"].get(key) != self.config[key] for key in ("snapshot_id", "manifest_sha")):
+            raise ValueError("Graph and serving snapshot identity mismatch")
         if self.config["implementation"] != implementation():
             raise ValueError(
                 "Hybrid implementation changed; run prepare-hybrid to bind a fresh configuration"
@@ -132,6 +184,7 @@ class Runtime:
         self.ledger = None
         self.ranker = None
         self.lexical = None
+        self.graph = None
         self.lock = threading.RLock()
         self.verified = False
 
@@ -175,6 +228,7 @@ class Runtime:
             return
         import torch
 
+        from .graph import source_identity
         from .index import DenseIndex
         from .lexical import LexicalIndex
         from .retrieval import HybridDiscovery
@@ -185,6 +239,17 @@ class Runtime:
         manifest, segments, links = self.ledger.load_snapshot(c["snapshot_id"])
         if manifest["hybrid_manifest_sha"] != c["manifest_sha"]:
             raise ValueError("Serving snapshot identity drift")
+        if (
+            source_identity(
+                c["snapshot_id"],
+                c["manifest_sha"],
+                {s["document_version_id"] for s in segments.values()},
+                links,
+            )
+            != c["graph"]["source_sha"]
+        ):
+            raise ValueError("Graph and source-link inventory mismatch")
+        self._load_graph()
         dense = DenseAdapter.from_local(
             Path(c["models"]) / "dense", MODELS["dense"][1], max_tokens=1024, batch_size=4, device=c["device"]
         )
@@ -212,6 +277,7 @@ class Runtime:
             sources=(manifest, segments, links),
             typed=manifest["hybrid_typed_postings"],
             lexical=self.lexical,
+            graph=self.graph,
             model_identity={
                 "serving_config_sha": sha(dump(c)),
                 "dense": c["dense_identity"],
@@ -234,10 +300,19 @@ class Runtime:
         if snapshot is not None and snapshot != self.config["snapshot_id"]:
             raise ValueError("Snapshot not prepared for hybrid retrieval")
         begin = time.monotonic()
-        identity = {"config": self.config, "question": question, "limit": limit}
+        identity = {
+            "config": self.config,
+            "question": question,
+            "limit": limit,
+            "retrieval_code_sha": sha(Path(__file__).with_name("retrieval.py").read_bytes()),
+            "query_normalizer_sha": sha(
+                (Path(__file__).parent.parent / "knowledge_language.py").read_bytes()
+            ),
+        }
         if code_context:
             identity["code_context"] = True
         with self._database() as ledger, ledger.query_lock(identity):
+            self._load_graph()
             self._verify_models()
             result = self.ledger.get_result(identity)
             cached = result is not None
@@ -255,7 +330,9 @@ class Runtime:
                 # Validate the retained inventory before advertising continuation.
                 self.ledger.page(result["workset_id"], limit=1)
             result["cache"] = {"hit": cached, "request_seconds": time.monotonic() - begin}
-            result["backend"] = "local-hybrid-postgresql"
+            result["backend"] = "local-hybrid-ladybugdb"
+            result["graph_backend"] = "ladybugdb"
+            result["records_backend"] = "postgresql"
             result["generative_model_calls"] = 0
             return result
 
@@ -263,7 +340,16 @@ class Runtime:
         with self._database() as ledger:
             return ledger.page(key, cursor=cursor, limit=limit)
 
+    def _load_graph(self):
+        from .graph import LadybugGraph
+
+        if self.graph is None:
+            self.graph = LadybugGraph(self.config["graph"])
+
     def close(self):
+        if self.graph is not None:
+            self.graph.close()
+            self.graph = None
         if self.lexical:
             self.lexical.close()
         if self.ledger is not None:

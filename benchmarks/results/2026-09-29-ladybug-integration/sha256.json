@@ -1,0 +1,22 @@
+{
+  "evidencekg/src/evidencekg/hybrid/graph.py": "ae7d965497f9288c6cf20cc18b0f73cf7fa404f04dfb42e4f2924813bb05cb54",
+  "evidencekg/src/evidencekg/hybrid/runtime.py": "c200476bf6c93db5204e4f8702d377b009f09eca6f35de2847b79f5e84531d3f",
+  "evidencekg/src/evidencekg/hybrid/retrieval.py": "caf9be5ef2686c5b9ebea25bb4af7d3fa66b4dd017aa94df375ea57425b7e9f4",
+  "evidencekg/tests/test_ladybug_graph.py": "58b0e2014806250a8c9862ef9f032c9f04812e7dd21e8753a4f91ff82713da62",
+  "evidencekg/tests/test_ladybug_retrieval.py": "e52644c6b4d2e4ee0db815058ac8e588f2a1a7394694ee3bc05558b14a189a63",
+  "evidencekg/tests/test_ladybug_live.py": "6aa0de223700cce46e5710ae0908b9da23ac6f3e18af0ebbfc1420a32591e161",
+  "evidencekg/tests/test_app_live.py": "5f7b3649e53ff4ee04df3845c7b1f5dbfe7e5bfe723c4defb7a7403344aebcf1",
+  "evidencekg/pyproject.toml": "99ffd7fd02c762a1be33209c6e5291c30fca36520479f9ffcd0e7d9f45ed8113",
+  "evidencekg/uv.lock": "c55f83fe447ebc495559903f62e6f48eb8185291924ecd53c8b3ed248211e612",
+  "evidencekg/HYBRID.md": "4ffbf758e3d3fdc1c25e2f4e4bbca28efe64a1472359cbd6040113566f72c498",
+  "THIRD_PARTY.md": "b8c56a5888432ff675670472b777e976ec892074cae57a46b8b895aaea1c83fc",
+  "benchmarks/results/2026-09-29-ladybug-integration/native.log": "78b476d3734e9847dd7dd6aad184f90bba369b129c1b45e0537635ae1830d546",
+  "benchmarks/results/2026-09-29-ladybug-integration/native.json": "20439effc7ffff9bbde0a080c4d4ee6802c426ee0c3f911b21d6c8d36d927685",
+  "benchmarks/results/2026-09-29-ladybug-integration/progress.log": "9f586239142c8c98bb2037065dadf2f71e4ee2f3918a0cf9b6e5c0a0d19eccee",
+  "benchmarks/results/2026-09-29-ladybug-integration/focused.log": "eccf6874928033eaf4faee26d64ee4cd934622bc5f894725ff8a2f0f983e24b0",
+  "benchmarks/results/2026-09-29-ladybug-integration/investigation-rerun.log": "12c6335887c555b79aafc1d4e69b3e367a984f12b141121924a25bcdfbb20d23",
+  "benchmarks/results/2026-09-29-ladybug-integration/README.md": "728920bcbbdbffde3bb09363dc3d4e599141134fde7b0d3e62b1f054fedea086",
+  "benchmarks/results/2026-09-29-ladybug-integration/full-suite.log": "f9595e52203458a7a812209014c75b05f1f9c1caa76d793e42b817ba5aaf53cf",
+  "benchmarks/results/2026-09-29-ladybug-integration/prechange-ocr.log": "f8d4fcc0db7aa8d318d205680157435fb29ce6a72d2cb9cad3285a451b7e4a76",
+  "benchmarks/results/2026-09-29-ladybug-integration/prechange-investigation.log": "2826a5e72c9f873a0370a41fe46a67989c4a682af951a8514eeb48dfd0b0e61b"
+}

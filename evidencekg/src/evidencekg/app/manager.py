@@ -10,6 +10,7 @@ crash/restart. No runtime DDL, generative clients, or writes to original sources
 from __future__ import annotations
 
 import threading
+import time
 import uuid
 from pathlib import Path
 
@@ -164,8 +165,22 @@ class Manager:
         """
         with self._scan_lock:
             with _connect(self.dsn) as db:
-                expected = self._row(db)["revision"]
+                workspace = self._row(db)
+                expected = workspace["revision"]
                 sources = self._sources(db)
+            from evidencekg.knowledge import signature as knowledge_signature
+
+            # Only queue an upgrade after the prior publication has settled;
+            # never supersede an active scan merely because rules changed.
+            knowledge_changed = (
+                workspace["state"] in ("ready", "ready_with_gaps")
+                and workspace["revision"] == workspace["published_revision"]
+                and workspace.get("publication") is not None
+                and workspace["publication"].get(
+                    "knowledge_request_signature", workspace["publication"].get("knowledge_signature")
+                )
+                != knowledge_signature()
+            )
             changes = []
             for source in sources:
                 if not source["enabled"]:
@@ -181,7 +196,7 @@ class Manager:
                     changes.append(
                         (dump(current), error, len(current), "blocked" if error else "pending", source["id"])
                     )
-            if changes:
+            if changes or knowledge_changed:
                 with _connect(self.dsn) as db, db.transaction():
                     if self._row(db, True)["revision"] != expected:
                         return False
@@ -191,7 +206,12 @@ class Manager:
                             "WHERE id=%s",
                             values,
                         )
-                    self._bump(db, "Source content changed; verifying a new snapshot.")
+                    self._bump(
+                        db,
+                        "Source content changed; verifying a new snapshot."
+                        if changes
+                        else "Knowledge rules or local parser models changed; rebuilding derived knowledge.",
+                    )
             return True
 
     def jobs(self):
@@ -229,6 +249,12 @@ class Manager:
             counts["sources"] = len(sources)
         return {
             "workspace_name": self.config.workspace_name or self.config.home.name,
+            "knowledge_restart_required": bool(
+                row.get("publication")
+                and row["publication"].get("knowledge_request_signature") is not None
+                and row["publication"].get("knowledge_request_signature")
+                != row["publication"].get("knowledge_signature")
+            ),
             "state": row["state"],
             "phase": row["phase"],
             "revision": row["revision"],
@@ -254,10 +280,18 @@ class Manager:
             ).fetchone()
             if active is None:
                 raise NotReady("Job executor was replaced; stale progress discarded")
-            db.execute("UPDATE public.docworm_workspace SET phase=%s WHERE id=%s", (phase, self.id))
+            db.execute(
+                "UPDATE public.docworm_workspace SET state='updating',phase=%s,message=%s WHERE id=%s",
+                (
+                    phase,
+                    "Processing sources in the background. Saved sessions and workspace controls remain available.",
+                    self.id,
+                ),
+            )
 
     def _build(self, job, sources, progress):
         from evidencekg.config import initialize
+        from evidencekg.knowledge import signature as knowledge_signature
 
         from .ingestion import ingest_isolated
 
@@ -268,28 +302,58 @@ class Manager:
         for source in sources:
             copied += stage(self.config, source, staging, self.stop_event.is_set)
             progress("staging", files=copied, total_files=sum(s["file_count"] for s in sources))
-        progress("ingesting", files=copied)
         # Size the parser acquisition bound to this verified inventory, rather than
         # imposing a product file-size ceiling. Context and archive guards remain.
-        largest = max((item["size"] for source in sources for item in source["inventory"].values()), default=1)
-        store = initialize(state, staging, {"max_file_bytes": max(100_000_000, largest)})
+        largest = max(
+            (item["size"] for source in sources for item in source["inventory"].values()), default=1
+        )
+        store = initialize(
+            state,
+            staging,
+            {
+                "max_file_bytes": max(100_000_000, largest),
+                **self.config.transcription_options(),
+                "knowledge_cache_directory": str(self.config.home / "knowledge-cache"),
+            },
+        )
+        extraction_progress = {}
+
+        def extracted(counts):
+            extraction_progress.update(counts)
+            progress("ingesting", **counts)
+
         try:
-            ingest_isolated(state, self.stop_event.is_set)
+            ingest_isolated(state, self.stop_event.is_set, progress=extracted)
             snapshot = store.one("SELECT snapshot_id FROM current_snapshot WHERE singleton=1")["snapshot_id"]
             manifest = store.manifest(snapshot)
         finally:
             store.close()
         # A verified extraction snapshot can support explicitly consented lexical
         # research while the dense serving projection is still being prepared.
-        progress(
-            "preparing",
-            documents=len(manifest["documents"]),
-            partial_publication={
+        preparation_progress = {
+            **extraction_progress,
+            "documents": len(manifest["documents"]),
+            "partial_publication": {
                 "snapshot_id": snapshot,
                 "state": str(state),
                 "sources": [{k: s[k] for k in ("id", "path", "kind", "inventory")} for s in sources],
             },
-        )
+        }
+        progress("preparing", **preparation_progress)
+        last_index_report = (None, 0.0)
+
+        def indexed(**counts):
+            nonlocal last_index_report
+            if self.stop_event.is_set():
+                raise InterruptedError("Application is stopping; job will resume on restart")
+            now = time.monotonic()
+            stage = counts["indexing_stage"]
+            completed = counts.get("indexing_completed", counts.get("indexed_passages"))
+            total = counts.get("indexing_total", counts.get("total_passages"))
+            if stage != last_index_report[0] or completed == total or now - last_index_report[1] >= 1:
+                progress("preparing", **preparation_progress, **counts)
+                last_index_report = (stage, now)
+
         prepared = prepare(
             state,
             self.config.models,
@@ -297,6 +361,7 @@ class Manager:
             snapshot=snapshot,
             device=self.config.device,
             output=generation / "hybrid.json",
+            progress=indexed,
         )
         with PostgresWorksetContext(self.dsn) as ledger:
             verified, segments, links = ledger.load_snapshot(snapshot)
@@ -305,6 +370,12 @@ class Manager:
         ) + len(verified.get("inventory_errors", []))
         return {
             "snapshot_id": snapshot,
+            "knowledge_signature": verified.get("knowledge", {}).get("signature"),
+            # Scheduling tracks the parent request separately from the worker's
+            # actual immutable result. A hot package replacement cannot cause
+            # an old parent to request the same upgrade forever. Restart after
+            # installing code/models; the new process queues at most one refresh.
+            "knowledge_request_signature": knowledge_signature(),
             "state": str(state),
             "config": prepared["config"],
             "sources": [{k: s[k] for k in ("id", "path", "kind", "inventory")} for s in sources],
@@ -476,6 +547,15 @@ class Manager:
                 self._runtime = None
 
     def _ready(self):
+        # A known unavailable collection must not wait behind a large checksum
+        # scan, especially when the caller holds the investigation-history lock.
+        with _connect(self.dsn) as db:
+            current = self._row(db)
+        if (
+            current["state"] not in ("ready", "ready_with_gaps")
+            or current["published_revision"] != current["revision"]
+        ):
+            raise NotReady("Current source revision is not ready")
         if not self.reconcile():
             raise NotReady("Source revision changed during verification; retry after rebuilding")
         with _connect(self.dsn) as db:
@@ -525,9 +605,23 @@ class Manager:
         state = Path(publication["state"])
         if not state.is_relative_to(self.config.home / "generations"):
             raise ValueError("Snapshot is outside the private generation store")
+        if "config" in publication:
+            result = self._with_runtime(frozen, lambda runtime: runtime.retrieve(question, limit=12))
+            chosen = [s.get("segment_id", s.get("id")) for s in result.get("segments", [])]
+            retrieval = "hybrid"
         store = ReadOnlyStore(state)
         try:
             manifest, segments, links = load_sources(store, publication["snapshot_id"])
+            if "config" not in publication:
+                words = set(question.casefold().split())
+                chosen = sorted(segments, key=lambda k: (-sum(w in segments[k]["text"].casefold()
+                                                                            for w in words), k))[:12]
+                retrieval = "early_lexical"
+            collection_documents = len(manifest["documents"])
+            selected_docs = {segments[k]["document_version_id"] for k in chosen if k in segments}
+            manifest = dict(manifest, documents=[d for d in manifest["documents"]
+                                                if d["document_version_id"] in selected_docs])
+            segments = {k: v for k, v in segments.items() if v["document_version_id"] in selected_docs}
             occurrences = store.rows(
                 "SELECT o.* FROM occurrences o JOIN snapshot_occurrences so ON so.occurrence_id=o.id "
                 "WHERE so.snapshot_id=? ORDER BY o.id",
@@ -538,6 +632,12 @@ class Manager:
                 "JOIN snapshot_occurrences so ON so.occurrence_id=o.id WHERE so.snapshot_id=? ORDER BY f.id",
                 (publication["snapshot_id"],),
             )
+            occurrences = [o for o in occurrences if o["segment_id"] in segments]
+            feature_ids = {o["feature_id"] for o in occurrences}
+            features = [f for f in features if f["id"] in feature_ids]
+            retained_nodes = set(segments) | selected_docs | feature_ids | {o["id"] for o in occurrences}
+            links = [link for link in links if link["from_node"] in retained_nodes
+                     and (link["to_node"] is None or link["to_node"] in retained_nodes)]
             originals = {}
             total_bytes = 0
             for doc in manifest["documents"]:
@@ -552,23 +652,12 @@ class Manager:
                     total_bytes += size
                     if total_bytes > 256 * 1024 * 1024:
                         raise ValueError(
-                            "This collection exceeds the 256 MiB investigation capture limit. "
+                            "The selected evidence exceeds the 256 MiB investigation capture limit. "
                             "Select a smaller source collection; no evidence was silently omitted."
                         )
                     originals[doc["document_version_id"]] = store.get(version["original_blob_sha"])
         finally:
             store.close()
-        if "config" in publication:
-            result = self._with_runtime(frozen, lambda runtime: runtime.retrieve(question, limit=12))
-            chosen = [s.get("segment_id", s.get("id")) for s in result.get("segments", [])]
-            retrieval = "hybrid"
-        else:
-            # Explicitly labelled early lexical mode; never claim hybrid readiness.
-            words = set(question.casefold().split())
-            chosen = sorted(
-                segments, key=lambda k: (-sum(w in segments[k]["text"].casefold() for w in words), k)
-            )[:12]
-            retrieval = "early_lexical"
         manifest = self._paths(manifest, frozen)
         forbidden_paths = restricted_paths(self.config)
         forbidden_hashes = restricted_hashes(self.config)
@@ -590,7 +679,9 @@ class Manager:
             "features": features,
             "selected_segments": [s for s in chosen if s in segments],
             "known_source_files": sum(s["file_count"] for s in self.sources()["items"] if s["enabled"]),
+            "collection_documents": collection_documents,
             "capture_limitations": [
+                "Only retrieved documents are retained for this run; the full collection was not copied.",
                 "Retrieval ranks candidates; it is not an exhaustive relevance assessment."
             ],
         }
@@ -670,7 +761,10 @@ class Manager:
             }
         return value
 
-    def documents(self, query="", offset=0, limit=50):
+    def documents(self, query="", offset=0, limit=50, issues=""):
+        if issues not in ("", "all", "unsupported", "failed", "partial"):
+            raise ValueError("Unknown processing issue filter")
+
         def perform(row):
             manifest, segments, _ = self._snapshot(row)
             counts = {}
@@ -686,6 +780,11 @@ class Manager:
                 }
                 for d in manifest["documents"]
                 if query.casefold() in self._path(d["path"], row).casefold()
+                and (
+                    not issues
+                    or (issues == "all" and (d["status"] != "ready" or d["warnings"] or d["empty"]))
+                    or d["status"] == issues
+                )
             ]
             return {"items": docs[offset : offset + limit], "total": len(docs)}
 
@@ -718,6 +817,20 @@ class Manager:
 
         return self.evidence(perform)
 
+    def knowledge(self, **filters):
+        """Read the published generation under the same source fence as evidence."""
+        from evidencekg.hybrid.sources import ReadOnlyStore
+        from evidencekg.retrieval import API
+
+        def perform(row):
+            store = ReadOnlyStore(row["publication"]["state"])
+            try:
+                return self._paths(API(store).knowledge_query(row["snapshot_id"], **filters), row)
+            finally:
+                store.close()
+
+        return self.evidence(perform)
+
     def graph(self, limit=2000, *, detailed=False):
         from evidencekg.hybrid.sources import ReadOnlyStore
 
@@ -745,6 +858,12 @@ class Manager:
                         "SELECT DISTINCT f.* FROM features f JOIN occurrences o ON o.feature_id=f.id "
                         "JOIN snapshot_occurrences so ON so.occurrence_id=o.id WHERE so.snapshot_id=? ORDER BY f.id",
                         (row["snapshot_id"],),
+                    )
+                    from evidencekg.knowledge import load as load_knowledge
+                    from evidencekg.knowledge import project as project_knowledge
+
+                    knowledge_nodes, knowledge_edges = project_knowledge(
+                        self._paths(load_knowledge(store, row["snapshot_id"]), row), row["snapshot_id"]
                     )
                 finally:
                     store.close()
@@ -796,6 +915,8 @@ class Manager:
                             },
                         ]
                     )
+                nodes.update({node["id"]: node for node in knowledge_nodes})
+                structural.extend(knowledge_edges)
                 for link in links:
                     for endpoint in (link["from_node"], link["to_node"]):
                         if endpoint and endpoint not in nodes:

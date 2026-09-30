@@ -14,7 +14,7 @@ from .semantic import exact_cosine_search
 
 
 class DenseIndex:
-    def __init__(self, directory, adapter, segments, snapshot, manifest_sha):
+    def __init__(self, directory, adapter, segments, snapshot, manifest_sha, progress=None):
         directory = Path(directory)
         directory.mkdir(parents=True, exist_ok=True)
         self.adapter = adapter
@@ -30,6 +30,11 @@ class DenseIndex:
             "semantic_sha": sha((Path(__file__).parent / "semantic.py").read_bytes()),
             "implementation_sha": sha(Path(__file__).read_bytes()),
         }
+        def report(stage):
+            if progress is not None:
+                progress(indexing_stage=stage)
+
+        report("waiting_for_index")
         with _locked(directory):
             marker = directory / "index.json"
             if marker.exists():
@@ -38,7 +43,9 @@ class DenseIndex:
                     raise ValueError("Dense index identity drift")
             else:
                 begin = time.monotonic()
-                encoded = adapter.encode_passages([segments[sid]["text"] for sid in ids])
+                texts = [segments[sid]["text"] for sid in ids]
+                encoded = adapter.encode_passages(texts, progress=progress) if progress else adapter.encode_passages(texts)
+                report("saving_index")
                 buffer = io.BytesIO()
                 np.save(buffer, encoded.vectors, allow_pickle=False)
                 atomic(directory / "vectors.npy", buffer.getvalue())
@@ -53,6 +60,7 @@ class DenseIndex:
                     "segments": len(ids),
                 }
                 _write(marker, data)
+            report("verifying_index")
             raw = (directory / "vectors.npy").read_bytes()
             if sha(raw) != data["vectors_sha"]:
                 raise ValueError("Dense vector corruption")

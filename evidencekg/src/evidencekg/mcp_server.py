@@ -121,6 +121,70 @@ def create_server(state, discovery_index=None, *, backend="hybrid", hybrid_confi
         structured_output=True,
         annotations=ToolAnnotations(read_only_hint=True, destructive_hint=False, open_world_hint=False),
     )
+    def knowledge_query(
+        snapshot_id: str,
+        kind: str = "claim",
+        entity: str | None = None,
+        predicate: str | None = None,
+        applicable_on: str | None = None,
+        valid_at: str | None = None,
+        group_id: str | None = None,
+        cursor: str | None = None,
+        limit: int = 100,
+        concept: str | None = None,
+        text: str | None = None,
+        segment_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Read automatic non-LLM knowledge with original quotations and uncertainty.
+
+        Kinds: claim, evidence_set, observation, concept, entity, identity, uncertainty,
+        conflict, dependence, source, edge. Enumerate entity
+        first or use discover's knowledge_context.entities (e.g. order:1847).
+        Then query claim by entity WITHOUT polarity filtering to retain conditions,
+        planned/negative claims and possible contrary evidence. Predicates:
+        approval, cancellation, payment, delivery, rejection, validity, supersession,
+        dependency. applicable_on matches explicit event days and excludes unknown
+        dates. valid_at matches stated validity intervals, retaining uncertain end
+        boundaries. Neither filter establishes current real-world authority.
+        group_id retrieves members of a conflict or shared-source signal. Every
+        next_cursor must be consumed for all stored matches. Literal entity matches
+        do not prove identity; no score is a probability of truth. Inspect sources.
+        Old snapshots require a new ingest to gain the automatic knowledge layer.
+        English/German and mixed-language terms share canonical concepts.
+        For complete entity context, use kind="evidence_set" and entity: this retains
+        negative, qualified, planned, other-day and unknown-date claims with role labels,
+        even when applicable_on or valid_at is supplied. Explicit incoming supersession
+        statements are included. Only entity, predicate and requested dates
+        are allowed in this mode. Page through all results before summarizing.
+        Use observation kind with concept="month:3" or text="März"/"March". Text matches
+        any recognized vocabulary concept, not arbitrary translated meaning.
+        Observations preserve ambiguous date/amount alternatives. segment_id
+        enumerates all claim/observation/uncertainty annotations for a passage.
+        With edge kind, segment_id enumerates its incident relationships and
+        incoming edges sharing their target nodes, with related source locators.
+        Identity comparisons are reversible, non-transitive hypotheses. Uncertainty
+        nodes locate unclear audio without releasing withheld transcript guesses.
+        """
+        return access(
+            "knowledge_query",
+            snapshot_id=snapshot_id,
+            kind=kind,
+            entity=entity,
+            predicate=predicate,
+            applicable_on=applicable_on,
+            valid_at=valid_at,
+            group_id=group_id,
+            cursor=cursor,
+            limit=limit,
+            concept=concept,
+            text=text,
+            segment_id=segment_id,
+        )
+
+    @server.tool(
+        structured_output=True,
+        annotations=ToolAnnotations(read_only_hint=True, destructive_hint=False, open_world_hint=False),
+    )
     def inventory(
         snapshot_id: str | None = None, cursor: str | None = None, limit: int = 100
     ) -> dict[str, Any]:

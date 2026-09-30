@@ -29,9 +29,27 @@ EventCallback = Callable[[dict[str, Any]], None]
 OUTPUT_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
-    "required": ["answer", "citations", "documents"],
+    "required": ["answer", "citations", "documents", "questions"],
     "properties": {
         "answer": {"type": "string"},
+        "questions": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["id", "question", "options"],
+                "properties": {
+                    "id": {"type": "string", "minLength": 1, "maxLength": 64},
+                    "question": {"type": "string", "minLength": 1, "maxLength": 500},
+                    "options": {
+                        "type": "array",
+                        "maxItems": 6,
+                        "items": {"type": "string", "minLength": 1, "maxLength": 200},
+                    },
+                },
+            },
+        },
         "citations": {
             "type": "array",
             "items": {
@@ -52,6 +70,31 @@ OUTPUT_SCHEMA = {
         },
     },
 }
+
+
+def validate_questions(result):
+    questions = result.get("questions", [])
+    if not isinstance(questions, list) or len(questions) > 3:
+        raise ValueError("Codex must return at most three clarification questions")
+    ids = set()
+    for question in questions:
+        key = question.get("id") if isinstance(question, dict) else None
+        text = question.get("question") if isinstance(question, dict) else None
+        options = question.get("options") if isinstance(question, dict) else None
+        if (
+            not isinstance(key, str)
+            or not key.strip()
+            or len(key) > 64
+            or key in ids
+            or not isinstance(text, str)
+            or not text.strip()
+            or len(text) > 500
+            or not isinstance(options, list)
+            or len(options) > 6
+            or any(not isinstance(o, str) or not o.strip() or len(o) > 200 for o in options)
+        ):
+            raise ValueError("Invalid clarification questions: use distinct nonempty IDs and bounded text")
+        ids.add(key)
 
 
 class AgentAdapter(Protocol):
@@ -140,7 +183,7 @@ class CodexSubscriptionAdapter:
         self,
         executable: str = "codex",
         *,
-        timeout_seconds: float = 120,
+        timeout_seconds: float = 600,
         max_output_bytes: int = 4 * 1024 * 1024,
         max_prompt_bytes: int = 1024 * 1024,
     ):
@@ -374,6 +417,7 @@ class CodexSubscriptionAdapter:
                 errors = list(Draft202012Validator(OUTPUT_SCHEMA).iter_errors(result))
                 if errors:
                     raise ValueError("Answer does not match schema")
+                validate_questions(result)
             except (ValueError, TypeError) as exc:
                 raise AgentExecutionError("malformed", "Invalid structured answer") from exc
             if cancel.is_set():

@@ -12,6 +12,12 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     signal: init.signal ?? AbortSignal.timeout(15000),
     credentials: "include",
     headers: { "Content-Type": "application/json", ...init.headers },
+  }).catch((error: Error) => {
+    if (error.name === "TimeoutError")
+      throw new Error(
+        "Graf took too long to respond. Your request may still be running. Check research history; retrying an unchanged prompt will reuse the same request.",
+      );
+    throw error;
   });
   const body = await response.json().catch(() => null);
   if (!response.ok)
@@ -35,6 +41,8 @@ export async function bootstrap() {
 }
 export type Status = {
   workspace_name: string;
+  knowledge_restart_required?: boolean;
+  jobs?: (Job & { revision: number })[];
   state: string;
   phase: string;
   revision: number;
@@ -59,6 +67,8 @@ export type Source = {
   error: string | null;
 };
 export type Job = {
+  attempts?: number;
+  revision?: number;
   id: string;
   state: string;
   phase: string;
@@ -89,6 +99,13 @@ export type Node = {
   kind: string;
   document_id: string | null;
   highlighted?: boolean;
+  epistemic_status?: string;
+  details?: {
+    tool: "knowledge_query";
+    snapshot_id: string;
+    kind: string;
+    group_id: string;
+  };
 };
 export type Edge = {
   id: string;
@@ -96,6 +113,12 @@ export type Edge = {
   target: string;
   type: string;
   highlighted?: boolean;
+  details?: {
+    tool: "knowledge_query";
+    snapshot_id: string;
+    kind: string;
+    group_id: string;
+  };
 };
 export type GraphData = {
   nodes: Node[];

@@ -111,7 +111,7 @@ def index_extraction(store, extraction, text, cfg, blob):
     for item in matches(text, cfg):
         add(*item)
     if blob:
-        store.get(blob)  # checksum-verified captured bytes; copies remain separate documents.
+        store.verify_blob(blob)  # checksum-verified captured bytes; copies remain separate documents.
         add("original_blob", "sha256", blob, 0, min(1, len(text)), {}, "captured-byte-identity")
     seen_headers = set()
     for segment in segments:

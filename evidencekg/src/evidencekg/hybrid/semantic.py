@@ -195,21 +195,31 @@ class _Adapter:
 class DenseAdapter(_Adapter):
     """BGE-M3 dense CLS pooling; sparse and multi-vector modes are not used."""
 
-    def encode_queries(self, queries: Sequence[str]) -> np.ndarray:
+    def encode_queries(self, queries: Sequence[str], progress=None) -> np.ndarray:
         rows = []
+        completed = 0
+        if progress is not None:
+            progress(indexing_stage="embedding", indexing_completed=0, indexing_total=len(queries))
         for output in self._batches(queries):
             rows.append(output.last_hidden_state[:, 0].float().cpu().numpy())
+            completed += len(rows[-1])
+            if progress is not None:
+                progress(indexing_stage="embedding", indexing_completed=completed, indexing_total=len(queries))
         if not rows:
             return np.empty((0, 0), dtype=np.float32)
         return _normalize(np.concatenate(rows))
 
-    def encode_passages(self, passages: Sequence[str]) -> PassageEmbeddings:
+    def encode_passages(self, passages: Sequence[str], progress=None) -> PassageEmbeddings:
         windows, indices = [], []
+        if progress is not None:
+            progress(indexing_stage="windowing", indexed_passages=0, total_passages=len(passages))
         for index, text in enumerate(passages):
             found = window_text(text, self.tokenizer, self.max_tokens)
             windows.extend(found)
             indices.extend([index] * len(found))
-        vectors = self.encode_queries([window.text for window in windows])
+            if progress is not None:
+                progress(indexing_stage="windowing", indexed_passages=index + 1, total_passages=len(passages))
+        vectors = self.encode_queries([window.text for window in windows], progress=progress)
         return PassageEmbeddings(vectors, tuple(windows), tuple(indices))
 
 

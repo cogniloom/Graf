@@ -1,6 +1,9 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
+  import ProcessingIssues from "./ProcessingIssues.svelte";
   import SourcePicker from "./SourcePicker.svelte";
+  import JobProgress from "./JobProgress.svelte";
+  import { phaseLabel } from "./progress";
   let picker: "file" | "directory" | null = null;
   import { api, type Source, type Job, type Status } from "./api";
   export let view: string;
@@ -13,10 +16,12 @@
     settings: Record<string, unknown> | null = null;
   let path = "",
     error = "",
+    loadError = "",
     message = "",
     busy = false,
     remove: Source | null = null,
     confirmDialog: HTMLDialogElement;
+  let pendingPage: string | null = null;
   let version = 0,
     alive = true;
   onDestroy(() => {
@@ -26,21 +31,34 @@
   $: load(view, tick);
   $: if (remove && confirmDialog && !confirmDialog.open)
     confirmDialog.showModal();
-  async function load(page: string, _tick: number) {
+  async function load(page: string, _tick: number, force = false) {
+    if (!force && pendingPage === page) return;
+    pendingPage = page;
     const v = ++version;
     try {
       if (page === "Sources") {
         const result = await api<NonNullable<typeof sources>>("/sources");
-        if (alive && v === version) sources = result;
+        if (alive && v === version) {
+          sources = result;
+          loadError = "";
+        }
       } else if (page === "Activity") {
         const result = await api<{ items: Job[] }>("/jobs");
-        if (alive && v === version) jobs = result.items;
+        if (alive && v === version) {
+          jobs = result.items;
+          loadError = "";
+        }
       } else {
         const result = await api<Record<string, unknown>>("/settings");
-        if (alive && v === version) settings = result;
+        if (alive && v === version) {
+          settings = result;
+          loadError = "";
+        }
       }
     } catch (e) {
-      if (alive && v === version) error = (e as Error).message;
+      if (alive && v === version) loadError = (e as Error).message;
+    } finally {
+      if (v === version) pendingPage = null;
     }
   }
   async function mutate(endpoint: string, method: string, body?: unknown) {
@@ -52,8 +70,8 @@
         method,
         ...(body ? { body: JSON.stringify(body) } : {}),
       });
-      await refresh();
-      await load(view, tick);
+      void refresh();
+      await load(view, tick, true);
       message = "Workspace updated.";
       return true;
     } catch (e) {
@@ -83,6 +101,7 @@
           : "A local workspace, connected on your terms."}
     </p>
   </header>
+  {#if loadError}<p class="notice error" role="alert">{loadError}</p>{/if}
   {#if error}<p class="notice error" role="alert">
       {error}
     </p>{/if}{#if message}<p role="status" class="notice">{message}</p>{/if}
@@ -105,6 +124,7 @@
         >
       </div>
     </div>
+    <ProcessingIssues {status} />
     <form
       class="add-source"
       on:submit|preventDefault={async () => {
@@ -240,8 +260,8 @@
   {:else if view === "Activity"}
     {#each jobs || [] as j}<article class="job-row">
         <div class="job-heading">
-          <h2>{j.phase || "Queued"}</h2>
-          <span>{j.state}</span>
+          <h2>{phaseLabel(j.phase || "queued")}</h2>
+          <span class="status-chip">{j.state.replaceAll("_", " ")}</span>
         </div>
         <p class="muted">
           {j.started_at
@@ -250,12 +270,13 @@
             ? ` → ${new Date(j.finished_at).toLocaleString()}`
             : ""}
         </p>
-        <code>{j.id}</code>{#if j.progress != null}<pre>{typeof j.progress ===
-            "string"
-              ? j.progress
-              : JSON.stringify(j.progress, null, 2)}</pre>{/if}{#if j.error}<p
-            class="error"
-          >
+        <JobProgress job={j} phase={j.phase} />
+        <details class="job-details">
+          <summary>Processing details</summary>
+          <p>Job <code>{j.id}</code></p>
+          {#if j.attempts}<p>Attempt {j.attempts}</p>{/if}
+        </details>
+        {#if j.error}<p class="error">
             {j.error}
           </p>{/if}
       </article>{:else}<p class="empty">

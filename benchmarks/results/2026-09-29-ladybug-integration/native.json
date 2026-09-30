@@ -1,0 +1,83 @@
+{
+  "backend": "local-hybrid-ladybugdb",
+  "graph": {
+    "database_sha": "82f57539b3ec5afbbc1f4925be6dc2bbaf116ffea7e5c0360c901a68a6a4b0ea",
+    "documents": 2,
+    "edges": 2,
+    "engine_version": "0.21.0",
+    "manifest_sha": "9bfb92823e8942c427964e80049cd27e2c3bcab14398c12e98dba5a0547d893d",
+    "path": "/tmp/pytest-of-wenga/pytest-20/test_native_hybrid_ladybug_ing0/state/hybrid-graphs/c183a92ac7e7fce125a0aceaa44fb83a319b7006f45aef621118e9ee6f8621cf/graph.lbdb",
+    "remaining_links": 1,
+    "schema": "graf-explicit-graph-v1",
+    "snapshot_id": "Nb755474f70461fc30e67e2b49c688228e12d29c409394653af31ce3869e7e611",
+    "source_sha": "7cb67ca215e4bf52aa03ddf13e92cd36fafebe8fa0a9ac3b6084ef279f31839c"
+  },
+  "source_context": {
+    "Sfbd30f48b6286a0cfb105b7566f761066ece96f9305160140d7ec4f274277e0d": {
+      "segment_id": "Sfbd30f48b6286a0cfb105b7566f761066ece96f9305160140d7ec4f274277e0d",
+      "source_path": "invoice.md",
+      "locators": [
+        {
+          "end": 74,
+          "locator": {
+            "kind": "text"
+          },
+          "modality": "native",
+          "start": 0
+        }
+      ],
+      "document_version_id": "Dbdc8ebadec61c5b711a43552c2abf986a05eed5bd19028b1dd2783cd619ba42f",
+      "text": "Invoice 1847 is awaiting approval. See [[approval.md]] and [[missing.md]]."
+    },
+    "Sbd27ba62daf6fc1e1bbcb272e03c965da2fb5298193a6e7cd88776b66a0a9820": {
+      "segment_id": "Sbd27ba62daf6fc1e1bbcb272e03c965da2fb5298193a6e7cd88776b66a0a9820",
+      "source_path": "approval.md",
+      "locators": [
+        {
+          "end": 49,
+          "locator": {
+            "kind": "text"
+          },
+          "modality": "native",
+          "start": 0
+        }
+      ],
+      "document_version_id": "Dc4298b059a0270363aec5ac2da9ee0ffeef913eddb9b7e730b6a61df3fb80185",
+      "text": "The invoice was not approved. See [[invoice.md]]."
+    }
+  },
+  "candidate_accounting": {
+    "scope_segments": 2,
+    "nonempty": 2,
+    "route_counts": {
+      "lexical": 2,
+      "literal": 1,
+      "identifier": 0,
+      "dense": 2,
+      "explicit_graph": 2,
+      "structural": 2
+    },
+    "union": 2,
+    "not_discovered": [],
+    "empty_or_gap": [],
+    "unreranked": 0,
+    "pending_expansions": [],
+    "unresolved_links": [
+      "L3d8cf91c7f78bde0e1300d2e5259ed5e817ee20af40abef6eb706563a3944b6a"
+    ],
+    "dense_cutoff": 100,
+    "dense_scope_scored": 2,
+    "scope": "bounded discovery; not exhaustive semantic review"
+  },
+  "cache_reopen_verified": true,
+  "missing_graph_cache_rejected": true,
+  "native_models": {
+    "ladybug": "0.21.0",
+    "numpy": "2.5.3",
+    "psycopg": "3.3.6",
+    "tokenizers": "0.23.2",
+    "torch": "2.14.0",
+    "transformers": "5.17.0"
+  },
+  "generative_calls": 0
+}

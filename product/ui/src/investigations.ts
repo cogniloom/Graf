@@ -31,6 +31,7 @@ export type Evidence = {
 export type Detail = Run & {
   result: {
     answer?: string;
+    questions?: { id: string; question: string; options: string[] }[];
     citations?: {
       segment_id: string;
       quote: string;

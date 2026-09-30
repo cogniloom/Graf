@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+<title id="title">How Graf turns documents into connected evidence</title>
+<desc id="desc">Four current stages preserve original sources, interpret supported text, connect related records, and supply evidence sets. Target improvements are listed separately. All interpretations remain linked to their source.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#45617d"/></marker></defs>
+<rect width="1200" height="680" rx="20" fill="#f4f7fb"/>
+<g font-family="DejaVu Sans,Arial,sans-serif">
+<text x="44" y="57" font-size="29" font-weight="700" fill="#152c43">From documents to connected evidence</text>
+<text x="44" y="89" font-size="17" fill="#455e76">What the current knowledge layer adds — and what is still being developed</text>
+
+<rect x="44" y="129" width="266" height="212" rx="13" fill="white" stroke="#cbd6e2"/>
+<rect x="44" y="129" width="266" height="57" rx="13" fill="#165a78"/>
+<text x="60" y="166" font-size="19" font-weight="700" fill="white">01  PRESERVE</text>
+<text x="60" y="222" font-size="16" fill="#213d57" transform="translate(0 0)">Original bytes</text>
+<text x="60" y="222" font-size="16" fill="#213d57" transform="translate(0 36)">Located passages</text>
+<text x="60" y="222" font-size="16" fill="#213d57" transform="translate(0 72)">Document versions</text>
+<path d="M312,261 L323,261" stroke="#45617d" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="326" y="129" width="266" height="212" rx="13" fill="white" stroke="#cbd6e2"/>
+<rect x="326" y="129" width="266" height="57" rx="13" fill="#16675c"/>
+<text x="342" y="166" font-size="19" font-weight="700" fill="white">02  INTERPRET</text>
+<text x="342" y="222" font-size="16" fill="#213d57" transform="translate(0 0)">EN/DE concepts</text>
+<text x="342" y="222" font-size="16" fill="#213d57" transform="translate(0 36)">Qualified claim candidates</text>
+<text x="342" y="222" font-size="16" fill="#213d57" transform="translate(0 72)">Explicit uncertainty</text>
+<path d="M594,261 L605,261" stroke="#45617d" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="608" y="129" width="266" height="212" rx="13" fill="white" stroke="#cbd6e2"/>
+<rect x="608" y="129" width="266" height="57" rx="13" fill="#5b478c"/>
+<text x="624" y="166" font-size="19" font-weight="700" fill="white">03  CONNECT</text>
+<text x="624" y="222" font-size="16" fill="#213d57" transform="translate(0 0)">Shared calendar meanings</text>
+<text x="624" y="222" font-size="16" fill="#213d57" transform="translate(0 36)">Potential conflicts</text>
+<text x="624" y="222" font-size="16" fill="#213d57" transform="translate(0 72)">Repeated-source signals</text>
+<path d="M876,261 L887,261" stroke="#45617d" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="890" y="129" width="266" height="212" rx="13" fill="white" stroke="#cbd6e2"/>
+<rect x="890" y="129" width="266" height="57" rx="13" fill="#87501c"/>
+<text x="906" y="166" font-size="19" font-weight="700" fill="white">04  RETRIEVE</text>
+<text x="906" y="222" font-size="16" fill="#213d57" transform="translate(0 0)">Original passages + context</text>
+<text x="906" y="222" font-size="16" fill="#213d57" transform="translate(0 36)">Contrary / qualified claims</text>
+<text x="906" y="222" font-size="16" fill="#213d57" transform="translate(0 72)">Counts, gaps, source links</text>
+<rect x="44" y="371" width="1112" height="89" rx="12" fill="#e4edf6"/>
+<text x="65" y="404" font-size="19" font-weight="700" fill="#152c43">Every interpretation keeps its route back to the source.</text>
+<text x="65" y="433" font-size="16" fill="#334f69">A candidate claim is not proven truth. A shared word or number is not resolved identity.</text>
+<rect x="44" y="487" width="1112" height="143" rx="12" fill="#fffaf0" stroke="#a87324" stroke-dasharray="7 5"/>
+<text x="65" y="521" font-size="18" font-weight="700" fill="#735018">TARGETS — broader capabilities remain incomplete</text>
+<text x="65" y="553" font-size="16" fill="#594c36">Paragraph-level events · structural attribution · reversible identity matching</text>
+<text x="65" y="581" font-size="16" fill="#594c36">Validity and supersession · near-duplicate dependence · recognition alternatives</text>
+<text x="65" y="609" font-size="16" fill="#594c36">Fine-grained refresh and measured large-corpus efficiency</text>
+<text x="44" y="660" font-size="13" fill="#53697f">Source-level guide · 30 September 2026 · Downstream LLM answer-quality improvement remains to be evaluated.</text>
+</g></svg>

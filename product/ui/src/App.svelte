@@ -6,13 +6,53 @@
   import Management from "./Management.svelte";
   import Explore from "./Explore.svelte";
   import Icon from "./Icon.svelte";
-  let tab = "Sessions",
+  import ProcessingStatus from "./ProcessingStatus.svelte";
+  const pages = [
+    "Sessions",
+    "Sources",
+    "Graph",
+    "Activity",
+    "Settings",
+    "Explore",
+  ];
+  function pageFromUrl() {
+    const page = new URLSearchParams(location.search).get("page");
+    return pages.find((name) => name.toLowerCase() === page) ?? "Sessions";
+  }
+  let tab = pageFromUrl(),
     status: Status | null = null,
     tick = 0,
     error = "",
     auth = false,
     loading = true,
-    query = "";
+    query = new URLSearchParams(location.search).get("q") ?? "";
+  let connected = false;
+  $: viewStatus = status ?? {
+    workspace_name: "Local workspace",
+    state: "unknown",
+    phase: "connecting",
+    revision: -1,
+    published_revision: -2,
+    snapshot_id: null,
+    counts: {},
+    message:
+      "Collection status is unavailable. Sources, settings, and saved sessions remain accessible.",
+    models_ready: false,
+    device: "",
+  };
+  function navigate(page: string, replace = false) {
+    tab = page;
+    const url = new URL(location.href);
+    url.searchParams.set("page", page.toLowerCase());
+    if (query) url.searchParams.set("q", query);
+    else url.searchParams.delete("q");
+    if (url.href !== location.href)
+      history[replace ? "replaceState" : "pushState"](null, "", url);
+  }
+  function restorePage() {
+    tab = pageFromUrl();
+    query = new URLSearchParams(location.search).get("q") ?? "";
+  }
   let version = 0,
     alive = true;
   async function refresh() {
@@ -20,10 +60,21 @@
     try {
       const s = await api<Status>("/status");
       if (!alive || v !== version) return;
-      status = s;
+      const running = s.jobs?.find(
+        (job) => job.revision === s.revision && job.state === "running",
+      );
+      status =
+        running && !["ready", "ready_with_gaps"].includes(s.state)
+          ? {
+              ...s,
+              state: "updating",
+              phase: running.phase,
+              message:
+                "Processing sources in the background. Saved sessions and workspace controls remain available.",
+            }
+          : s;
       auth = false;
       error = "";
-      tick++;
     } catch (e) {
       if (!alive || v !== version) return;
       status = null;
@@ -47,7 +98,11 @@
       loading = true;
       try {
         await bootstrap();
-        if (alive && c === connection) void poll(c);
+        if (alive && c === connection) {
+          connected = true;
+          auth = false;
+          void poll(c);
+        }
       } catch (e) {
         if (alive && c === connection) {
           status = null;
@@ -61,6 +116,10 @@
       if (new URLSearchParams(location.hash.slice(1)).has("token"))
         void connect();
     }
+    const pageTimer = setInterval(() => {
+      if (connected && !auth) tick++;
+    }, 3000);
+    window.addEventListener("popstate", restorePage);
     window.addEventListener("hashchange", hashChange);
     void connect();
     return () => {
@@ -68,6 +127,8 @@
       version++;
       connection++;
       clearTimeout(timer);
+      clearInterval(pageTimer);
+      window.removeEventListener("popstate", restorePage);
       window.removeEventListener("hashchange", hashChange);
     };
   });
@@ -91,7 +152,7 @@
       {#each ["Sessions", "Sources", "Graph", "Activity", "Settings"] as name}<button
           class:active={tab === name}
           aria-current={tab === name ? "page" : undefined}
-          on:click={() => (tab = name)}
+          on:click={() => navigate(name)}
           ><Icon {name} /><span>{name}</span></button
         >{/each}
     </nav>
@@ -108,7 +169,7 @@
             aria-label="Search document names"
             placeholder="Find a document…"
             bind:value={query}
-            on:input={() => (tab = "Explore")}
+            on:input={() => navigate("Explore", tab === "Explore")}
           /></label
         ><span class="workspace-readiness" role="status"
           ><i
@@ -125,34 +186,44 @@
         >
       </div>
     </header>
-    {#if status && status.state !== "ready"}<div class="phase-strip">
-        <strong>{status.phase}</strong><span>{status.message}</span
-        >{#if status.counts.gaps > 0}<span>{status.counts.gaps} gaps</span>{/if}
-      </div>{/if}
+    {#if status?.knowledge_restart_required}<p class="notice">
+        Knowledge processing changed while Graf was running. Let any active scan
+        finish, then restart Graf to finish applying the update.
+      </p>{/if}
+    {#if status && status.state !== "ready"}<ProcessingStatus
+        {status}
+        onActivity={() => navigate("Activity")}
+        onSources={() => navigate("Sources")}
+      />{/if}
     <main id="main" tabindex="-1">
       {#if error}<p role="alert" class="notice error">
           {error}
-        </p>{/if}{#if loading}<div class="empty" role="status">
+        </p>{/if}
+      {#if connected && loading}<p class="notice" role="status">
+          Checking collection status…
+        </p>{/if}
+      {#if connected && !status && !loading && !auth}<p class="notice">
+          Collection status is unavailable. You can still browse saved sessions
+          and manage your workspace.
+          <button on:click={refresh}>Retry status</button>
+        </p>{/if}
+      {#if !connected && loading}<div class="empty" role="status">
           Connecting to your local workspace…
         </div>{:else if auth}<div class="empty">
           <h1>Open your workspace securely</h1>
           <p>Run <code>./graf open</code> to establish a local session.</p>
           <button on:click={refresh}>Check connection</button>
-        </div>{:else if !status}<div class="empty">
-          <h1>Local server unavailable</h1>
-          <p>Check that Graf is running, then reconnect.</p>
-          <button on:click={refresh}>Retry connection</button>
         </div>{:else if tab === "Sessions"}<Investigations
-          {status}
+          status={viewStatus}
           {tick}
         />{:else if tab === "Graph"}<WorkspaceGraph
         />{:else if tab === "Explore"}<Explore
-          {status}
+          status={viewStatus}
           {query}
-          onSources={() => (tab = "Sources")}
+          onSources={() => navigate("Sources")}
         />{:else}{#key tab}<Management
             view={tab}
-            {status}
+            status={viewStatus}
             {tick}
             {refresh}
             {logout}

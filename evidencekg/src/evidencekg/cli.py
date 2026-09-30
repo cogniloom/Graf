@@ -26,6 +26,49 @@ def parser():
     listing.add_argument("--snapshot")
     listing.add_argument("--cursor")
     listing.add_argument("--limit", type=int, default=100)
+    knowledge = commands.add_parser("knowledge", help="Enumerate automatic source-bound claims and graph")
+    knowledge.add_argument("--snapshot")
+    knowledge.add_argument(
+        "--kind",
+        choices=[
+            "claim",
+            "evidence_set",
+            "observation",
+            "concept",
+            "entity",
+            "conflict",
+            "dependence",
+            "source",
+            "edge",
+            "identity",
+            "uncertainty",
+        ],
+        default="claim",
+    )
+    knowledge.add_argument("--concept", help="Canonical concept, e.g. month:3")
+    knowledge.add_argument("--text", help="English/German vocabulary concept search")
+    knowledge.add_argument("--segment-id")
+    knowledge.add_argument("--entity", help="Exact literal key, e.g. order:1847; not resolved identity")
+    knowledge.add_argument(
+        "--predicate",
+        choices=[
+            "approval",
+            "cancellation",
+            "payment",
+            "delivery",
+            "rejection",
+            "validity",
+            "supersession",
+            "dependency",
+        ],
+    )
+    knowledge.add_argument("--applicable-on", help="Explicit unambiguous ISO, English or German event day")
+    knowledge.add_argument(
+        "--valid-at", help="Explicit stated validity interval; includes unresolved end boundary"
+    )
+    knowledge.add_argument("--group-id")
+    knowledge.add_argument("--cursor")
+    knowledge.add_argument("--limit", type=int, default=100)
     search = commands.add_parser("search")
     search.add_argument("query")
     search.add_argument("--mode", choices=["lexical", "literal"], default="lexical")
@@ -228,6 +271,21 @@ def main(argv=None):
                 result = reports.verify(store)
             elif args.command == "inventory":
                 result = api.inventory(args.snapshot, args.cursor, args.limit)
+            elif args.command == "knowledge":
+                result = api.knowledge_query(
+                    store.snapshot(args.snapshot)["id"],
+                    kind=args.kind,
+                    entity=args.entity,
+                    predicate=args.predicate,
+                    applicable_on=args.applicable_on,
+                    valid_at=args.valid_at,
+                    group_id=args.group_id,
+                    cursor=args.cursor,
+                    limit=args.limit,
+                    concept=args.concept,
+                    text=args.text,
+                    segment_id=args.segment_id,
+                )
             elif args.command == "search":
                 result = api.search(
                     store.snapshot(args.snapshot)["id"], args.query, args.mode, args.cursor, args.limit

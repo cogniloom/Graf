@@ -378,6 +378,12 @@ class RankedDiscovery:
         )
         packet = {
             "snapshot_id": self.snapshot_id,
+            "knowledge_context": {
+                "tool": "knowledge_query",
+                "snapshot_id": self.snapshot_id,
+                "instruction": "Enumerate entity then evidence_set records for qualifications and contrary candidates; "
+                "literal surfaces are unresolved identities, not facts.",
+            },
             "arm": "graph",
             "segments": [],
             "reasons": {},

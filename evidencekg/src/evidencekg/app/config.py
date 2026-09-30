@@ -30,15 +30,37 @@ class AppConfig:
     ui_dist: Path
     # Accepted for compatibility with existing app.json files; no longer an allowlist.
     allowed_roots: tuple[Path, ...] = ()
-    device: str = "cpu"
+    device: str = "auto"
     host: str = "127.0.0.1"
     port: int = 8765
     scan_interval_seconds: float = 30
     python: str | None = None
     mcp_bridge: str | None = None
     workspace_name: str | None = None
+    transcription_model: str | None = None
+    transcription_language: str | None = None
+    transcription_min_confidence: float = 0.8
+    transcription_max_seconds: int = 600
+    transcription_calibration: str | None = None
+    transcription_input_domain: str | None = None
+
+    def transcription_options(self):
+        return {
+            name: getattr(self, name)
+            for name in (
+                "transcription_model",
+                "transcription_language",
+                "transcription_min_confidence",
+                "transcription_max_seconds",
+                "transcription_calibration",
+                "transcription_input_domain",
+            )
+        }
 
     def __post_init__(self):
+        from evidencekg.config import validate_transcription
+
+        validate_transcription(self.transcription_options())
         if self.workspace_name is not None and (
             not isinstance(self.workspace_name, str) or not 1 <= len(self.workspace_name) <= 200
         ):
@@ -50,8 +72,8 @@ class AppConfig:
             raise ValueError("Private configuration and tokens must not be in the served UI directory")
         if self.host != "127.0.0.1" or type(self.port) is not int or not 1024 <= self.port <= 65535:
             raise ValueError("Server must bind 127.0.0.1 on a port from 1024 to 65535")
-        if self.device not in ("cpu", "cuda"):
-            raise ValueError("Device must be cpu or cuda")
+        if self.device not in ("auto", "cpu", "cuda"):
+            raise ValueError("Device must be auto, cpu or cuda")
         if (
             type(self.scan_interval_seconds) not in (int, float)
             or not 0.1 <= self.scan_interval_seconds <= 86400

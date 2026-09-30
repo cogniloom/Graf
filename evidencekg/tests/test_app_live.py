@@ -84,7 +84,7 @@ def test_native_server_real_local_models_and_removal(manager, tmp_path):
                 )
                 assert response.status_code == 200, response.text
                 result = response.json()
-                assert result["backend"] == "local-hybrid-postgresql"
+                assert result["backend"] == "local-hybrid-ladybugdb"
                 assert result["generative_model_calls"] == 0
                 assert any("not approved" in s["text"] for s in result["source_context"].values())
                 workset = result["workset_id"]

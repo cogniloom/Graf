@@ -185,3 +185,19 @@ def test_filesystem_picker_lists_local_paths_and_handles_errors(client, manager,
     assert client.get("/api/filesystem", params={"path": str(manager.config.home)}, headers=auth()).status_code == 422
     assert client.get("/api/filesystem", params={"path": str(folder)}, headers=auth() | {"Origin": "https://example.com"}).status_code == 403
     assert client.post("/api/sources", json={"path": str(folder)}, headers=auth()).status_code == 200
+
+
+def test_unready_graph_does_not_block_saved_sessions_behind_source_scan(client, manager):
+    from concurrent.futures import ThreadPoolExecutor
+
+    manager.register(str(manager.config.allowed_roots[0]))
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        with manager._scan_lock:
+            graph = pool.submit(client.get, "/api/investigation-graph", headers=auth())
+            sessions = pool.submit(client.get, "/api/investigations", headers=auth())
+            graph_response = graph.result(timeout=3)
+            session_response = sessions.result(timeout=3)
+    assert graph_response.status_code == 200
+    assert graph_response.json()["current_collection_incomplete"] is True
+    assert session_response.status_code == 200
+    assert session_response.json()["items"] == []

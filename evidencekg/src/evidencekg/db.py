@@ -131,8 +131,16 @@ class Store:
         rel = f"objects/{key[:2]}/{key}"
         path = self.state / rel
         if path.exists():
-            if path.read_bytes() != data:
-                raise ValueError("Content-address collision or corrupt artifact")
+            # Retries may reuse gigabyte-sized captured sources. Compare bounded
+            # chunks instead of allocating another complete copy of the input.
+            with path.open("rb") as existing:
+                view = memoryview(data)
+                for offset in range(0, len(data), 1024 * 1024):
+                    expected = view[offset : offset + 1024 * 1024]
+                    if existing.read(len(expected)) != expected:
+                        raise ValueError("Content-address collision or corrupt artifact")
+                if existing.read(1):
+                    raise ValueError("Content-address collision or corrupt artifact")
         else:
             atomic(path, data)
         self.db.execute("INSERT OR IGNORE INTO blobs VALUES(?,?,?)", (key, len(data), rel))
@@ -145,6 +153,15 @@ class Store:
         if sha(data) != key:
             raise ValueError("Corrupt artifact: " + key)
         return data
+
+    def verify_blob(self, key):
+        """Verify captured bytes without allocating a full in-memory copy."""
+        if not isinstance(key, str) or len(key) != 64 or any(c not in "0123456789abcdef" for c in key):
+            raise ValueError("Invalid artifact key")
+        with (self.state / "objects" / key[:2] / key).open("rb") as source:
+            digest = hashlib.file_digest(source, "sha256").hexdigest()
+        if digest != key:
+            raise ValueError("Corrupt artifact: " + key)
 
     def rows(self, sql, params=()):
         return [dict(r) for r in self.db.execute(sql, params)]

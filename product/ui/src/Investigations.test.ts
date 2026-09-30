@@ -372,3 +372,112 @@ it("discards an erasure impact response if the reason changed while it was pendi
     screen.queryByRole("button", { name: "Authorize erasure" }),
   ).toBeNull();
 });
+
+it("accepts a slow saved-session list across ingestion polling ticks", async () => {
+  let resolve!: (response: Response) => void;
+  const fetch = vi.fn(
+    () =>
+      new Promise<Response>((done) => {
+        resolve = done;
+      }),
+  );
+  vi.stubGlobal("fetch", fetch);
+  history.replaceState(null, "", "/");
+  const props = {
+    status: { ...status, state: "updating", revision: 2 },
+    tick: 0,
+  };
+  const app = render(Investigations, props);
+  await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
+  await app.rerender({ ...props, tick: 1 });
+  await app.rerender({ ...props, tick: 2 });
+  expect(fetch).toHaveBeenCalledTimes(1);
+  resolve(new Response(JSON.stringify({ items: [run] })));
+  await screen.findByText(run.prompt);
+});
+
+it("sends uploaded files with the prompt and shows their filenames", async () => {
+  render(Investigations, { status, tick: 0 });
+  await fireEvent.input(
+    screen.getByLabelText("What would you like to investigate?"),
+    {
+      target: { value: "Read memo.txt" },
+    },
+  );
+  const input = screen.getByLabelText("Attach files");
+  const file = new File(["BLUE-742"], "memo.txt", { type: "text/plain" });
+  await fireEvent.change(input, { target: { files: [file] } });
+  expect(screen.getByRole("button", { name: "Remove memo.txt" })).toBeTruthy();
+  await fireEvent.click(
+    screen.getByRole("button", { name: /Start investigation/ }),
+  );
+  await waitFor(() => {
+    const request = fetchMock.mock.calls.find(
+      ([url, options]) =>
+        url === "/api/investigations" && options?.method === "POST",
+    );
+    expect(request).toBeTruthy();
+    const body = JSON.parse(String(request![1]!.body));
+    expect(body.prompt).toBe("Read memo.txt");
+    expect(body.attachments).toEqual([
+      { name: "memo.txt", data: btoa("BLUE-742") },
+    ]);
+  });
+});
+
+it("offers clarification choices and keeps free-text answers in a linked followup", async () => {
+  history.replaceState(null, "", "/?run=run-one");
+  const base = fetchMock.getMockImplementation()! as (
+    url: string,
+    options?: RequestInit,
+  ) => Promise<Response>;
+  fetchMock.mockImplementation(async (url: string, options?: RequestInit) => {
+    if (url === "/api/investigations/run-one")
+      return new Response(
+        JSON.stringify({
+          ...detail,
+          state: "awaiting_input",
+          result: {
+            answer: "Choose a format",
+            questions: [
+              {
+                id: "format",
+                question: "Which format?",
+                options: ["Short", "Long"],
+              },
+            ],
+          },
+        }),
+      );
+    return base(url, options);
+  });
+  render(Investigations, { status, tick: 0 });
+  await screen.findByRole("heading", { name: "Codex needs your input" });
+  await fireEvent.click(screen.getByRole("button", { name: "Short" }));
+  expect(
+    (screen.getByLabelText("Your answer") as HTMLTextAreaElement).value,
+  ).toBe("Short");
+  await fireEvent.input(screen.getByLabelText("Your answer"), {
+    target: { value: "Short, in English" },
+  });
+  await fireEvent.click(
+    screen.getByRole("button", { name: "Continue with answers" }),
+  );
+  expect(
+    (
+      screen.getByLabelText(
+        "What would you like to investigate?",
+      ) as HTMLTextAreaElement
+    ).value,
+  ).toContain("Short, in English");
+  await fireEvent.click(
+    screen.getByRole("button", { name: /Start investigation/ }),
+  );
+  await waitFor(() => {
+    const request = fetchMock.mock.calls.find(
+      ([url, options]) =>
+        url === "/api/investigations" && options?.method === "POST",
+    );
+    expect(JSON.parse(String(request![1]!.body)).parent_id).toBe("run-one");
+  });
+});
