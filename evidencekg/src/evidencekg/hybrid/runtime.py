@@ -93,24 +93,32 @@ def prepare(state, models, database_config, *, snapshot=None, device="auto", out
     ledger = PostgresWorkset(database_dsn(database_config))
     try:
         sid = store.snapshot(snapshot)["id"]
+        manifest_sha = store.snapshot(sid)["manifest_sha"]
         manifest, segments, links = load_sources(store, sid)
         report(indexing_stage="verifying_sources")
         typed = postings(store, sid)
         cache = {}
-        for posting in typed:
+        # Keep the single-extraction verification cache effective even though
+        # public postings are ordered by occurrence hash. Only reorder this
+        # temporary view; the persisted posting order remains unchanged.
+        for posting in sorted(typed, key=lambda row: row["extraction_id"]):
             verify_posting(store, posting, cache)
+        del cache
         manifest = dict(
-            manifest, hybrid_typed_postings=typed, hybrid_manifest_sha=store.snapshot(sid)["manifest_sha"]
+            manifest, hybrid_typed_postings=typed, hybrid_manifest_sha=manifest_sha
         )
         report(indexing_stage="importing_snapshot")
-        ledger.import_snapshot(sid, manifest["hybrid_manifest_sha"], manifest, segments, links)
+        ledger.import_snapshot(sid, manifest_sha, manifest, segments, links)
         graph = prepare_graph(
             state / "hybrid-graphs",
             sid,
-            manifest["hybrid_manifest_sha"],
+            manifest_sha,
             {segment["document_version_id"] for segment in segments.values()},
             links,
         )
+        # The verified ledger and graph now own these persisted inputs. Dense
+        # indexing needs passages and the binding hash, not validation indexes.
+        del typed, manifest, links
         report(indexing_stage="loading_model")
         dense = DenseAdapter.from_local(
             models / "dense", MODELS["dense"][1], max_tokens=1024, batch_size=4, device=device
@@ -129,14 +137,14 @@ def prepare(state, models, database_config, *, snapshot=None, device="auto", out
             )
         )
         cache_dir = state / "hybrid" / sid / index_generation
-        index = DenseIndex(cache_dir, dense, segments, sid, manifest["hybrid_manifest_sha"], progress=report if progress is not None else None)
+        index = DenseIndex(cache_dir, dense, segments, sid, manifest_sha, progress=report if progress is not None else None)
         report(indexing_stage="finalizing")
         cross_identity = snapshot_identity(models / "reranker", RERANKER_MODEL_ID, MODELS["reranker"][1])
         config = {
             "version": 2,
             "graph": graph,
             "snapshot_id": sid,
-            "manifest_sha": manifest["hybrid_manifest_sha"],
+            "manifest_sha": manifest_sha,
             "models": str(models),
             "database_config": str(database_config),
             "dense_index": str(cache_dir),

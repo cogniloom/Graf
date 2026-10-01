@@ -6,6 +6,7 @@ import base64
 import importlib.metadata
 import json
 import os
+import re
 import signal
 import subprocess
 import sys
@@ -76,14 +77,37 @@ def signature(cfg):
             versions[cmd] = (p.stdout + p.stderr).decode(errors="replace").splitlines()[0]
         except (OSError, IndexError, subprocess.TimeoutExpired):
             versions[cmd] = "unavailable"
-    if cfg.get("tessdata"):
+    tessdata = cfg.get("tessdata")
+    if not tessdata:
+        # Match the worker's sanitized environment, including the absence of
+        # TESSDATA_PREFIX. Installing a previously missing default model must
+        # invalidate cached OCR gaps even when the Tesseract binary is unchanged.
+        try:
+            available = subprocess.run(
+                ["tesseract", "--list-langs"],
+                capture_output=True,
+                timeout=5,
+                env={k: v for k, v in os.environ.items() if k in ("PATH", "LANG", "LC_ALL", "SYSTEMROOT")},
+            )
+            match = re.search(
+                r'List of available languages in "([^"\n]+)"',
+                (available.stdout + available.stderr).decode(errors="replace"),
+            )
+            if available.returncode == 0 and match:
+                tessdata = match.group(1)
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+    if tessdata:
         import hashlib
 
         for language in cfg["ocr_languages"].split("+"):
-            path = Path(cfg["tessdata"]) / (language + ".traineddata")
+            path = Path(tessdata) / (language + ".traineddata")
             versions["language:" + language] = (
                 hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else "unavailable"
             )
+    else:
+        for language in cfg["ocr_languages"].split("+"):
+            versions["language:" + language] = "unavailable"
     try:
         import libarchive.ffi
 

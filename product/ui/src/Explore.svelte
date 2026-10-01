@@ -2,6 +2,7 @@
   import { onDestroy } from "svelte";
   import Relationship from "./Relationship.svelte";
   import SpeechConfidence from "./SpeechConfidence.svelte";
+  import SourceReadings from "./SourceReadings.svelte";
   import { api, isReady, type Status, type Doc, type Detail } from "./api";
   export let status: Status;
   export let query: string;
@@ -16,6 +17,13 @@
     version = 0,
     detailVersion = 0,
     alive = true;
+  let reviewReading = false;
+  let reviewButton: HTMLButtonElement;
+  function closeReading() {
+    reviewReading = false;
+    reviewButton?.focus();
+  }
+  $: if (!ready || !selected) reviewReading = false;
   onDestroy(() => {
     alive = false;
     version++;
@@ -45,6 +53,7 @@
     }
   }
   function select(id: string) {
+    reviewReading = false;
     selected = id;
     passageOffset = 0;
   }
@@ -68,6 +77,12 @@
     }
   }
 </script>
+
+{#if reviewReading && selected && ready}
+  {#key `${status.revision}:${selected}`}
+    <SourceReadings documentId={selected} onClose={closeReading} />
+  {/key}
+{/if}
 
 <section class="management-page">
   <header class="page-heading">
@@ -131,6 +146,11 @@
               {detail.path.split("/").pop()}
             </h3>
             <p class="path">{detail.path}</p>
+            <button
+              bind:this={reviewButton}
+              on:click={() => (reviewReading = true)}
+              >Review PDF / image reading</button
+            >
             <code>{detail.id}</code>{#each detail.warnings || [] as w}<p
                 class="notice"
               >

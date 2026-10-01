@@ -221,7 +221,12 @@ def calendar_mentions(text):
     for match in MONTH_YEAR_RE.finditer(text):
         if contains(covered, date_starts, match.start()):
             continue
-        month = MONTH_ALIASES[fold(match["month"]).rstrip(".")]["month"]
+        # IGNORECASE also matches Unicode variants (e.g. dotless i) that
+        # casefold does not map to our vocabulary. Do not guess their meaning.
+        info = MONTH_ALIASES.get(fold(match["month"]).rstrip("."))
+        if info is None:
+            continue
+        month = info["month"]
         year = int(match["year"])
         value = f"{year:04d}-{month:02d}"
         partial.append(match.span())
@@ -241,7 +246,9 @@ def calendar_mentions(text):
     covered = sorted(covered + partial)
     starts = [a for a, _ in covered]
     for match in MONTH_RE.finditer(text):
-        info = MONTH_ALIASES[fold(match.group()).rstrip(".")]
+        info = MONTH_ALIASES.get(fold(match.group()).rstrip("."))
+        if info is None:
+            continue
         # Modal 'may' must not become a month. Named full dates above are explicit.
         if fold(match.group()) in {"may", "march"} and not contains(covered, starts, match.start()):
             before = text[max(0, match.start() - 12) : match.start()].strip().casefold()
@@ -342,7 +349,9 @@ def observations(text):
     yield from calendar_mentions(text)
     yield from money_mentions(text)
     for match in TERM_RE.finditer(text):
-        value = TERM_ALIASES[fold(match.group())]
+        value = TERM_ALIASES.get(fold(match.group()))
+        if value is None:
+            continue
         yield _observed(
             *match.span(),
             text,
@@ -352,7 +361,10 @@ def observations(text):
             interpretation="lexical_candidate; no event or decision asserted",
         )
     for match in ENTITY_RE.finditer(text):
-        value = ENTITY_TYPES[fold(match["type"])] + ":" + match["value"]
+        entity_type = ENTITY_TYPES.get(fold(match["type"]))
+        if entity_type is None:
+            continue
+        value = entity_type + ":" + match["value"]
         yield _observed(
             *match.span(),
             text,

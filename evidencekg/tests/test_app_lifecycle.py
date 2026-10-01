@@ -257,6 +257,70 @@ def test_staging_detects_drift_and_never_writes_original(manager, tmp_path):
     assert path.read_text() == "Changed after inventory"
 
 
+def test_import_monitor_updates_do_not_queue_rebuilds_but_document_changes_do(manager):
+    root = manager.config.allowed_roots[0]
+    metadata = root / "metadata"
+    metadata.mkdir()
+    (metadata / "graf-import.log").write_text("waiting")
+    (metadata / "graf-import-status.json").write_text('{"state":"waiting"}')
+    source = manager.register(str(root))
+    manager.reconcile()
+    revision = manager.status()["revision"]
+    for tick in range(3):
+        (metadata / "graf-import.log").write_text(f"waiting {tick}")
+        pending = metadata / "graf-import-status.json.tmp"
+        pending.write_text('{"state":"waiting","tick":%d}' % tick)
+        pending.replace(metadata / "graf-import-status.json")
+        assert manager.reconcile()
+        assert manager.status()["revision"] == revision
+    assert manager.sources()["items"][0]["id"] == source["id"]
+    assert manager.sources()["items"][0]["path"] == str(root)
+    (root / "a.txt").write_text("Real changed evidence")
+    assert manager.reconcile()
+    assert manager.status()["revision"] == revision + 1
+
+
+def test_superseded_staging_stops_at_progress_checkpoint(manager):
+    root = manager.config.allowed_roots[0]
+    for index in range(205):
+        (root / f"{index:03}.txt").write_text("verified evidence")
+    manager.register(str(root))
+    manager.reconcile()
+    initial_revision = manager.status()["revision"]
+    original = manager.builder
+    reports = []
+
+    def superseded(job, sources, progress):
+        def changed(phase, **counts):
+            reports.append(counts)
+            if counts.get("files", 0) >= 100:
+                manager.rebuild()
+            progress(phase, **counts)
+        return original(job, sources, changed)
+
+    manager.builder = superseded
+    assert not manager.run_once()
+    assert any(0 < p.get("files", 0) < 206 for p in reports)
+    assert max(p.get("files", 0) for p in reports) < 206
+    jobs = manager.jobs()["items"]
+    assert next(j for j in jobs if j["revision"] == initial_revision)["state"] == "superseded"
+    assert jobs[0]["state"] == "queued"
+
+
+def test_job_progress_response_omits_internal_publication_inventories(manager):
+    manager.register(str(manager.config.allowed_roots[0]))
+    job = manager.jobs()["items"][0]
+    with _connect(manager.dsn) as db:
+        db.execute("UPDATE public.docworm_jobs SET progress=%s::jsonb WHERE id=%s", (
+            dump({"files": 12, "partial_publication": {"sources": [{"inventory": {"private-path": {}}}]}}),
+            job["id"],
+        ))
+    assert manager.jobs()["items"][0]["progress"] == {"files": 12}
+    with _connect(manager.dsn) as db:
+        retained = db.execute("SELECT progress FROM public.docworm_jobs WHERE id=%s", (job["id"],)).fetchone()
+    assert "partial_publication" in retained["progress"]
+
+
 def test_removed_during_build_cannot_publish_and_no_duplicate_executor(manager):
     source = manager.register(str(manager.config.allowed_roots[0]))
     entered, release = threading.Event(), threading.Event()
@@ -497,3 +561,39 @@ def test_retry_progress_clears_interrupted_workspace_message(manager):
 
     manager.builder = retry
     assert manager.run_once()
+
+
+def test_restart_reports_recovery_while_source_check_is_pending(manager, monkeypatch):
+    manager.register(str(manager.config.allowed_roots[0]))
+
+    def interrupt(job, sources, progress):
+        raise InterruptedError("Source ingestion stopped")
+
+    manager.builder = interrupt
+    assert not manager.run_once()
+    entered, release = threading.Event(), threading.Event()
+    original = manager.reconcile
+
+    def slow_check():
+        entered.set()
+        release.wait(10)
+        if not manager.stop_event.is_set():
+            return original()
+
+    monkeypatch.setattr(manager, "reconcile", slow_check)
+    try:
+        manager.start()
+        assert entered.wait(5)
+        status = manager.status()
+        assert status["state"] == "updating"
+        assert status["phase"] == "queued"
+        assert "Resuming" in status["message"]
+        job = next(j for j in status["jobs"] if j["revision"] == status["revision"])
+        assert job["state"] == "queued"
+        assert job["phase"] == "queued"
+        assert job["error"] is None
+        assert job["finished_at"] is None
+    finally:
+        manager.stop_event.set()
+        release.set()
+        manager.stop()

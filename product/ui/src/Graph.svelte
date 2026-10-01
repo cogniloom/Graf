@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import type { Cosmograph } from "@cosmograph/cosmograph";
   import type { GraphData } from "./api";
+  import { indexGraphLinks, isLargeGraph } from "./graph-data";
   import wasmUrl from "@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url";
   import workerUrl from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
   export let data: GraphData;
@@ -13,7 +14,10 @@
   let pendingUpdate = Promise.resolve();
   let error = "";
   let loaded = false;
-  let labels = !compact;
+  let renderedEdges = data.edges.length;
+  const large = isLargeGraph(data);
+  let labels = !compact && !large;
+  let connections = true;
   let paused = matchMedia("(prefers-reduced-motion: reduce)").matches;
   onMount(() => {
     let disposed = false;
@@ -75,11 +79,8 @@
                 : "#567968",
         size: n.kind === "document" ? 9 : 4,
       }));
-      const links = data.edges.map((e) => ({
-        ...e,
-        sourceIndex: data.nodes.findIndex((n) => n.id === e.source),
-        targetIndex: data.nodes.findIndex((n) => n.id === e.target),
-      }));
+      const links = indexGraphLinks(data);
+      renderedEdges = links.length;
       // Arrow's tableFromJSON uses new Function for null-sentinel checks.
       // These graph columns are explicitly non-null, so typed builders avoid
       // dynamic code generation while preserving the strict page CSP.
@@ -112,13 +113,13 @@
       if (links.length)
         await connection.insertArrowTable(
           new arrow.Table({
-            source: strings(links.map((e) => e.source)),
-            target: strings(links.map((e) => e.target)),
+            source: strings(links.map(({ edge }) => edge.source)),
+            target: strings(links.map(({ edge }) => edge.target)),
             sourceIndex: numbers(links.map((e) => e.sourceIndex)),
             targetIndex: numbers(links.map((e) => e.targetIndex)),
             color: strings(
-              links.map((e) =>
-                e.highlighted === false ? "#d4d4ce" : "#a1aaa1",
+              links.map(({ edge }) =>
+                edge.highlighted === false ? "#d4d4ce" : "#a1aaa1",
               ),
             ),
           }),
@@ -143,6 +144,8 @@
           linkSourceIndexBy: "sourceIndex",
           linkTargetIndexBy: "targetIndex",
           backgroundColor: "#f7f6f2",
+          // Avoid scaling the large canvas workload by devicePixelRatio squared.
+          pixelRatio: large ? 1 : Math.min(window.devicePixelRatio || 1, 2),
           // Avoid degree/count aggregation paths that invoke Arrow's dynamic null checker.
           linkColorStrategy: "direct",
           linkColorBy: "color",
@@ -153,7 +156,7 @@
           pointColorStrategy: "direct",
           pointSizeStrategy: "direct",
           pointLabelColor: "#353a37",
-          showLabels: !compact,
+          showLabels: labels,
           showDynamicLabels: false,
           showTopLabels: false,
           showLabelsFor: data.nodes
@@ -192,8 +195,8 @@
             else if (n) onSelect(n.id);
           },
           onLinkClick: (index) => {
-            if (index !== undefined && data.edges[index])
-              onSelectEdge?.(data.edges[index].id);
+            if (index !== undefined && links[index])
+              onSelectEdge?.(links[index].edge.id);
           },
         },
         { duckdb: db, connection },
@@ -209,9 +212,12 @@
         return;
       }
       if (instance.stats.pointsCount !== data.nodes.length)
-        throw new Error("Graph engine did not load the expected node count");
+        throw new Error(
+          `Graph engine loaded ${instance.stats.pointsCount} of ${data.nodes.length} expected nodes`,
+        );
       graph = instance;
       loaded = true;
+      pauseWhenHidden();
       instance.fitView(0);
     })().catch(async (e) => {
       if (!disposed)
@@ -233,11 +239,36 @@
   function toggleLabels() {
     if (!graph) return;
     labels = !labels;
-    pendingUpdate = graph.setConfig({ showLabels: labels }).catch((e) => {
-      error = e.message;
-    });
+    updateDisplay();
+  }
+  function toggleConnections() {
+    if (!graph) return;
+    connections = !connections;
+    updateDisplay();
+  }
+  function updateDisplay() {
+    const instance = graph;
+    if (!instance) return;
+    const display = { showLabels: labels, renderLinks: connections };
+    // Cosmograph replaces its config. Preserve data/style/callback settings,
+    // and serialize rapid toggles so an older update cannot overwrite a newer one.
+    pendingUpdate = pendingUpdate
+      .then(async () =>
+        instance.setConfig({ ...(await instance.getConfig()), ...display }),
+      )
+      .catch((e) => {
+        error = e.message;
+      });
+  }
+  function pauseWhenHidden() {
+    if (document.hidden && graph) {
+      graph.pause();
+      paused = true;
+    }
   }
 </script>
+
+<svelte:document on:visibilitychange={pauseWhenHidden} />
 
 <div class="graph-wrap">
   <div class="graph-toolbar">
@@ -254,6 +285,11 @@
     >
     <button disabled={!loaded} aria-pressed={labels} on:click={toggleLabels}
       >Labels</button
+    >
+    <button
+      disabled={!loaded}
+      aria-pressed={connections}
+      on:click={toggleConnections}>Connections</button
     >
   </div>
   <div
@@ -275,7 +311,23 @@
     ><span>Layout proximity is not evidence.</span>
   </div>
   <div class="graph-count">
-    {data.nodes.length} of {data.total_nodes} nodes · {data.edges.length} of {data.total_edges}
+    {data.nodes.length} of {data.total_nodes} nodes · {renderedEdges} of {data.total_edges}
     connections{data.truncated ? " · Bounded view" : ""}
   </div>
+  {#if renderedEdges < data.edges.length}<p class="large-graph-note">
+      {data.edges.length - renderedEdges} connections have endpoints outside the
+      loaded graph. Inspect them in the relationship list.
+    </p>{/if}
+  {#if large}<p class="large-graph-note">
+      Large graph: labels start hidden. Pause motion or hide connections for
+      easier navigation; record lists remain available.
+    </p>{/if}
 </div>
+
+<style>
+  .large-graph-note {
+    margin: 0;
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+</style>

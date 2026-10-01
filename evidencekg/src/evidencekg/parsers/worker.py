@@ -9,6 +9,7 @@ from email import policy
 from email.parser import BytesParser
 from pathlib import Path
 
+from .ocr_readings import native_reading, tsv_reading
 from .payloads import write_payload
 
 
@@ -19,6 +20,10 @@ def extract(data, suffix, cfg, directory):
     from .media import extract_media
 
     suffix = detect(data, suffix, cfg)
+    if suffix == ".appledouble":
+        from .appledouble import extract_appledouble
+
+        return extract_appledouble(data)
     for adapter in (extract_archive, extract_document, extract_media):
         adapted = adapter(data, suffix, cfg, directory)
         if adapted is not None:
@@ -66,20 +71,34 @@ def extract(data, suffix, cfg, directory):
             return payload.decode("utf-8", errors="replace")
 
     def ocr(image):
+        from PIL import Image
+
         if cfg["ocr"] != "auto":
             raise ValueError("OCR disabled")
+        output = image.with_suffix(".ocr")
         p = subprocess.run(
-            ["tesseract", str(image), "stdout", "-l", cfg["ocr_languages"]]
-            + (["--tessdata-dir", cfg["tessdata"]] if cfg.get("tessdata") else []),
+            ["tesseract", str(image), str(output), "-l", cfg["ocr_languages"]]
+            + (["--tessdata-dir", cfg["tessdata"]] if cfg.get("tessdata") else [])
+            + ["txt", "tsv"],
             capture_output=True,
             timeout=90,
         )
         if p.returncode:
             raise ValueError(p.stderr.decode(errors="replace")[-1000:])
-        text = p.stdout.decode("utf-8")
+        text = Path(str(output) + ".txt").read_bytes().decode("utf-8")
+        artifact(output.name + ".txt", text.encode("utf-8"))
+        try:
+            tsv_bytes = Path(str(output) + ".tsv").read_bytes()
+        except FileNotFoundError:
+            tsv_bytes = b""
+        artifact(output.name + ".tsv", tsv_bytes)
+        tsv = tsv_bytes.decode("utf-8", errors="replace")
+        with Image.open(image) as img:
+            reading, warnings = tsv_reading(tsv, text, cfg["ocr_languages"], *img.size)
+        result["warnings"].extend(f"{image.name}: {warning}" for warning in warnings)
         if not text.strip():
             result["warnings"].append("OCR returned no readable text")
-        return text
+        return text, reading
 
     if suffix in (".txt", ".md"):
         encoding = "utf-16" if data.startswith((b"\xff\xfe", b"\xfe\xff")) else "utf-8-sig"
@@ -253,6 +272,7 @@ def extract(data, suffix, cfg, directory):
                         f"Page {i}: native text failed; OCR/annotations still attempted: {exc}"
                     )
                 method = "native"
+                reading = native_reading()
                 if not text.strip():
                     try:
                         target = directory / f"page-{i}"
@@ -277,17 +297,30 @@ def extract(data, suffix, cfg, directory):
                             raise ValueError("PDF rendering failed")
                         image = target.with_suffix(".png")
                         artifact(f"page-{i}.png", image.read_bytes())
-                        text = ocr(image)
+                        text, reading = ocr(image)
                         method = "ocr"
+                        artifact(
+                            f"page-{i}.ocr.json",
+                            json.dumps(
+                                {"locator": {"kind": "pdf", "page": i}, "text": text, "reading": reading},
+                                ensure_ascii=False,
+                            ).encode("utf-8"),
+                        )
                     except Exception as exc:
                         result["warnings"].append(f"Page {i}: unread/OCR gap: {exc}")
-                add(text, {"kind": "pdf", "page": i}, method)
+                add(text, {"kind": "pdf", "page": i, "reading": reading}, method)
                 for j, annotation in enumerate(page.get("/Annots", [])):
                     obj = annotation.get_object()
                     for key in ("/Contents", "/T", "/V", "/Subj"):
                         if obj.get(key):
                             value = obj[key]
-                            locator = {"kind": "pdf_annotation", "page": i, "annotation": j, "field": key}
+                            locator = {
+                                "kind": "pdf_annotation",
+                                "page": i,
+                                "annotation": j,
+                                "field": key,
+                                "reading": native_reading(),
+                            }
                             if isinstance(value, str):
                                 add(value, locator)
                             else:
@@ -320,7 +353,16 @@ def extract(data, suffix, cfg, directory):
                 img.convert("RGB").save(target)
                 artifact(target.name, target.read_bytes())
                 try:
-                    add(ocr(target), {"kind": "image", "frame": i}, "ocr")
+                    text, reading = ocr(target)
+                    locator = {"kind": "image", "frame": i, "reading": reading}
+                    add(text, locator, "ocr")
+                    artifact(
+                        f"image-{i}.ocr.json",
+                        json.dumps(
+                            {"locator": {"kind": "image", "frame": i}, "text": text, "reading": reading},
+                            ensure_ascii=False,
+                        ).encode("utf-8"),
+                    )
                 except Exception as exc:
                     result["warnings"].append(f"Frame {i}: OCR gap: {exc}")
     if result["warnings"]:

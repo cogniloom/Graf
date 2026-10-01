@@ -452,7 +452,9 @@ it("offers clarification choices and keeps free-text answers in a linked followu
     return base(url, options);
   });
   render(Investigations, { status, tick: 0 });
-  await screen.findByRole("heading", { name: "Codex needs your input" });
+  await screen.findByRole("heading", {
+    name: "A clarification could change the answer",
+  });
   await fireEvent.click(screen.getByRole("button", { name: "Short" }));
   expect(
     (screen.getByLabelText("Your answer") as HTMLTextAreaElement).value,

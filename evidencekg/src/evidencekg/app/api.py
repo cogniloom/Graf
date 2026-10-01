@@ -66,6 +66,15 @@ class Annotation(Payload):
     text: str = Field(min_length=1, max_length=16000)
 
 
+class InterpretationReview(Payload):
+    target_kind: str = Field(min_length=1, max_length=32)
+    target_id: str = Field(min_length=1, max_length=200)
+    decision: str = Field(min_length=1, max_length=16)
+    reason: str = Field(min_length=1, max_length=4000)
+    correction: str = Field(default="", max_length=8000)
+    supersedes: str | None = Field(default=None, max_length=64)
+
+
 class Revision(Payload):
     text: str = Field(min_length=1, max_length=16000)
 
@@ -102,6 +111,10 @@ def create_app(config, *, manager=None, start_background=True, investigations=No
 
     app = FastAPI(title="Graf", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
     app.state.manager = manager
+
+    from .reading_routes import install as install_reading_routes
+
+    install_reading_routes(app, manager)
 
     def cookie_key(value):
         return hashlib.sha256(value.encode()).hexdigest()
@@ -353,6 +366,15 @@ def create_app(config, *, manager=None, start_background=True, investigations=No
     @app.post("/api/investigations/{run_id}/cancel")
     def investigation_cancel(run_id: str):
         return investigations.cancel(run_id)
+
+    @app.get("/api/investigations/{run_id}/review-targets")
+    def investigation_review_targets(run_id: str, offset: int = Query(0, ge=0),
+                                     limit: int = Query(30, ge=1, le=100)):
+        return investigations.review_targets(run_id, offset, limit)
+
+    @app.post("/api/investigations/{run_id}/reviews")
+    def investigation_review(run_id: str, body: InterpretationReview):
+        return investigations.review(run_id, **body.model_dump())
 
     @app.post("/api/investigations/{run_id}/annotations")
     def investigation_annotation(run_id: str, body: Annotation):

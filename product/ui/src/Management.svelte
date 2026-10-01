@@ -340,3 +340,9 @@
     </section>
   {/if}
 </section>
+
+<style>
+  .job-row .error {
+    overflow-wrap: anywhere;
+  }
+</style>

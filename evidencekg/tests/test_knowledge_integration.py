@@ -15,6 +15,18 @@ from evidencekg.retrieval import API
 __all__ = ["vault"]
 
 
+def test_unicode_vocabulary_variants_do_not_abort_ingestion(vault):
+    root, store = vault
+    text = "Maı. 2026; Aprİl; decısion; ınvoice INV-12. Payment in May 2026."
+    (root / "unicode.txt").write_text(text)
+    sid = ingest(store)
+    assert len(store.manifest(sid)["documents"]) == 1
+    assert store.one("SELECT text FROM segments")["text"] == text
+    rows = API(store).knowledge_query(sid, kind="observation", concept="date:2026-05")["items"]
+    assert len(rows) == 1
+    assert rows[0]["quote"] == "May 2026"
+
+
 def test_bilingual_evidence_set_retains_qualifiers_other_and_unknown_days(vault):
     root, store = vault
     write_claims(root)
@@ -133,6 +145,7 @@ def test_graph_projection_and_published_manager_read_use_real_vault(vault):
     (source / "de.txt").write_text("Die Bestellung 1847 wurde am 12. März 2026 genehmigt.")
     sid = ingest(store)
     manager = Manager.__new__(Manager)
+    manager.config = SimpleNamespace(home=store.state.parent)
     row = {
         "snapshot_id": sid,
         "publication": {

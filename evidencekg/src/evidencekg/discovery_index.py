@@ -13,11 +13,13 @@ import json
 import os
 import time
 from dataclasses import dataclass
+from itertools import groupby
 from pathlib import Path
 
 import jsonschema
 
 from .db import atomic, dump, ident, sha
+from .knowledge_readings import compact_locator
 from .validation import obj
 
 VERSION = "bilingual-discovery-v1"
@@ -215,64 +217,72 @@ def _batches(segments, snapshot_id):
 def _sources(store, snapshot_id):
     manifest = store.manifest(snapshot_id)
     documents = {d["extraction_id"]: d for d in manifest["documents"]}
-    rows = store.rows(
+    rows = store.db.execute(
         "SELECT s.*, sd.document_version_id FROM segments s JOIN snapshot_documents sd "
-        "ON s.extraction_id=sd.extraction_id WHERE sd.snapshot_id=? ORDER BY s.id",
+        "ON s.extraction_id=sd.extraction_id WHERE sd.snapshot_id=? "
+        "ORDER BY s.extraction_id,s.ordinal,s.id",
         (snapshot_id,),
     )
-    artifacts, segments = {}, []
-    for row in rows:
-        extraction = row["extraction_id"]
-        if (
-            extraction not in documents
-            or documents[extraction]["document_version_id"] != row["document_version_id"]
-        ):
+    segments, seen = [], set()
+    # Validate one extraction at a time. Keep output passages, but release the
+    # decoded source (including sections and audit data) before opening the next.
+    for extraction, parts in groupby(rows, key=lambda row: row["extraction_id"]):
+        if extraction not in documents:
             raise ValueError("Snapshot source membership mismatch")
-        if extraction not in artifacts:
-            artifact_sha = store.one("SELECT artifact_sha FROM extractions WHERE id=?", (extraction,))[
-                "artifact_sha"
-            ]
-            artifacts[extraction] = (artifact_sha, json.loads(store.get(artifact_sha)))
-        artifact_sha, artifact = artifacts[extraction]
-        start, end, text = row["char_start"], row["char_end"], row["text"]
-        if (
-            not 0 <= start <= end <= len(artifact["text"])
-            or artifact["text"][start:end] != text
-            or sha(text) != row["text_sha"]
-            or row["id"] != ident("S", extraction, row["ordinal"], start, end)
-        ):
-            raise ValueError("Immutable source text/range/identity mismatch")
-        locators = [loc for loc in artifact["locators"] if loc["end"] >= start and loc["start"] <= end]
-        if json.loads(row["locator_json"]) != locators:
-            raise ValueError("Original locator mismatch")
-        segments.append(
-            {
-                k: row[k]
-                for k in (
-                    "id",
-                    "extraction_id",
-                    "document_version_id",
-                    "ordinal",
-                    "text",
-                    "text_sha",
-                    "char_start",
-                    "char_end",
-                    "status",
-                )
-            }
-            | dict(locators=locators, source_path=documents[extraction]["path"], artifact_sha=artifact_sha)
-        )
-    for extraction, document in documents.items():
-        ranges = sorted((s for s in segments if s["extraction_id"] == extraction), key=lambda s: s["ordinal"])
-        if not ranges:
-            raise ValueError("Snapshot extraction has no immutable segment; source inventory gap")
+        artifact_sha = store.one("SELECT artifact_sha FROM extractions WHERE id=?", (extraction,))[
+            "artifact_sha"
+        ]
+        artifact = json.loads(store.get(artifact_sha))
         pos = 0
-        for ordinal, segment in enumerate(ranges):
-            if segment["ordinal"] != ordinal or segment["char_start"] != pos:
+        for ordinal, row in enumerate(parts):
+            if documents[extraction]["document_version_id"] != row["document_version_id"]:
+                raise ValueError("Snapshot source membership mismatch")
+            start, end, text = row["char_start"], row["char_end"], row["text"]
+            if (
+                not 0 <= start <= end <= len(artifact["text"])
+                or artifact["text"][start:end] != text
+                or sha(text) != row["text_sha"]
+                or row["id"] != ident("S", extraction, row["ordinal"], start, end)
+            ):
+                raise ValueError("Immutable source text/range/identity mismatch")
+            locators = [loc for loc in artifact["locators"] if loc["end"] >= start and loc["start"] <= end]
+            retained_locators = json.loads(row["locator_json"])
+            if retained_locators != locators:
+                # New extractions retain OCR word geometry only in the source
+                # artifact. Accept exactly that projection, while preserving
+                # compatibility with older full-locator segment records.
+                locators = [dict(loc, locator=compact_locator(loc.get("locator", {}))) for loc in locators]
+                if retained_locators != locators:
+                    raise ValueError("Original locator mismatch")
+            if row["ordinal"] != ordinal or start != pos:
                 raise ValueError("Immutable segment coverage gap or overlap")
-            pos = segment["char_end"]
-        if pos != len(artifacts[extraction][1]["text"]):
+            pos = end
+            segments.append(
+                {
+                    k: row[k]
+                    for k in (
+                        "id",
+                        "extraction_id",
+                        "document_version_id",
+                        "ordinal",
+                        "text",
+                        "text_sha",
+                        "char_start",
+                        "char_end",
+                        "status",
+                    )
+                }
+                | dict(
+                    locators=locators, source_path=documents[extraction]["path"], artifact_sha=artifact_sha
+                )
+            )
+        if pos != len(artifact["text"]):
             raise ValueError("Immutable extraction tail gap")
+        seen.add(extraction)
+        del artifact
+    if seen != documents.keys():
+        raise ValueError("Snapshot extraction has no immutable segment; source inventory gap")
+    segments.sort(key=lambda segment: segment["id"])
     return dict(manifest=manifest, segments=segments)
 
 

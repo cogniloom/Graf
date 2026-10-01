@@ -6,6 +6,97 @@ import type { Job, Status } from "./api";
 const job = (progress: unknown, phase = "ingesting") =>
   ({ state: "running", phase, progress }) as Job;
 
+it("shows byte progress within a large first file without claiming it is verified", () => {
+  render(JobProgress, {
+    job: job(
+      {
+        files: 0,
+        total_files: 2,
+        bytes_copied: 1024,
+        total_bytes: 4096,
+        current_file: "large.pdf",
+        current_source: "/evidence",
+      },
+      "staging",
+    ),
+    phase: "staging",
+  });
+  const bar = screen.getByRole("progressbar", {
+    name: "Source preparation bytes",
+  }) as HTMLProgressElement;
+  expect(bar.value).toBe(1024);
+  expect(bar.max).toBe(4096);
+  expect(screen.getByText("25%")).toBeTruthy();
+  expect(screen.getByText(/0 of 2 files verified/)).toBeTruthy();
+  expect(screen.getByText("Current file: large.pdf")).toBeTruthy();
+  expect(
+    screen.getByText(/Document extraction and search indexing follow/),
+  ).toBeTruthy();
+});
+
+it("explains a queued snapshot waiting for an earlier running scan", () => {
+  render(ProcessingStatus, {
+    status: {
+      state: "updating",
+      phase: "queued",
+      revision: 8,
+      counts: {},
+      jobs: [
+        { ...job({}, "queued"), state: "queued", revision: 8 },
+        { ...job({ files: 120, total_files: 200 }, "staging"), revision: 7 },
+      ],
+    } as Status,
+    onActivity: () => {},
+    onSources: () => {},
+  });
+  expect(
+    screen.getByRole("heading", { name: "Switching to updated sources" }),
+  ).toBeTruthy();
+  expect(
+    screen.getByText(/earlier scan \(revision 7\), not the new snapshot/),
+  ).toBeTruthy();
+  expect(screen.getByRole("progressbar").getAttribute("value")).toBe("120");
+});
+
+it("shows live source checking instead of an unexplained queued job", () => {
+  render(ProcessingStatus, {
+    status: {
+      state: "updating",
+      phase: "queued",
+      revision: 8,
+      counts: {},
+      jobs: [{ ...job({}, "queued"), state: "queued", revision: 8 }],
+      source_scan: {
+        files_checked: 4200,
+        bytes_checked: 50000,
+        current_file: "invoice.pdf",
+        current_source: "/evidence",
+      },
+    } as Status,
+    onActivity: () => {},
+    onSources: () => {},
+  });
+  expect(
+    screen.getByRole("heading", { name: "Checking source files" }),
+  ).toBeTruthy();
+  expect(screen.getByRole("progressbar").hasAttribute("value")).toBe(false);
+  expect(screen.getByText(/4,200 files checked/)).toBeTruthy();
+  expect(screen.getByText("Current file: invoice.pdf")).toBeTruthy();
+});
+
+it("renders an indeterminate waiting bar for a queued job with no active executor", () => {
+  render(JobProgress, {
+    job: { ...job({}, "queued"), state: "queued" },
+    phase: "queued",
+  });
+  expect(
+    screen
+      .getByRole("progressbar", { name: "Waiting for processing" })
+      .hasAttribute("value"),
+  ).toBe(false);
+  expect(screen.getByText(/will start automatically/)).toBeTruthy();
+});
+
 it("reports actual source completion while keeping failures and embedded documents visible", () => {
   render(JobProgress, {
     job: job({

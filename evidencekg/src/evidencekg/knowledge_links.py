@@ -9,9 +9,11 @@ from __future__ import annotations
 import re
 import unicodedata
 from collections import defaultdict
+from functools import lru_cache
 from itertools import combinations
 
 from .db import ident, sha
+from .knowledge_graph import Graph
 
 MAX_BLOCK = 64
 MAX_PAIRS = 20000
@@ -187,34 +189,57 @@ def compare_identities(observations):
 
 
 def passage_dependence(observations):
-    records = {n["id"]: n for n in observations if n.get("category") == "dependence_passage"}
-    fingerprints, postings = {}, defaultdict(set)
-    for key, row in records.items():
-        words = re.findall(r"\w+", row["quote"].casefold())
-        features = {sha(" ".join(words[i : i + 5]))[:20] for i in range(len(words) - 4)}
-        # Stable bottom-k sketch limits index space. Exact Jaccard is checked on
-        # the complete bounded-passage shingle sets, never on the sketch alone.
-        fingerprints[key] = features
-        for feature in sorted(features)[:32]:
-            postings[feature].add(key)
+    # Keep both passage payloads and the inverted index off the resident graph.
+    with Graph() as storage:
+        for row in observations:
+            if row.get("category") == "dependence_passage":
+                storage.nodes[row["id"]] = {
+                    key: row[key]
+                    for key in ("id", "quote", "document_version_id", "evidence_role")
+                    if key in row
+                }
+        return _passage_dependence(storage.nodes, storage.db)
+
+
+def _passage_dependence(records, db):
+    def fingerprint(key):
+        words = re.findall(r"\w+", records[key]["quote"].casefold())
+        return {sha(" ".join(words[i : i + 5]))[:20] for i in range(len(words) - 4)}
+
+    db.execute("CREATE TABLE postings(feature TEXT, member TEXT, PRIMARY KEY(feature,member)) WITHOUT ROWID")
+    for key in records:
+        db.executemany(
+            "INSERT INTO postings VALUES(?,?)",
+            ((feature, key) for feature in sorted(fingerprint(key))[:32]),
+        )
     pairs, gaps = set(), {}
-    for feature in sorted(postings):
-        members = sorted(postings[feature])
-        if len(members) > MAX_BLOCK:
+    for feature, count in db.execute(
+        "SELECT feature,count(*) FROM postings GROUP BY feature ORDER BY feature"
+    ):
+        if count > MAX_BLOCK:
             gaps["dependence_common_fingerprint_skipped"] = (
                 gaps.get("dependence_common_fingerprint_skipped", 0) + 1
             )
             continue
+        members = [
+            row[0]
+            for row in db.execute("SELECT member FROM postings WHERE feature=? ORDER BY member", (feature,))
+        ]
+        documents = {key: records[key]["document_version_id"] for key in members}
         for a, b in combinations(members, 2):
-            if records[a]["document_version_id"] == records[b]["document_version_id"]:
+            if documents[a] == documents[b]:
                 continue
             if len(pairs) >= MAX_PAIRS:
                 gaps["dependence_pair_limit"] = 1
                 break
             pairs.add((a, b))
     nodes, edges = [], []
+    # Full shingle sets scale with passage length; retaining them for the entire
+    # library exhausted the isolated worker's address space during finalization.
+    # Recompute only candidates, with a small per-call cache for shared members.
+    fingerprints = lru_cache(maxsize=64)(fingerprint)
     for a, b in sorted(pairs):
-        left, right = fingerprints[a], fingerprints[b]
+        left, right = fingerprints(a), fingerprints(b)
         overlap = len(left & right) / len(left | right)
         if overlap < 0.8:
             continue
@@ -243,17 +268,20 @@ def passage_dependence(observations):
 
 def enrich(nodes, edges):
     gaps = {}
-    observations = list(nodes.values())
+
+    def observations():
+        return (n for n in nodes.values() if n.get("kind") in {"claim", "observation"})
+
     for algorithm in (compare_identities, passage_dependence):
-        added, links, limitations = algorithm(observations)
+        added, links, limitations = algorithm(observations())
         nodes.update({n["id"]: n for n in added})
         edges.extend(links)
         gaps.update(limitations)
     by_document = defaultdict(list)
-    for row in observations:
+    for row in observations():
         if row.get("kind") == "claim":
             by_document[row["document_version_id"]].append(row)
-    for group in list(nodes.values()):
+    for group in nodes.values():
         if group.get("method") != "passage-shingle-jaccard-v1":
             continue
         for member in group["member_ids"]:
@@ -265,11 +293,15 @@ def enrich(nodes, edges):
                 ):
                     claim.setdefault("groups", []).append(group["id"])
                     edges.append(relation(claim["id"], "SHARED_PASSAGE_SIGNAL", group["id"]))
+    for claims in by_document.values():
+        for claim in claims:
+            nodes[claim["id"]] = claim
+    del by_document
     contacts = defaultdict(list)
-    for row in observations:
+    for row in observations():
         if row.get("category") == "identity_record":
             contacts[normalize(row["attributes"]["name"])].append(row["id"])
-    for claim in observations:
+    for claim in observations():
         if claim.get("kind") == "claim" and claim.get("actor_surface"):
             candidates = sorted(contacts.get(normalize(claim["actor_surface"]), []))
             if len(candidates) > MAX_BLOCK:
@@ -283,11 +315,12 @@ def enrich(nodes, edges):
                     )
                 )
     # Explicit source assertions, never inferred temporal precedence from age.
-    for claim in observations:
+    pending_entities = {}
+    for claim in observations():
         if claim.get("kind") != "claim" or not claim.get("object_key"):
             continue
         target = ident("KM", claim["object_key"])
-        nodes.setdefault(
+        pending_entities.setdefault(
             target,
             dict(
                 id=target,
@@ -305,8 +338,10 @@ def enrich(nodes, edges):
                 premises=[claim["id"]],
             )
         )
+    for key, value in pending_entities.items():
+        nodes.setdefault(key, value)
     interval_groups = defaultdict(list)
-    for claim in observations:
+    for claim in observations():
         interval = claim.get("validity", {})
         if (
             claim.get("kind") == "claim"
@@ -342,5 +377,6 @@ def enrich(nodes, edges):
             )
             for claim in (left, right):
                 claim.setdefault("groups", []).append(key)
+                nodes[claim["id"]] = claim
                 edges.append(relation(claim["id"], "POTENTIAL_CONFLICT_MEMBER", key))
     return gaps

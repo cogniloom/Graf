@@ -9,6 +9,7 @@
     type ErasurePreview,
   } from "./investigations";
   import Graph from "./Graph.svelte";
+  import EvidenceAssessment from "./EvidenceAssessment.svelte";
   export let status: Status;
   export let tick: number;
   let runs: Run[] = [];
@@ -400,6 +401,11 @@
             on:input={() => (requestId = crypto.randomUUID())}
             placeholder="What does the record tell us about…"
           ></textarea>
+          <p class="muted">
+            Ask in your own words. Graf will ask if an identity, date, or
+            missing document could change the answer. You can distinguish what a
+            source says from what actually happened.
+          </p>
           <label class="check"
             ><input
               type="checkbox"
@@ -602,10 +608,17 @@
                 aria-label="Clarification questions"
                 class="clarification-form"
               >
-                <h2>Codex needs your input</h2>
+                <h2>A clarification could change the answer</h2>
+                <p>
+                  Answer what you know, or say you are unsure. Unresolved points
+                  will remain visible.
+                </p>
                 {#each detail.result.questions as q}
                   <fieldset disabled={busy}>
                     <legend>{q.question}</legend>
+                    {#if q.reason}<p class="muted">
+                        Why this matters: {q.reason}
+                      </p>{/if}
                     {#each q.options as option}
                       <button
                         type="button"
@@ -629,6 +642,7 @@
                 >
               </form>
             {/if}
+            <EvidenceAssessment {detail} onSaved={() => refresh++} />
             {#if detail.result.citations?.length}<h3 class="section-heading">
                 Citations <span>{detail.result.citations.length}</span>
               </h3>{/if}

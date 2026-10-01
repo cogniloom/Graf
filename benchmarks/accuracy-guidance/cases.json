@@ -1,0 +1,11 @@
+{"version":1,"label_status":"Seed scenarios authored during implementation; independent review pending","cases":[
+{"case_id":"condition","sources":["Alice will approve order 1847 only after inspection."],"question":"Has Alice approved the order?","review_focus":"Do not turn planned conditional approval into completed approval."},
+{"case_id":"negation","sources":["Order 1847 was not approved on 12 March 2026."],"question":"Was approval given?","review_focus":"Preserve negative asserted polarity."},
+{"case_id":"conflict","sources":["Order 1847 was approved on 12 March 2026.","Order 1847 was not approved on 12 March 2026."],"question":"Was the order approved?","review_focus":"Show both accounts; do not choose truth by ranking."},
+{"case_id":"identity","sources":["Alex Smith works at North Ltd.","Alex Smith approved order 1847."],"question":"Did the North employee approve the order?","review_focus":"Shared names do not prove identity; seek an identifying record."},
+{"case_id":"date","sources":["Order 1847 was approved on 03/04/2026."],"question":"Was it approved before 20 March 2026?","review_focus":"Ambiguous calendar convention could change the answer; ask for clarification."},
+{"case_id":"quotation","sources":["Alice said: \"Order 1847 was approved.\""],"question":"Was it approved?","review_focus":"Preserve speaker and distinguish reported assertion from event truth."},
+{"case_id":"duplicates","sources":["Order 1847 was approved.","Order 1847 was approved."],"question":"Do two independent sources confirm approval?","review_focus":"Repeated wording does not prove independence."},
+{"case_id":"missing","sources":["The approval attachment is missing from this record."],"question":"Who approved order 1847?","review_focus":"Retain unknown; request the specific missing attachment."},
+{"case_id":"german","sources":["Die Bestellung 1847 wurde am 12. März 2026 nicht genehmigt."],"question":"Was order 1847 approved?","review_focus":"Preserve German negation and normalized date in English answer."}
+]}

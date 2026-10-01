@@ -1,4 +1,5 @@
 """Real filesystem regressions; no database or model execution required."""
+
 from dataclasses import replace
 from pathlib import Path
 
@@ -14,8 +15,13 @@ from evidencekg.ingest import ingest
 def config(tmp_path):
     private = tmp_path / "graf"
     private.mkdir()
-    return AppConfig(home=private, database_config=private / "db.json", models=private / "models",
-                     token_file=private / "token", ui_dist=tmp_path / "ui")
+    return AppConfig(
+        home=private,
+        database_config=private / "db.json",
+        models=private / "models",
+        token_file=private / "token",
+        ui_dist=tmp_path / "ui",
+    )
 
 
 def test_arbitrary_location_and_legacy_configuration(config, tmp_path):
@@ -92,6 +98,144 @@ def test_double_slash_cannot_bypass_private_exclusion(config, tmp_path):
     assert inventory(config, source) == {}
 
 
+def test_import_bookkeeping_changes_do_not_invalidate_directory_inventory(config, tmp_path, monkeypatch):
+    from evidencekg.app import files
+
+    root = tmp_path / "corpus"
+    metadata = root / "metadata"
+    metadata.mkdir(parents=True)
+    document = metadata / "evidence.json"
+    document.write_text('{"approval": false}')
+    (metadata / "server.log").write_text("ordinary evidence log")
+    for name in files.IMPORT_RUNTIME_FILES:
+        (metadata / name).write_text("old operational state")
+    source = {"id": "s1", "path": str(root), "kind": "directory"}
+    before = inventory(config, source)
+    assert set(before) == {"metadata/evidence.json", "metadata/server.log"}
+    original = files.read_file
+
+    def update_bookkeeping(*args, **kwargs):
+        result = original(*args, **kwargs)
+        # Same atomic replacement used by the real import helper: it changes the
+        # metadata directory's mtime, but not any included evidence.
+        temporary = metadata / "graf-import-status.json.tmp"
+        temporary.write_text("new operational state")
+        temporary.replace(metadata / "graf-import-status.json")
+        (metadata / "graf-import.log").write_text("still waiting")
+        return result
+
+    monkeypatch.setattr(files, "read_file", update_bookkeeping)
+    assert inventory(config, source) == before
+    monkeypatch.setattr(files, "read_file", original)
+    single = {"id": "log", "path": str(metadata / "graf-import.log"), "kind": "file"}
+    assert set(inventory(config, single)) == {"graf-import.log"}
+    # A matching basename outside the reserved metadata location is evidence.
+    (root / "graf-import.log").write_text("user log")
+    assert "graf-import.log" in inventory(config, source)
+
+
+def test_bookkeeping_temp_files_are_excluded_but_directories_and_symlinks_are_not(config, tmp_path):
+    root = tmp_path / "corpus"
+    metadata = root / "metadata"
+    metadata.mkdir(parents=True)
+    (metadata / "graf-import-status.json.tmp").write_text("partially written status")
+    nested = metadata / "graf-import.log"
+    nested.mkdir()
+    (nested / "original.txt").write_text("must be retained")
+    source = {"path": str(root), "kind": "directory"}
+    assert set(inventory(config, source)) == {"metadata/graf-import.log/original.txt"}
+    (metadata / "graf-import-status.json").symlink_to(nested / "original.txt")
+    with pytest.raises(OSError):
+        inventory(config, source)
+
+
+def test_inventory_still_rejects_included_file_changes_during_scan(config, tmp_path, monkeypatch):
+    from evidencekg.app import files
+
+    root = tmp_path / "evidence"
+    root.mkdir()
+    document = root / "a.txt"
+    document.write_text("before")
+    original = files.read_file
+
+    def mutate(*args, **kwargs):
+        result = original(*args, **kwargs)
+        document.write_text("after!")
+        return result
+
+    monkeypatch.setattr(files, "read_file", mutate)
+    with pytest.raises(ValueError, match="changed during inventory"):
+        inventory(config, {"path": str(root), "kind": "directory"})
+
+
+def test_import_receipt_rename_between_scandir_and_stat_is_not_source_drift(config, tmp_path, monkeypatch):
+    from contextlib import contextmanager
+    from types import SimpleNamespace
+
+    from evidencekg.app import files
+
+    root = tmp_path / "corpus"
+    metadata = root / "metadata"
+    metadata.mkdir(parents=True)
+    (root / "original.txt").write_text("evidence")
+    temporary = metadata / "graf-import-status.json.tmp"
+    temporary.write_text("updated status")
+    original = files.os.scandir
+
+    @contextmanager
+    def racing(fd):
+        with original(fd) as entries:
+            result = []
+            for entry in entries:
+                if entry.name == temporary.name:
+
+                    def vanished(**kwargs):
+                        temporary.replace(metadata / "graf-import-status.json")
+                        raise FileNotFoundError("receipt was atomically renamed")
+
+                    result.append(SimpleNamespace(name=entry.name, stat=vanished))
+                else:
+                    result.append(entry)
+            yield iter(result)
+
+    monkeypatch.setattr(files.os, "scandir", racing)
+    assert set(inventory(config, {"path": str(root), "kind": "directory"})) == {"original.txt"}
+
+
+def test_staging_reports_verified_files_before_whole_source_finishes(config, tmp_path):
+    root = tmp_path / "many"
+    root.mkdir()
+    for index in range(205):
+        (root / f"{index:03}.txt").write_bytes(b"abc")
+    source = {"id": "s1", "path": str(root), "kind": "directory"}
+    source["inventory"] = inventory(config, source)
+    reports = []
+    stage(config, source, config.home / "stage", progress=lambda **p: reports.append(p))
+    assert any(0 < p["files"] < 205 for p in reports)
+    assert reports[-1] == {"files": 205, "bytes_copied": 615, "current_file": "204.txt"}
+
+
+def test_staging_byte_progress_can_cancel_a_large_file(config, tmp_path, monkeypatch):
+    from evidencekg.app import files
+
+    original = tmp_path / "large.txt"
+    original.write_bytes(b"x" * (3 * 1024 * 1024))
+    source = {"id": "s1", "path": str(original), "kind": "file"}
+    source["inventory"] = inventory(config, source)
+    ticks = iter(range(100))
+    monkeypatch.setattr(files.time, "monotonic", lambda: next(ticks))
+    reports = []
+
+    def superseded(**counts):
+        reports.append(counts)
+        raise InterruptedError("newer revision")
+
+    with pytest.raises(InterruptedError, match="newer revision"):
+        stage(config, source, config.home / "stage", progress=superseded)
+    assert reports == [{"files": 0, "bytes_copied": 1024 * 1024, "current_file": "large.txt"}]
+    assert original.stat().st_size == 3 * 1024 * 1024
+
+
 def test_isolated_ingestion_accepts_large_source_and_reports_memory_failure(config, tmp_path):
     from evidencekg.app.ingestion import ingest_isolated
 
@@ -124,7 +268,9 @@ def test_active_and_forced_cancellation_reaps_parser_descendants():
 
     result = subprocess.run(
         [sys.executable, str(Path(__file__).with_name("_ingestion_cancellation.py"))],
-        capture_output=True, text=True, timeout=40,
+        capture_output=True,
+        text=True,
+        timeout=40,
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert "PASS: normal cancellation, stopped-worker fallback, and abrupt worker death" in result.stdout

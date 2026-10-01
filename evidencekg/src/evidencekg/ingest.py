@@ -12,6 +12,7 @@ from .features import index_extraction
 from .inventory import capture, inventory
 from .knowledge import enrich_document
 from .knowledge import freeze as freeze_knowledge
+from .knowledge_readings import compact_locator
 from .segmentation import canonical, split
 
 
@@ -176,6 +177,12 @@ def ingest(store, reextract=False, progress=None, diagnostic=None):
                     body = text[start:end]
                     segment = ident("S", extraction, ordinal, start, end)
                     locations = [loc for loc in locators if loc["end"] >= start and loc["start"] <= end]
+                    # Full word geometry stays in the immutable extraction artifact.
+                    # Repeating a whole OCR page in every passage can exhaust the
+                    # research evidence budget before any text reaches the reader.
+                    locations = [
+                        dict(loc, locator=compact_locator(loc.get("locator", {}))) for loc in locations
+                    ]
                     store.db.execute(
                         "INSERT INTO segments VALUES(?,?,?,?,?,?,?,?,?,?)",
                         (
@@ -240,21 +247,21 @@ def ingest(store, reextract=False, progress=None, diagnostic=None):
                 attachment_count += 1
                 child_data = store.get(child["blob"]) if child["blob"] else None
                 attachment_bytes += len(child_data or b"")
-                gap = child.get("gap")
+                gaps = [child["gap"]] if child.get("gap") else []
                 if depth >= cfg["max_attachment_depth"]:
-                    gap = "Attachment depth limit reached"
+                    gaps.append("Attachment depth limit reached")
                 elif (
                     attachment_count > cfg["max_attachments"]
                     or attachment_bytes > cfg["max_attachment_bytes"]
                 ):
-                    gap = "Attachment aggregate limit reached"
+                    gaps.append("Attachment aggregate limit reached")
                 elif len(child_data or b"") > cfg["max_file_bytes"]:
-                    gap = "Attachment size limit reached"
+                    gaps.append("Attachment size limit reached")
                 acquire(
                     path + "::" + child["part"] + "/" + Path(child["name"]).name,
                     child_data,
-                    status="failed" if gap else "pending",
-                    warnings=[gap] if gap else [],
+                    status="failed" if gaps else "pending",
+                    warnings=gaps,
                     parent=version,
                     part=child["part"],
                     mime=child["mime"],
@@ -262,6 +269,9 @@ def ingest(store, reextract=False, progress=None, diagnostic=None):
                 )
 
         for item in items:
+            # Independent originals have independent budgets. Every nested
+            # descendant of this original still shares these same counters.
+            attachment_count = attachment_bytes = 0
             if diagnostic is not None:
                 diagnostic({"stage": "reading", "path": item["path"]})
             data = None
@@ -274,6 +284,7 @@ def ingest(store, reextract=False, progress=None, diagnostic=None):
                     status = "failed"
                     warnings.append(str(exc))
             acquire(item["path"], data, status, warnings)
+            del data  # Source bytes are persisted; finalization must not retain them.
             counts["processed_files"] += 1
             report()
         if diagnostic is not None:

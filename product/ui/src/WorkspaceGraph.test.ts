@@ -168,3 +168,72 @@ it("shows an empty collection without starting the graph engine during ingestion
   expect(screen.queryByText("Loading local graph engine…")).toBeNull();
   expect(screen.queryByRole("button", { name: "Fit graph" })).toBeNull();
 });
+
+it("pages records, searches beyond the current page and renders relationships only when expanded", async () => {
+  const graph = {
+    ...graphFixture(),
+    nodes: Array.from({ length: 205 }, (_, i) => ({
+      id: `n${i}`,
+      label: `Record ${i}`,
+      kind: "document",
+      document_id: `n${i}`,
+    })),
+    edges: Array.from({ length: 205 }, (_, i) => ({
+      id: `e${i}`,
+      source: "n0",
+      target: `n${i}`,
+      type: "references",
+    })),
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () => new Response(JSON.stringify(graph))),
+  );
+  const { container } = render(WorkspaceGraph);
+  await screen.findByText("Record 0");
+  expect(container.querySelectorAll(".graph-node-list button")).toHaveLength(
+    100,
+  );
+  expect(container.querySelectorAll(".record-list button")).toHaveLength(0);
+  await fireEvent.click(screen.getByRole("button", { name: "Next records" }));
+  expect(screen.getByText("Record 100")).toBeTruthy();
+  expect(screen.queryByText("Record 0")).toBeNull();
+  await fireEvent.input(
+    screen.getByRole("textbox", { name: "Filter graph records" }),
+    { target: { value: "Record 204" } },
+  );
+  expect(screen.getByText("Record 204")).toBeTruthy();
+  expect(container.querySelectorAll(".graph-node-list button")).toHaveLength(1);
+  await fireEvent.click(
+    screen.getByRole("button", { name: /document Record 204/ }),
+  );
+  expect(screen.getByRole("heading", { name: "Selected record" })).toBeTruthy();
+  await fireEvent.input(
+    screen.getByRole("textbox", { name: "Filter graph records" }),
+    { target: { value: "no match" } },
+  );
+  expect(screen.getByText("0–0 of 0 loaded records")).toBeTruthy();
+  const details = container.querySelector("details")!;
+  details.open = true;
+  await fireEvent(details, new Event("toggle"));
+  expect(container.querySelectorAll(".record-list button")).toHaveLength(100);
+  await fireEvent.click(
+    screen.getByRole("button", { name: "Next relationships" }),
+  );
+  expect(
+    screen.getByRole("button", { name: "references · e100" }),
+  ).toBeTruthy();
+  await fireEvent.click(
+    screen.getByRole("button", { name: "Next relationships" }),
+  );
+  expect(container.querySelectorAll(".record-list button")).toHaveLength(5);
+  expect(
+    screen.getByRole("button", { name: "Next relationships" }),
+  ).toHaveProperty("disabled", true);
+  await fireEvent.click(
+    screen.getByRole("button", { name: "references · e204" }),
+  );
+  expect(
+    container.querySelector(".selected-record pre")?.textContent,
+  ).toContain('"id": "e204"');
+});

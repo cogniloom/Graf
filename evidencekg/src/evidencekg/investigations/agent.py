@@ -25,23 +25,28 @@ from typing import Any, Protocol
 
 from jsonschema import Draft202012Validator
 
+from .evidence_contract import CONCLUSION, INSTRUCTIONS
+
 EventCallback = Callable[[dict[str, Any]], None]
 OUTPUT_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
-    "required": ["answer", "citations", "documents", "questions"],
+    "required": ["answer", "citations", "documents", "questions", "conclusions"],
     "properties": {
         "answer": {"type": "string"},
+        "conclusions": {"type": "array", "maxItems": 40, "items": CONCLUSION},
         "questions": {
             "type": "array",
             "maxItems": 3,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
-                "required": ["id", "question", "options"],
+                "required": ["id", "question", "options", "kind", "reason"],
                 "properties": {
                     "id": {"type": "string", "minLength": 1, "maxLength": 64},
                     "question": {"type": "string", "minLength": 1, "maxLength": 500},
+                    "kind": {"enum": ["identity", "time", "scope", "missing_evidence"]},
+                    "reason": {"type": "string", "minLength": 1, "maxLength": 1000},
                     "options": {
                         "type": "array",
                         "maxItems": 6,
@@ -95,6 +100,12 @@ def validate_questions(result):
         ):
             raise ValueError("Invalid clarification questions: use distinct nonempty IDs and bounded text")
         ids.add(key)
+    for question in questions:
+        if question.get("kind") not in {"identity", "time", "scope", "missing_evidence"} or not (
+            isinstance(question.get("reason"), str) and question["reason"].strip()
+            and len(question["reason"]) <= 1000
+        ):
+            raise ValueError("Clarification questions require a kind and a reason that explains why the answer matters")
 
 
 class AgentAdapter(Protocol):
@@ -363,6 +374,7 @@ class CodexSubscriptionAdapter:
                 'forced_login_method="chatgpt"',
                 'web_search="disabled"',
                 "project_doc_max_bytes=0",
+                "developer_instructions=" + json.dumps(INSTRUCTIONS),
                 "model_reasoning_effort=" + json.dumps(effort),
             ):
                 args.extend(["-c", config])

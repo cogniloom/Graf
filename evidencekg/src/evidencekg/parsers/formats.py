@@ -22,6 +22,8 @@ SUPPORTED = TEXT | DOCUMENTS | ARCHIVES | MEDIA | IMAGES | {".pdf", ".eml"}
 
 def detect(data, suffix, cfg):
     suffix = suffix.lower()
+    if data.startswith(b"\x00\x05\x16\x07"):
+        return ".appledouble"
     if data.startswith(b"%PDF-"):
         return ".pdf"
     if data.startswith((b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08")):

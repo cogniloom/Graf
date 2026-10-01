@@ -52,6 +52,7 @@ class Manager:
         self._runtime_path = None
         self._runtime_lock = threading.RLock()
         self._scan_lock = threading.Lock()
+        self._scan_progress = None
         config.home.mkdir(parents=True, exist_ok=True, mode=0o700)
         if config.home.stat().st_mode & 0o077:
             raise ValueError("Workspace home must be private (mode 0700)")
@@ -164,60 +165,82 @@ class Manager:
         racing a source mutation is discarded; it cannot overwrite newer state.
         """
         with self._scan_lock:
-            with _connect(self.dsn) as db:
-                workspace = self._row(db)
-                expected = workspace["revision"]
-                sources = self._sources(db)
-            from evidencekg.knowledge import signature as knowledge_signature
+            self._scan_progress = {"files_checked": 0, "bytes_checked": 0}
+            try:
+                return self._reconcile()
+            finally:
+                self._scan_progress = None
 
-            # Only queue an upgrade after the prior publication has settled;
-            # never supersede an active scan merely because rules changed.
-            knowledge_changed = (
-                workspace["state"] in ("ready", "ready_with_gaps")
-                and workspace["revision"] == workspace["published_revision"]
-                and workspace.get("publication") is not None
-                and workspace["publication"].get(
-                    "knowledge_request_signature", workspace["publication"].get("knowledge_signature")
-                )
-                != knowledge_signature()
+    def _reconcile(self):
+        with _connect(self.dsn) as db:
+            workspace = self._row(db)
+            expected = workspace["revision"]
+            sources = self._sources(db)
+        from evidencekg.knowledge import signature as knowledge_signature
+
+        # Only queue an upgrade after the prior publication has settled;
+        # never supersede an active scan merely because rules changed.
+        knowledge_changed = (
+            workspace["state"] in ("ready", "ready_with_gaps")
+            and workspace["revision"] == workspace["published_revision"]
+            and workspace.get("publication") is not None
+            and workspace["publication"].get(
+                "knowledge_request_signature", workspace["publication"].get("knowledge_signature")
             )
-            changes = []
-            for source in sources:
-                if not source["enabled"]:
-                    continue
-                try:
-                    current = inventory(self.config, source, self.stop_event.is_set)
-                    error = None
-                except InterruptedError:
-                    raise
-                except (OSError, ValueError) as exc:
-                    current, error = {}, f"{type(exc).__name__}: {exc}"
-                if current != source["inventory"] or error != source["error"]:
-                    changes.append(
-                        (dump(current), error, len(current), "blocked" if error else "pending", source["id"])
+            != knowledge_signature()
+        )
+        changes = []
+        checked_files = checked_bytes = 0
+        for source in sources:
+            if not source["enabled"]:
+                continue
+            scanned = {"files_checked": 0, "bytes_checked": 0}
+
+            def scanning(*, files_checked, bytes_checked, current_file):
+                scanned.update(files_checked=files_checked, bytes_checked=bytes_checked)
+                self._scan_progress = {
+                    "files_checked": checked_files + files_checked,
+                    "bytes_checked": checked_bytes + bytes_checked,
+                    "current_source": source["path"], "current_file": current_file,
+                }
+
+            scanning(files_checked=0, bytes_checked=0, current_file="")
+            try:
+                current = inventory(self.config, source, self.stop_event.is_set, progress=scanning)
+                error = None
+            except InterruptedError:
+                raise
+            except (OSError, ValueError) as exc:
+                current, error = {}, f"{type(exc).__name__}: {exc}"
+            checked_files += scanned["files_checked"]
+            checked_bytes += scanned["bytes_checked"]
+            if current != source["inventory"] or error != source["error"]:
+                changes.append(
+                    (dump(current), error, len(current), "blocked" if error else "pending", source["id"])
+                )
+        if changes or knowledge_changed:
+            with _connect(self.dsn) as db, db.transaction():
+                if self._row(db, True)["revision"] != expected:
+                    return False
+                for values in changes:
+                    db.execute(
+                        "UPDATE public.docworm_sources SET inventory=%s::jsonb,error=%s,file_count=%s,status=%s "
+                        "WHERE id=%s",
+                        values,
                     )
-            if changes or knowledge_changed:
-                with _connect(self.dsn) as db, db.transaction():
-                    if self._row(db, True)["revision"] != expected:
-                        return False
-                    for values in changes:
-                        db.execute(
-                            "UPDATE public.docworm_sources SET inventory=%s::jsonb,error=%s,file_count=%s,status=%s "
-                            "WHERE id=%s",
-                            values,
-                        )
-                    self._bump(
-                        db,
-                        "Source content changed; verifying a new snapshot."
-                        if changes
-                        else "Knowledge rules or local parser models changed; rebuilding derived knowledge.",
-                    )
-            return True
+                self._bump(
+                    db,
+                    "Source content changed; verifying a new snapshot."
+                    if changes
+                    else "Knowledge rules or local parser models changed; rebuilding derived knowledge.",
+                )
+        return True
 
     def jobs(self):
         with _connect(self.dsn) as db:
             rows = db.execute(
-                "SELECT id,state,phase,started_at,finished_at,error,progress,revision,attempts "
+                "SELECT id,state,phase,started_at,finished_at,error,"
+                "progress - 'partial_publication' AS progress,revision,attempts "
                 "FROM public.docworm_jobs WHERE workspace=%s ORDER BY revision DESC LIMIT 100",
                 (self.id,),
             ).fetchall()
@@ -235,7 +258,18 @@ class Manager:
 
     def status(self):
         with _connect(self.dsn) as db:
-            row, sources = self._row(db), self._sources(db)
+            # Polling must not deserialize hundreds of thousands of source
+            # checksums or historical publication inventories on every request.
+            row = db.execute(
+                "SELECT state,phase,revision,published_revision,snapshot_id,counts,message,"
+                "CASE WHEN jsonb_typeof(publication) = 'object' THEN publication - 'sources' "
+                "ELSE publication END AS publication FROM public.docworm_workspace WHERE id=%s",
+                (self.id,),
+            ).fetchone()
+            sources = db.execute(
+                "SELECT enabled,error FROM public.docworm_sources WHERE workspace=%s AND NOT removed",
+                (self.id,),
+            ).fetchall()
         ready = row["revision"] == row["published_revision"] and row["state"] in ("ready", "ready_with_gaps")
         counts = {
             "sources": len(sources),
@@ -262,6 +296,7 @@ class Manager:
             "snapshot_id": row["snapshot_id"] if ready else None,
             "counts": counts,
             "jobs": self.jobs()["items"],
+            "source_scan": self._scan_progress,
             "message": row["message"],
             "models_ready": self.models_ready(),
             "device": self.config.device,
@@ -299,9 +334,20 @@ class Manager:
         staging, state = generation / "staging", generation / "vault"
         staging.mkdir(parents=True, mode=0o700)
         copied = 0
+        copied_bytes = 0
+        total_files = sum(s["file_count"] for s in sources)
+        total_bytes = sum(item["size"] for s in sources for item in s["inventory"].values())
         for source in sources:
-            copied += stage(self.config, source, staging, self.stop_event.is_set)
-            progress("staging", files=copied, total_files=sum(s["file_count"] for s in sources))
+            def staged(*, files, bytes_copied, current_file):
+                progress(
+                    "staging", files=copied + files, total_files=total_files,
+                    bytes_copied=copied_bytes + bytes_copied, total_bytes=total_bytes,
+                    current_source=source["path"], current_file=current_file,
+                )
+
+            staged(files=0, bytes_copied=0, current_file="")
+            copied += stage(self.config, source, staging, self.stop_event.is_set, progress=staged)
+            copied_bytes += sum(item["size"] for item in source["inventory"].values())
         # Size the parser acquisition bound to this verified inventory, rather than
         # imposing a product file-size ceiling. Context and archive guards remain.
         largest = max(
@@ -500,11 +546,18 @@ class Manager:
             return
         self.stop_event.clear()
         # Graceful interruptions, unlike failures, retry automatically on restart.
-        with _connect(self.dsn) as db:
-            db.execute(
-                "UPDATE public.docworm_jobs SET state='queued' WHERE workspace=%s AND state='interrupted'",
+        with _connect(self.dsn) as db, db.transaction():
+            row = self._row(db, True)
+            recovered = db.execute(
+                "UPDATE public.docworm_jobs SET state='queued',phase='queued',error=NULL,finished_at=NULL "
+                "WHERE workspace=%s AND state='interrupted' RETURNING revision",
                 (self.id,),
-            )
+            ).fetchall()
+            if any(job["revision"] == row["revision"] for job in recovered):
+                db.execute(
+                    "UPDATE public.docworm_workspace SET state='updating',phase='queued',message=%s WHERE id=%s",
+                    ("Resuming interrupted processing. Checking sources before retrying the snapshot.", self.id),
+                )
 
         def watch():
             while not self.stop_event.is_set():
@@ -617,11 +670,26 @@ class Manager:
                 chosen = sorted(segments, key=lambda k: (-sum(w in segments[k]["text"].casefold()
                                                                             for w in words), k))[:12]
                 retrieval = "early_lexical"
+            # Preserve typed contrary/qualified context instead of relying only on top ranks.
+            initial = list(chosen)
+            related = list(dict.fromkeys(sid for key in initial for sid in
+                                        segments.get(key, {}).get("knowledge_related", [])
+                                        if sid in segments and sid not in initial))
+            chosen += related[:24]
+            related_omitted = len(related[24:]) + sum(
+                segments.get(key, {}).get("knowledge_related_omitted", 0) for key in initial)
+            collection_gaps = [{"document_version_id": d["document_version_id"],
+                                "path": d["path"], "status": d["status"], "warnings": d.get("warnings", [])}
+                               for d in manifest["documents"]
+                               if d["status"] != "ready" or d.get("warnings")]
             collection_documents = len(manifest["documents"])
             selected_docs = {segments[k]["document_version_id"] for k in chosen if k in segments}
             manifest = dict(manifest, documents=[d for d in manifest["documents"]
                                                 if d["document_version_id"] in selected_docs])
             segments = {k: v for k, v in segments.items() if v["document_version_id"] in selected_docs}
+            from evidencekg.source_readings import attach_reviews
+
+            attach_reviews(self.config.home, segments)
             occurrences = store.rows(
                 "SELECT o.* FROM occurrences o JOIN snapshot_occurrences so ON so.occurrence_id=o.id "
                 "WHERE so.snapshot_id=? ORDER BY o.id",
@@ -659,9 +727,10 @@ class Manager:
         finally:
             store.close()
         manifest = self._paths(manifest, frozen)
+        collection_gaps = self._paths(collection_gaps, frozen)
         forbidden_paths = restricted_paths(self.config)
         forbidden_hashes = restricted_hashes(self.config)
-        if any(doc["path"] in forbidden_paths for doc in manifest["documents"]) or any(
+        if any(doc["path"] in forbidden_paths for doc in manifest["documents"] + collection_gaps) or any(
             sha(content) in forbidden_hashes for content in originals.values()
         ):
             raise NotReady("This snapshot contains restricted evidence. Rebuild with those sources excluded.")
@@ -680,6 +749,9 @@ class Manager:
             "selected_segments": [s for s in chosen if s in segments],
             "known_source_files": sum(s["file_count"] for s in self.sources()["items"] if s["enabled"]),
             "collection_documents": collection_documents,
+            "collection_gaps": collection_gaps[:100],
+            "collection_gaps_total": len(collection_gaps),
+            "related_context_omitted": related_omitted,
             "capture_limitations": [
                 "Only retrieved documents are retained for this run; the full collection was not copied.",
                 "Retrieval ranks candidates; it is not an exhaustive relevance assessment."
@@ -750,7 +822,9 @@ class Manager:
         return path
 
     def _paths(self, value, row):
-        if isinstance(value, list):
+        from evidencekg.knowledge_storage import ShardedRows
+
+        if isinstance(value, (list, ShardedRows)):
             return [self._paths(v, row) for v in value]
         if isinstance(value, dict):
             return {
@@ -821,11 +895,13 @@ class Manager:
         """Read the published generation under the same source fence as evidence."""
         from evidencekg.hybrid.sources import ReadOnlyStore
         from evidencekg.retrieval import API
+        from evidencekg.source_readings import overlay_knowledge
 
         def perform(row):
             store = ReadOnlyStore(row["publication"]["state"])
             try:
-                return self._paths(API(store).knowledge_query(row["snapshot_id"], **filters), row)
+                result = API(store).knowledge_query(row["snapshot_id"], **filters)
+                return self._paths(overlay_knowledge(self.config.home, store, row["snapshot_id"], result), row)
             finally:
                 store.close()
 

@@ -13,6 +13,20 @@
     version = 0,
     alive = true;
   let host: HTMLDivElement;
+  const pageSize = 100;
+  let recordPage = 0;
+  let relationshipPage = 0;
+  let relationshipsOpen = false;
+  // Filtering searches every loaded record; only the current page enters the DOM.
+  $: search = filter.trim().toLowerCase();
+  $: filteredNodes = (graph?.nodes ?? []).filter((n) =>
+    `${n.label} ${n.kind}`.toLowerCase().includes(search),
+  );
+  $: if (filteredNodes) recordPage = 0;
+  $: visibleNodes = filteredNodes.slice(
+    recordPage * pageSize,
+    (recordPage + 1) * pageSize,
+  );
   onMount(() => {
     void load();
   });
@@ -34,6 +48,7 @@
         "/investigation-graph",
       );
       if (alive && v === version) graph = result;
+      if (alive && v === version) relationshipPage = 0;
     } catch (e) {
       if (alive && v === version) {
         graph = null;
@@ -130,10 +145,25 @@
           placeholder="Filter nodes…"
           bind:value={filter}
         />
+        <p class="muted" role="status">
+          {filteredNodes.length ? recordPage * pageSize + 1 : 0}–{Math.min(
+            (recordPage + 1) * pageSize,
+            filteredNodes.length,
+          )} of {filteredNodes.length} loaded records
+        </p>
+        {#if filteredNodes.length > pageSize}
+          <nav aria-label="Record pages">
+            <button disabled={recordPage === 0} on:click={() => recordPage--}
+              >Previous records</button
+            >
+            <button
+              disabled={(recordPage + 1) * pageSize >= filteredNodes.length}
+              on:click={() => recordPage++}>Next records</button
+            >
+          </nav>
+        {/if}
         <div class="graph-node-list">
-          {#each graph.nodes.filter((n) => `${n.label} ${n.kind}`
-              .toLowerCase()
-              .includes(filter.toLowerCase())) as n}<button
+          {#each visibleNodes as n (n.id)}<button
               class:chosen={selected === n}
               on:click={() => void select(n)}
               ><small>{n.kind.replaceAll("_", " ")}</small><span
@@ -173,13 +203,33 @@
           {:else}<pre>{JSON.stringify(selected, null, 2)}</pre>{/if}
         {:else}<pre>{JSON.stringify(selected, null, 2)}</pre>{/if}
       </section>{/if}
-    <details>
+    <details bind:open={relationshipsOpen}>
       <summary>Accessible relationship list ({graph.edges.length})</summary>
-      <div class="record-list">
-        {#each graph.edges as e}<button on:click={() => void select(e)}
-            >{e.type} · {e.id}</button
-          >{/each}
-      </div>
+      {#if relationshipsOpen}
+        <p class="muted" role="status">
+          {graph.edges.length ? relationshipPage * pageSize + 1 : 0}–{Math.min(
+            (relationshipPage + 1) * pageSize,
+            graph.edges.length,
+          )} of {graph.edges.length} loaded relationships
+        </p>
+        {#if graph.edges.length > pageSize}
+          <nav aria-label="Relationship pages">
+            <button
+              disabled={relationshipPage === 0}
+              on:click={() => relationshipPage--}>Previous relationships</button
+            >
+            <button
+              disabled={(relationshipPage + 1) * pageSize >= graph.edges.length}
+              on:click={() => relationshipPage++}>Next relationships</button
+            >
+          </nav>
+        {/if}
+        <div class="record-list">
+          {#each graph.edges.slice(relationshipPage * pageSize, (relationshipPage + 1) * pageSize) as e (e.id)}<button
+              on:click={() => void select(e)}>{e.type} · {e.id}</button
+            >{/each}
+        </div>
+      {/if}
     </details>{:else if !error}<div class="empty" role="status">
       Loading workspace graph…
     </div>{/if}

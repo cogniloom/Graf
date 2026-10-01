@@ -116,3 +116,11 @@ bounded to 5,000 nodes and 20,000 relationships. The installation identifies the
 local authenticated owner; it is not a multi-user identity or independent witnessing
 system. Jurisdiction-specific legal acceptance requires a separately validated
 procedure, identity policy, preservation policy and expert review.
+
+## Evidence assessment and attributed corrections
+
+New investigations provide conclusion-level supporting/contrary quotations, assumptions and unresolved gaps. Material clarification questions explain why your answer matters. The Evidence assessment panel also lists source-processing and context limits.
+
+Inspect and review interpretations lets you confirm, reject, clarify or retract your interpretation of a retained passage, extracted claim, relationship or conclusion. Every effective decision has a signed-ledger event and an attributed immutable artifact; changes supersede earlier decisions. Original extractions remain intact. Follow-up prompts receive bounded human assertions as such, not as documentary facts.
+
+See [accuracy evaluation and review contracts](ACCURACY_EVALUATION.md) for the workflow, reproducible evaluation commands and current limits.

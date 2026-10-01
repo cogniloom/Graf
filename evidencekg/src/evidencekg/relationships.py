@@ -237,15 +237,22 @@ def verify_posting(store, row, cache=None):
         )
         if document["original_blob_sha"] != row["canonical_value"]:
             raise ValueError("Invalid captured-byte feature")
-        if row["canonical_value"] not in cache:
-            cache[row["canonical_value"]] = store.get(row["canonical_value"])
+        marker = ("verified_blob", row["canonical_value"])
+        if marker not in cache:
+            store.verify_blob(row["canonical_value"])
+            cache[marker] = True
         return
     if row["kind"] == "paragraph":
         extraction = segment["extraction_id"]
-        if extraction not in cache:
+        if cache.get("paragraph_extraction") != extraction:
+            # Only one decoded extraction survives between postings. Remove the
+            # previous text before decoding, so source-sized buffers do not overlap.
+            cache.pop("paragraph_text", None)
+            cache.pop("paragraph_extraction", None)
             artifact = store.one("SELECT artifact_sha FROM extractions WHERE id=?", (extraction,))
-            cache[extraction] = json.loads(store.get(artifact["artifact_sha"]))["text"]
+            cache["paragraph_text"] = json.loads(store.get(artifact["artifact_sha"]))["text"]
+            cache["paragraph_extraction"] = extraction
         bounds = json.loads(row["ambiguity_json"])
-        original = cache[extraction][bounds["canonical_start"] : bounds["canonical_end"]]
+        original = cache["paragraph_text"][bounds["canonical_start"] : bounds["canonical_end"]]
         if " ".join(original.split()) != row["canonical_value"]:
             raise ValueError("Paragraph hash hit failed original sequence validation")

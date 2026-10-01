@@ -60,6 +60,14 @@ export function jobProgress(
         ? "CPU"
         : null;
   const staged = phase === "staging";
+  const bytesCompleted = count(p.bytes_copied);
+  const bytesTotal = count(p.total_bytes);
+  const bytesMeasured =
+    staged &&
+    bytesCompleted !== null &&
+    bytesTotal !== null &&
+    bytesTotal > 0 &&
+    bytesCompleted <= bytesTotal;
   const completed = count(staged ? p.files : p.processed_files);
   const total = count(p.total_files);
   const finalizing = phase === "ingesting" && p.stage === "finalizing";
@@ -70,7 +78,8 @@ export function jobProgress(
     total !== null &&
     total > 0 &&
     completed <= total;
-  const active = job?.state === "running" || (!job && countable);
+  const active =
+    job?.state === "running" || (!job && (countable || phase === "inventory"));
   return {
     indexing,
     indexingTitle: stages[indexingStage] ?? "Building search index",
@@ -88,6 +97,15 @@ export function jobProgress(
     completed,
     total,
     staged,
+    bytesCompleted,
+    bytesTotal,
+    bytesMeasured,
+    bytesPercent: bytesMeasured
+      ? Math.floor((bytesCompleted! / bytesTotal!) * 100)
+      : null,
+    filesChecked: count(p.files_checked),
+    currentFile: typeof p.current_file === "string" ? p.current_file : "",
+    currentSource: typeof p.current_source === "string" ? p.current_source : "",
     finalizing,
     measured,
     active,

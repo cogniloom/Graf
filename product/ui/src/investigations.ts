@@ -1,3 +1,45 @@
+export type EvidenceCitation = {
+  segment_id: string;
+  quote: string;
+  valid?: boolean;
+  document_id?: string;
+};
+export type Conclusion = {
+  id: string;
+  text: string;
+  status: "supported" | "inference" | "conflicting" | "unresolved";
+  supporting: EvidenceCitation[];
+  contrary: EvidenceCitation[];
+  assumptions: string[];
+  gaps: string[];
+};
+export type Review = {
+  id: string;
+  target_kind: string;
+  target_id: string;
+  decision: string;
+  reason: string;
+  correction: string;
+  actor: string;
+  time: string;
+  ledger_seq: number;
+  ledger_hash: string;
+  supersedes: string | null;
+  current: boolean;
+  effective: boolean;
+};
+export type ReviewTarget = {
+  target_kind: string;
+  target_id: string;
+  record: Record<string, unknown>;
+  sources: {
+    id?: string;
+    segment_id?: string;
+    text?: string;
+    quote?: string;
+    source_path?: string;
+  }[];
+};
 export type Run = {
   id: string;
   session_id: string;
@@ -31,13 +73,34 @@ export type Evidence = {
 export type Detail = Run & {
   result: {
     answer?: string;
-    questions?: { id: string; question: string; options: string[] }[];
+    conclusions?: Conclusion[];
+    evidence_contract?: {
+      version: string;
+      validation: string;
+      semantic_support?: string;
+    };
+    questions?: {
+      id: string;
+      question: string;
+      options: string[];
+      kind?: string;
+      reason?: string;
+    }[];
     citations?: {
       segment_id: string;
       quote: string;
       valid: boolean;
       document_id: string;
     }[];
+  };
+  reviews?: Review[];
+  supplied_reviews?: Review[];
+  supplied_reviews_omitted?: number;
+  guidance?: {
+    messages?: { kind: string; message: string; action: string }[];
+    document_gaps?: { path: string; status: string; warnings?: string[] }[];
+    document_gaps_total?: number;
+    document_gaps_total_is_lower_bound?: boolean;
   };
   error: { message: string } | null;
   artifacts: Artifact[];

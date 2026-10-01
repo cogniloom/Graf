@@ -44,7 +44,7 @@ class API:
             segment_id=segment_id,
         )
 
-    def page(self, snapshot, scope, rows, cursor=None, limit=100, key=lambda x: x["id"]):
+    def page(self, snapshot, scope, rows, cursor=None, limit=100, key=lambda x: x["id"], *, presorted=False):
         self.store.snapshot(snapshot)
         if not 1 <= limit <= 1000:
             raise ValueError("limit must be 1..1000")
@@ -58,24 +58,35 @@ class API:
                 after = value["after"]
             except Exception as exc:
                 raise ValueError("Invalid cursor") from exc
-        ordered = sorted(rows, key=key)
-        total = len(ordered)
-        selected = [r for r in ordered if after is None or key(r) > after]
+        ordered = rows if presorted else sorted(rows, key=key)
+        total = selected = used = 0
         items = []
-        used = 0
-        for row in selected[:limit]:
+        full = False
+        previous = None
+        for row in ordered:
+            current = key(row)
+            if previous is not None and current < previous:
+                raise ValueError("Result stream is not ordered")
+            previous = current
+            total += 1
+            if after is not None and current <= after:
+                continue
+            selected += 1
+            if full or len(items) >= limit:
+                continue
             size = len(dump(row).encode())
             if used + size > 750000:
                 if not items:
                     raise ValueError("One result exceeds response budget; use bounded source/feature reads")
-                break
+                full = True
+                continue
             items.append(row)
             used += size
         nxt = (
             base64.urlsafe_b64encode(
                 dump({"snapshot": snapshot, "scope": signature, "after": key(items[-1])}).encode()
             ).decode()
-            if len(selected) > len(items)
+            if selected > len(items)
             else None
         )
         manifest = self.store.manifest(snapshot)
@@ -85,7 +96,7 @@ class API:
             next_cursor=nxt,
             total=None if scope["kind"] == "inventory" and not manifest["inventory_complete"] else total,
             known_matches=total,
-            remaining=max(0, len(selected) - len(items)),
+            remaining=max(0, selected - len(items)),
             extraction_warnings={
                 "count": sum(bool(d["warnings"]) for d in manifest["documents"]),
                 "details": "inventory tool enumerates all document warnings without truncation",

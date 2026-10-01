@@ -15,15 +15,17 @@ from functools import lru_cache
 from itertools import accumulate, chain
 from pathlib import Path
 
-from . import knowledge_links
+from . import knowledge_links, knowledge_readings
 from . import knowledge_semantics as semantics
 from .db import atomic, dump, ident, sha
+from .knowledge_graph import Graph as DiskGraph
 from .knowledge_language import DATE_PATTERN, ENTITY_TYPES, date_readings, query_concepts
 from .knowledge_language import observations as span_observations
 from .knowledge_nlp import MAX_DOCUMENT_CHARS
 from .knowledge_nlp import identity as nlp_identity
 from .knowledge_nlp import observations as nlp_observations
 from .knowledge_storage import put as put_knowledge
+from .knowledge_storage import put_graph
 from .knowledge_storage import read as read_knowledge
 
 VERSION = "document-knowledge-en-de-v3"
@@ -464,6 +466,8 @@ def paragraph_sections(artifact):
             result = dict(section, start=section["start"] + begin, end=section["start"] + end)
             result["locator"] = dict(
                 section.get("locator", {}),
+                reading_section_start=section["start"],
+                reading_section_end=section["end"],
                 inline_quote_scopes=[
                     [max(0, lo - begin), min(end, hi) - begin, speaker] for lo, hi, speaker in active
                 ],
@@ -564,6 +568,7 @@ def extract_document(store, document, use_cache=True):
                     original_blob_sha=document.get("blob"),
                     sources=source_refs(segments, start, end, text),
                     transcription={"raw": confidence, "calibrated_probability": None},
+                    source_reading=knowledge_readings.reference(document, section, start, end),
                     section_canonical_start=section["start"],
                     evidence_role=locator.get("evidence_role", "body"),
                     quotation_depth=max(int(inline_quoted), locator.get("quotation_depth", 0)),
@@ -595,7 +600,8 @@ def extract_document(store, document, use_cache=True):
                     segments, max(section["start"], start - 500), min(section["end"], end + 500), text
                 ),
                 discourse_status="surrounding_discourse_unresolved",
-                locator={k: v for k, v in locator.items() if k != "words"},
+                locator=knowledge_readings.compact_locator(locator),
+                source_reading=knowledge_readings.reference(document, section, start, end),
                 modality_source=section.get("modality", "native"),
                 original_blob_sha=document.get("blob"),
                 **parsed,
@@ -641,9 +647,11 @@ def enrich_document(store, document, previous=None):
     return {"signature": signature(), "blob": put_knowledge(store, result), "coverage": result["coverage"]}
 
 
-def graph_for(documents, read_artifact):
+def graph_for(documents, read_artifact, storage=None):
     """Linear-size typed graph, with separate interpretation and observation nodes."""
-    nodes, edges, claims, groups = {}, [], [], defaultdict(list)
+    nodes = storage.nodes if storage is not None else {}
+    edges = storage.edges if storage is not None else []
+    groups = defaultdict(list)
 
     def edge(source, relation, target):
         edges.append(
@@ -713,7 +721,7 @@ def graph_for(documents, read_artifact):
                 ("repeated_wording", " ".join(claim["quote"].split())),
             ):
                 if key:
-                    groups[(method, key)].append(claim)
+                    groups[(method, key)].append(claim["id"])
             if (
                 claim["modality"] == "asserted"
                 and not claim["condition"]
@@ -732,10 +740,12 @@ def graph_for(documents, read_artifact):
                             ]
                         ),
                     )
-                ].append(claim)
-            claims.append(claim)
+                ].append(claim["id"])
+            nodes[claim["id"]] = claim
     for (method, key), members in sorted(groups.items()):
-        if len(members) < 2 or (method == "potential_conflict" and len({c["polarity"] for c in members}) < 2):
+        if len(members) < 2 or (
+            method == "potential_conflict" and len({nodes[key]["polarity"] for key in members}) < 2
+        ):
             continue
         group_id = ident("KG", method, key)
         node = dict(
@@ -748,14 +758,16 @@ def graph_for(documents, read_artifact):
             else "shared source signal; independence unknown",
         )
         nodes[group_id] = node
-        for claim in members:
+        for member in members:
+            claim = nodes[member]
             claim.setdefault("groups", []).append(group_id)
+            nodes[claim["id"]] = claim
             edge(
                 claim["id"],
                 "POTENTIAL_CONFLICT_MEMBER" if method == "potential_conflict" else "SHARED_SOURCE_SIGNAL",
                 group_id,
             )
-    nodes.update({claim["id"]: claim for claim in claims})
+    del groups
     # A small explainable rule over normalized calendar concepts, not events.
     # Store adjacent known days only; transitive traversal supplies longer order
     # proofs without quadratic day-pair expansion or inferred event occurrence.
@@ -765,8 +777,8 @@ def graph_for(documents, read_artifact):
         if node["kind"] == "concept" and re.fullmatch(r"date:\d{4}-\d{2}-\d{2}", node["key"])
     )
     for (earlier, source), (later, target) in zip(days, days[1:]):
-        edge(source, "CALENDAR_PRECEDES", target)
-        edges[-1].update(
+        calendar_edge = knowledge_links.relation(source, "CALENDAR_PRECEDES", target)
+        calendar_edge.update(
             epistemic_status="logical_derivation",
             rule_id="iso-calendar-order",
             rule_version="1",
@@ -774,11 +786,14 @@ def graph_for(documents, read_artifact):
             proof={"earlier_day": earlier, "later_day": later},
             conclusion_scope="calendar ordering only; not a statement that either event occurred",
         )
+        edges.append(calendar_edge)
     graph_gaps = knowledge_links.enrich(nodes, edges)
     return {
         "graph_gaps": graph_gaps,
-        "nodes": sorted(nodes.values(), key=lambda n: n["id"]),
-        "edges": sorted(edges, key=lambda e: e["id"]),
+        "nodes": storage.rows("nodes")
+        if storage is not None
+        else sorted(nodes.values(), key=lambda n: n["id"]),
+        "edges": storage.rows("edges") if storage is not None else sorted(edges, key=lambda e: e["id"]),
     }
 
 
@@ -804,6 +819,9 @@ def freeze(store, documents, previous=None):
         retained = read_knowledge(store, previous["blob"])
         if retained["signature"] != signature() or retained["coverage"] != previous["coverage"]:
             raise ValueError("Knowledge graph reuse identity mismatch")
+        for kind in ("nodes", "edges"):
+            for _ in retained[kind]:
+                pass
         return previous
     gaps = Counter()
 
@@ -812,24 +830,25 @@ def freeze(store, documents, previous=None):
         gaps.update(artifact["coverage"]["gaps"])
         return artifact
 
-    graph = graph_for(documents, read_artifact)
-    gaps.update(graph.get("graph_gaps", {}))
-    result = dict(
-        signature=signature(),
-        **graph,
-        limitations=LIMITATIONS,
-        coverage={
-            "documents": len(documents),
-            "gaps": dict(gaps),
-            "node_counts": dict(Counter(n["kind"] for n in graph["nodes"])),
-        },
-    )
-    return {
-        "signature": signature(),
-        "blob": put_knowledge(store, result),
-        "coverage": result["coverage"],
-        "input_sha": input_sha,
-    }
+    with DiskGraph() as storage:
+        graph = graph_for(documents, read_artifact, storage)
+        gaps.update(graph.get("graph_gaps", {}))
+        result = dict(
+            signature=signature(),
+            **graph,
+            limitations=LIMITATIONS,
+            coverage={
+                "documents": len(documents),
+                "gaps": dict(gaps),
+                "node_counts": dict(Counter(n["kind"] for n in graph["nodes"])),
+            },
+        )
+        return {
+            "signature": signature(),
+            "blob": put_graph(store, result),
+            "coverage": result["coverage"],
+            "input_sha": input_sha,
+        }
 
 
 def load(store, snapshot):
@@ -906,8 +925,15 @@ def verify(store, snapshot):
     graph = load(store, snapshot)
     if graph is None:
         return
+    with DiskGraph() as storage:
+        for node in graph["nodes"]:
+            storage.nodes[node["id"]] = node
+        _verify_graph(store, manifest, graph, storage.nodes)
+
+
+def _verify_graph(store, manifest, graph, records):
     graph_claims = {
-        node["id"]: node for node in graph["nodes"] if node["kind"] in {"claim", "observation", "uncertainty"}
+        node["id"] for node in graph["nodes"] if node["kind"] in {"claim", "observation", "uncertainty"}
     }
     verified_claims = set()
     for doc in manifest["documents"]:
@@ -930,7 +956,7 @@ def verify(store, snapshot):
                 or claim["id"] in verified_claims
             ):
                 raise ValueError("Knowledge claim identity mismatch")
-            retained = graph_claims.get(claim["id"], {})
+            retained = records.get(claim["id"], {})
             if (
                 any(retained.get(key) != value for key, value in claim.items())
                 or retained.get("source_path") != doc["path"]
@@ -960,11 +986,21 @@ def verify(store, snapshot):
     ):
         raise ValueError("Knowledge graph endpoint mismatch")
     if graph["signature"] == signature():
-        expected = graph_for(
-            manifest["documents"], lambda doc: read_knowledge(store, doc["knowledge"]["blob"])
-        )
-        if any(graph[k] != expected[k] for k in ("nodes", "edges")):
-            raise ValueError("Knowledge graph derivation mismatch")
+        with DiskGraph() as expected_storage:
+            expected = graph_for(
+                manifest["documents"],
+                lambda doc: read_knowledge(store, doc["knowledge"]["blob"]),
+                expected_storage,
+            )
+            from itertools import zip_longest
+
+            missing = object()
+            if any(
+                a != b
+                for kind in ("nodes", "edges")
+                for a, b in zip_longest(graph[kind], expected[kind], fillvalue=missing)
+            ):
+                raise ValueError("Knowledge graph derivation mismatch")
 
 
 def query(
@@ -1054,9 +1090,9 @@ def query(
     role_counts = Counter()
     if graph:
         record_kind = "claim" if evidence_set else kind
-        rows = [n for n in graph["edges" if kind == "edge" else "nodes"] if n["kind"] == record_kind]
+        rows = (n for n in graph["edges" if kind == "edge" else "nodes"] if n["kind"] == record_kind)
         if record_kind == "claim":
-            rows = [
+            rows = (
                 n
                 for n in rows
                 if (
@@ -1076,7 +1112,7 @@ def query(
                     or semantics.temporal_relation(n, valid_at)
                     in {"within_stated_validity", "boundary_unresolved"}
                 )
-            ]
+            )
         if evidence_set:
             groups = {
                 node["id"]: node for node in graph["nodes"] if node["kind"] in {"conflict", "dependence"}
@@ -1125,11 +1161,11 @@ def query(
                 )
             rows = enriched
         if group_id is not None:
-            rows = [
+            rows = (
                 n
                 for n in rows
                 if group_id in n.get("groups", []) or n.get("to_node") == group_id or n["id"] == group_id
-            ]
+            )
 
         def concepts_for(node):
             values = set(node.get("concepts", []))
@@ -1138,10 +1174,10 @@ def query(
             return values
 
         if concept is not None:
-            rows = [node for node in rows if concept in concepts_for(node)]
+            rows = (node for node in rows if concept in concepts_for(node))
         if text is not None:
             concepts = set(normalized_text_concepts)
-            rows = [
+            rows = (
                 node
                 for node in rows
                 if (
@@ -1149,33 +1185,15 @@ def query(
                     if concepts
                     else text.casefold() in (node.get("quote", "") + node.get("key", "")).casefold()
                 )
-            ]
+            )
         if segment_id is not None:
             if kind == "edge":
-                nodes = {node["id"]: node for node in graph["nodes"]}
-                seeds = {
-                    key
-                    for key, node in nodes.items()
-                    if any(ref["segment_id"] == segment_id for ref in node.get("sources", []))
-                }
-                targets = {edge["to_node"] for edge in graph["edges"] if edge["from_node"] in seeds}
-                rows = [
-                    dict(
-                        edge,
-                        related_sources=[
-                            ref
-                            for key in (edge["from_node"], edge["to_node"])
-                            for ref in nodes[key].get("sources", [])
-                        ],
-                    )
-                    for edge in rows
-                    if edge["from_node"] in seeds or edge["to_node"] in targets or edge["to_node"] in seeds
-                ]
+                rows = _segment_edges(graph, rows, segment_id)
             else:
-                rows = [
+                rows = (
                     node for node in rows if any(ref["segment_id"] == segment_id for ref in node["sources"])
-                ]
-    result = api.page(snapshot["id"], scope, rows, cursor, limit)
+                )
+    result = api.page(snapshot["id"], scope, rows, cursor, limit, presorted=True)
     result.update(
         knowledge_status="available" if graph else "unavailable_reingest_required",
         recorded_at=snapshot["created_at"],
@@ -1200,12 +1218,39 @@ def query(
     return result
 
 
+def _segment_edges(graph, rows, segment_id):
+    seeds = {
+        node["id"]
+        for node in graph["nodes"]
+        if any(ref["segment_id"] == segment_id for ref in node.get("sources", []))
+    }
+    targets = {edge["to_node"] for edge in graph["edges"] if edge["from_node"] in seeds}
+    selected = [
+        edge
+        for edge in rows
+        if edge["from_node"] in seeds or edge["to_node"] in targets or edge["to_node"] in seeds
+    ]
+    endpoints = {edge[key] for edge in selected for key in ("from_node", "to_node")}
+    sources = {node["id"]: node.get("sources", []) for node in graph["nodes"] if node["id"] in endpoints}
+    for edge in selected:
+        yield dict(
+            edge,
+            related_sources=[ref for key in (edge["from_node"], edge["to_node"]) for ref in sources[key]],
+        )
+
+
 def annotate_segments(store, snapshot, segments):
     """Bounded interpretation metadata alongside original text, including in app prompts."""
     graph = load(store, snapshot)
     if graph is None:
         return
-    records = {row["id"]: row for row in graph["nodes"]}
+    with DiskGraph() as storage:
+        for record in graph["nodes"]:
+            storage.nodes[record["id"]] = record
+        _annotate_segments(graph, snapshot, segments, storage.nodes)
+
+
+def _annotate_segments(graph, snapshot, segments, records):
     record_segments = {
         key: {ref["segment_id"] for ref in row.get("sources", [])} for key, row in records.items()
     }
@@ -1297,9 +1342,10 @@ def annotate_segments(store, snapshot, segments):
         if claim["kind"] in {"claim", "observation"}:
             for ref in claim["sources"]:
                 target = by_segment if claim["kind"] == "claim" else observed_segments
-                target[ref["segment_id"]].append(claim)
+                target[ref["segment_id"]].append(claim["id"])
     for sid in sorted(set(by_segment) | set(observed_segments)):
-        claims = by_segment[sid]
+        claims = [records[key] for key in by_segment[sid]]
+        observations = [records[key] for key in observed_segments[sid]]
         if sid not in segments:
             raise ValueError("Knowledge claim outside snapshot sources")
         items = []
@@ -1342,6 +1388,7 @@ def annotate_segments(store, snapshot, segments):
                         "speaker_surface",
                         "context_sources",
                         "discourse_status",
+                        "source_reading",
                     )
                     if key in claim
                 }
@@ -1394,7 +1441,7 @@ def annotate_segments(store, snapshot, segments):
             for c in claims
         )
         observed = []
-        for observation in observed_segments[sid]:
+        for observation in observations:
             item = {
                 key: value
                 for key, value in observation.items()
@@ -1421,9 +1468,7 @@ def annotate_segments(store, snapshot, segments):
                 "segment_id": sid,
             },
         )
-        concepts = sorted(
-            {key for record in [*observed_segments[sid], *claims] for key in record.get("concepts", [])}
-        )
+        concepts = sorted({key for record in [*observations, *claims] for key in record.get("concepts", [])})
         segments[sid]["knowledge_concepts"] = concepts[:256]
         segments[sid]["knowledge_concepts_remaining"] = max(0, len(concepts) - 256)
 

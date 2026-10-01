@@ -14,6 +14,7 @@ from evidencekg.investigations.agent import AgentExecutionError, CodexSubscripti
 ANSWER = {
     "answer": "Synthetic answer",
     "questions": [],
+    "conclusions": [],
     "citations": [{"segment_id": "s1", "quote": "one"}],
     "documents": [{"name": "report.md", "media_type": "text/markdown", "content": "one"}],
 }
@@ -102,6 +103,8 @@ def test_success_controls_and_lossless_capture(tmp_path, monkeypatch):
     args = json.loads((tmp_path / "argv.json").read_text())
     assert args[args.index("--sandbox") + 1] == "read-only"
     assert "--ignore-user-config" in args and "--ephemeral" in args
+    from evidencekg.investigations.evidence_contract import INSTRUCTIONS
+    assert "developer_instructions=" + json.dumps(INSTRUCTIONS) in args
     assert 'forced_login_method="chatgpt"' in args
     assert "--no-daemon" in args and "--strict-config" in args
     for feature in ("shell_tool", "unified_exec", "apps", "plugins", "multi_agent", "memories"):

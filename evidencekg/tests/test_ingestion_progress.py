@@ -197,7 +197,11 @@ def test_manager_real_ingestion_progress_separates_staging(tmp_path, monkeypatch
             manager, {"id": "job"}, [source], lambda phase, **counts: events.append((phase, counts))
         )
     extracted = [counts for phase, counts in events if phase == "ingesting"]
-    assert events[0] == ("staging", {"files": 1, "total_files": 1})
+    staged = [counts for phase, counts in events if phase == "staging"]
+    assert staged[0]["files"] == staged[0]["bytes_copied"] == 0
+    assert staged[-1]["files"] == staged[-1]["total_files"] == 1
+    assert staged[-1]["bytes_copied"] == staged[-1]["total_bytes"] == len(b"\x00Unsupported")
+    assert staged[-1]["current_file"] == "a.xyz"
     assert extracted[0]["processed_files"] == 0
     assert extracted[-1]["processed_files"] == extracted[-1]["total_files"] == 1
     assert extracted[-1]["unsupported_documents"] == 1

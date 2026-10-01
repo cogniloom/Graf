@@ -78,6 +78,27 @@ def test_partial_dates_relative_anchors_and_modal_homonyms():
     assert not list(calendar_mentions("Alice may approve. They march forward."))
 
 
+@pytest.mark.parametrize("surface", ["Maı", "MAİ", "Aprıl", "Aprİl", "Junı", "Julİ"])
+def test_unicode_regex_month_variants_do_not_crash_or_guess(surface):
+    assert date_readings(f"12 {surface} 2026") == []
+    rows = list(calendar_mentions(f"{surface}; {surface} 2026; 12 {surface} 2026"))
+    assert all(row["alternatives"] == [] for row in rows)
+    assert query_concepts(surface) == []
+
+
+@pytest.mark.parametrize("surface", ["decısion", "DECİSION", "ınvoice INV-12", "TİCKET 42"])
+def test_unicode_regex_vocabulary_variants_do_not_crash_or_guess(surface):
+    assert list(observations(surface)) == []
+
+
+def test_supported_unicode_casefold_preserves_original_spans():
+    text = "ſeptember 2026; deciſion; ticKet 42; März 2026"
+    rows = list(observations(text))
+    concepts = {concept for row in rows for concept in row["concepts"]}
+    assert {"date:2026-09", "topic:decision", "entity:ticket:42", "date:2026-03"} <= concepts
+    assert all(text[row["start"] : row["end"]] == row["quote"] for row in rows)
+
+
 @pytest.mark.parametrize(
     "surface,expected",
     [

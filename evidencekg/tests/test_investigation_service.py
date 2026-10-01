@@ -60,6 +60,9 @@ class Answerer:
         on_event({"type": "message", "text": "Reviewing supplied evidence", "time": "synthetic"})
         return {
             "answer": "Approval was not given.",
+            "conclusions": [{"id": "c1", "text": "The source denies approval.", "status": "supported",
+                             "supporting": [{"segment_id": "seg1", "quote": "not approved"}],
+                             "contrary": [], "assumptions": [], "gaps": []}],
             "citations": [
                 {"segment_id": "seg1", "quote": "not approved"},
                 {"segment_id": "seg1", "quote": "invented quotation"},
@@ -340,16 +343,20 @@ def test_attachment_referenced_in_questions_and_followup_preserves_source(servic
             if not ctx.get("previous_result"):
                 return {
                     "answer": "Which format?",
+                    "conclusions": [],
                     "citations": [],
                     "documents": [],
                     "questions": [
-                        {"id": "format", "question": "Which format?", "options": ["Short", "Long"]}
+                        {"id": "format", "question": "Which format?", "options": ["Short", "Long"], "kind": "scope", "reason": "The requested report length is unspecified."}
                     ],
                 }
             assert ctx["previous_result"]["questions"][0]["id"] == "format"
             assert ctx["previous_prompt"] == "Read memo.txt"
             return {
                 "answer": "BLUE-742",
+                "conclusions": [{"id": "marker", "text": "The supplied marker is BLUE-742.", "status": "supported",
+                                 "supporting": [{"segment_id": attachment["id"], "quote": "BLUE-742"}],
+                                 "contrary": [], "assumptions": [], "gaps": []}],
                 "questions": [],
                 "documents": [],
                 "citations": [{"segment_id": attachment["id"], "quote": "BLUE-742"}],

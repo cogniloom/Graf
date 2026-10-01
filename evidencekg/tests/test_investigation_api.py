@@ -19,6 +19,9 @@ class SyntheticAdapter:
         on_event({"type": "synthetic", "text": "Synthetic provider fixture"})
         return {
             "answer": "The invoice was not approved.",
+            "conclusions": [{"id": "denial", "text": "The source denies approval.", "status": "supported",
+                             "supporting": [{"segment_id": segment["id"], "quote": "not approved"}],
+                             "contrary": [], "assumptions": [], "gaps": []}],
             "citations": [{"segment_id": segment["id"], "quote": "not approved"}],
             "documents": [
                 {

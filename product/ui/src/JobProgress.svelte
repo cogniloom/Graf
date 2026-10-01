@@ -5,6 +5,12 @@
   export let phase = job?.phase ?? "queued";
   $: progress = jobProgress(job, phase);
   const number = (n: number) => n.toLocaleString();
+  const bytes = (n: number) =>
+    n >= 1024 ** 3
+      ? `${(n / 1024 ** 3).toFixed(1)} GB`
+      : n >= 1024 ** 2
+        ? `${(n / 1024 ** 2).toFixed(1)} MB`
+        : `${number(n)} bytes`;
 </script>
 
 <div class="job-progress">
@@ -52,6 +58,28 @@
         ? "is still in progress"
         : "has stopped"}.
     </p>
+  {:else if progress.bytesMeasured}
+    <div class="progress-caption">
+      <span>Copying and verifying source files</span><span
+        class="progress-percent">{progress.bytesPercent}%</span
+      >
+    </div>
+    <progress
+      class="progress-track"
+      max={progress.bytesTotal!}
+      value={progress.bytesCompleted!}
+      aria-label="Source preparation bytes"
+    ></progress>
+    <p class="progress-detail">
+      {bytes(progress.bytesCompleted!)} of {bytes(progress.bytesTotal!)} copied.
+      {progress.completed !== null && progress.total !== null
+        ? `${number(progress.completed)} of ${number(progress.total)} files verified.`
+        : "Verification is in progress."}
+    </p>
+    <p class="progress-detail">
+      This is source preparation. Document extraction and search indexing
+      follow.
+    </p>
   {:else if progress.measured}
     <div class="progress-caption">
       <span
@@ -78,15 +106,29 @@
       >
         File processing is complete. The collection is still being prepared.
       </p>{/if}
+  {:else if phase === "queued"}
+    <progress class="progress-track" aria-label="Waiting for processing"
+    ></progress>
+    <p class="progress-detail">
+      Waiting for the processing worker. This job will start automatically.
+    </p>
   {:else if progress.active}
     <div class="progress-caption">
       <span
-        >{phase === "preparing"
-          ? "Preparing documents for search"
-          : "Processing in the background"}</span
+        >{phase === "inventory"
+          ? "Checking source files for changes"
+          : phase === "preparing"
+            ? "Preparing documents for search"
+            : "Processing in the background"}</span
       ><span class="progress-percent">In progress</span>
     </div>
     <progress class="progress-track" aria-label={progress.title}></progress>
+    {#if phase === "inventory"}<p class="progress-detail">
+        {progress.filesChecked !== null
+          ? `${number(progress.filesChecked)} files checked. `
+          : ""}Verifying file contents before preparing the snapshot; the
+        complete file total is not known yet.
+      </p>{/if}
     {#if phase === "ingesting"}<p class="progress-detail">
         {progress.preparedFiles !== null
           ? `${number(progress.preparedFiles)} files prepared. `
@@ -96,6 +138,16 @@
         Document extraction is complete. Search indexing is still in progress.
       </p>{/if}
   {/if}
+  {#if progress.active && progress.currentSource}<p
+      class="progress-detail progress-path"
+    >
+      Source: {progress.currentSource}
+    </p>{/if}
+  {#if progress.active && progress.currentFile}<p
+      class="progress-detail progress-path"
+    >
+      Current file: {progress.currentFile}
+    </p>{/if}
   {#if !progress.measured && progress.completed !== null && progress.total !== null && progress.completed <= progress.total}
     <p class="progress-detail">
       {number(progress.completed)} of {number(progress.total)} source files processed.
@@ -119,3 +171,9 @@
         >{/if}
     </div>{/if}
 </div>
+
+<style>
+  .progress-path {
+    overflow-wrap: anywhere;
+  }
+</style>

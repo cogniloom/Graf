@@ -233,6 +233,7 @@ def test_compressed_artifacts_remain_verifiable_and_read_legacy(vault):
     metadata = store.manifest(sid)["knowledge"]
     encoded = store.get(metadata["blob"])
     value = knowledge.load(store, sid)
+    value = dict(value, nodes=list(value["nodes"]), edges=list(value["edges"]))
     assert len(encoded) < len(json.dumps(value).encode()) / 5
     old = store.put(json.dumps(value))
     assert knowledge.read_knowledge(store, old) == value

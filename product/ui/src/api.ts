@@ -40,6 +40,12 @@ export async function bootstrap() {
   }
 }
 export type Status = {
+  source_scan?: {
+    files_checked: number;
+    bytes_checked: number;
+    current_source?: string;
+    current_file?: string;
+  } | null;
   workspace_name: string;
   knowledge_restart_required?: boolean;
   jobs?: (Job & { revision: number })[];
